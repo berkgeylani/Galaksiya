@@ -13,6 +13,7 @@ public class Main {
 		private static final Logger LOG = Logger.getLogger(Main.class);
 
 		public static void main(String[] args) throws IllegalArgumentException, IOException {
+			LOG.error("qwerqwerqwerqwerqwr");
 			final String FILE_PATH="/home/francium/new.txt";//txt file path
 			MainProcess mainprocessor = new MainProcess();
 			FileParser fileParser = new FileParser(FILE_PATH); //process tx file and return ArrayList which contains URLs

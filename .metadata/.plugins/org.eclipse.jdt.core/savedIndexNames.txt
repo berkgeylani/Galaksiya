@@ -1,0 +1,6 @@
+INDEX VERSION 1.127+/home/francium/workspace/.metadata/.plugins/org.eclipse.jdt.core
+1642929840.index
+585844418.index
+3106610943.index
+4151018693.index
+417347297.index

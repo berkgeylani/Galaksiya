@@ -1,0 +1,134 @@
+package database;
+import com.mongodb.Block;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+
+
+public class MongoDb implements Database {
+	private MongoClient mongoClient ;
+	private MongoDatabase mDatabase ;
+	private MongoCollection<Document> statisticsCollection ;
+	
+	//infos for mongodb
+	public MongoDb(){
+		mongoClient = new MongoClient( "localhost", 27017);
+		mDatabase = mongoClient.getDatabase( "mydb" );
+		statisticsCollection = mDatabase.getCollection("statistics");
+		
+	}
+	public MongoClient getMongoClient() {
+		return mongoClient;
+	}
+
+	@Override
+	public void save(String dateStr,String word,int frequency) { //insert process date-word-frequency
+		Date date =dateConverter(dateStr);
+			statisticsCollection.insertOne(new Document()
+			        .append("date", date)
+			        .append("word", word)
+			        .append("frequency", frequency));		
+	}
+
+	@Override
+	public void delete() {// Delete All documents from collection Using blank BasicDBObject
+			statisticsCollection.deleteMany(new Document()); 
+	}
+
+	@Override
+	public void update(String dateStr,String word,int frequency) {  //update and increment the frequency
+		Date dateConverted = dateConverter(dateStr);
+		statisticsCollection.updateOne(new Document("date", dateConverted).append("word", word), new Document("$inc", new Document("frequency", frequency)));
+	}
+
+	@Override
+	public void fetch(String date) { //frequency sorted from a date for all words
+		Date dateConverted = dateConverter(date);
+
+		FindIterable<Document> iterable = statisticsCollection.find(
+				new Document().append("date",dateConverted)).sort(new Document()
+				.append("frequency", -1 ));// filter in document example  new Document("borough", "Manhattan")
+		printerOfFindIterable(iterable);
+
+	}
+	
+	public void fetch(String date,int limit) { //frquency sorted for top 10 word
+		Date dateConverted = dateConverter(date);
+
+		FindIterable<Document> iterable = statisticsCollection.find(
+				new Document().append("date",dateConverted))
+				.sort(new Document().append("frequency", -1 ))
+				.limit(limit);// filter in document example  new Document("borough", "Manhattan")
+		
+		printerOfFindIterable(iterable);
+	}
+	public void fetch() { //frequency sorted for all the world
+
+		FindIterable<Document> iterable = statisticsCollection.find(new Document()).sort(new Document().append("frequency", -1 ));
+		printerOfFindIterable(iterable);
+	}
+	
+	private void printerOfFindIterable(FindIterable<Document> iterable){ //which provide to print document in collection
+		//TODO if nothing to show say in here There is nothing to show
+		System.out.println("----Date----"+"\t\t\t\t"+"----Word----"+"\t"+"----Frequency----");
+
+		iterable.forEach(new Block<Document>() {
+		    @Override
+		    public void apply(final Document document) {
+		        System.out.println(document.get("date")+"\t\t"+document.get("word")+"\t\t"+document.get("frequency"));
+		    }
+		});
+	}
+	
+	public long fetchCount(String dateStr,String word) { //give a count from a date which contain "word"
+		Date date =dateConverter(dateStr);
+		
+		Bson filter = new Document()
+				.append("date", date )
+				.append("word", word);
+		
+		return statisticsCollection.count(filter);//sayısını
+		
+	}
+	
+	private Date dateConverter(String dateStr){
+		Boolean flag=false;
+		
+		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
+		Date date=null;
+		do{
+			if(flag){
+			System.out.println("BE CAREFUL.Insert a date of day like :  17 Mar 2016\n");
+            try {
+				dateStr=input.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            }
+			try {
+				date = format1.parse(dateStr.replaceAll("\\s+","-"));
+				flag =false;
+
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				flag=true;
+				e.printStackTrace();
+			}//date is the our object's date
+		}while(flag);
+		return date;
+	}
+	}
+	

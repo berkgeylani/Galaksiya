@@ -1,1 +1,4 @@
-Logged-exception handled-optimizied-github
+**Logged
+**Exception handled
+**Using optimizied github
+**Creating jar(executable) file

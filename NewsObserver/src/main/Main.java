@@ -22,7 +22,6 @@ public class Main {
 			IntervalFetcher intervalFetcher = new IntervalFetcher();
 			intervalFetcher.intervaller(fileParser.getRssLinksAL(),lastNews);//check the rss in every 5 min
 			menu();
-			   
 	    }
 		
 		private static void menu(){

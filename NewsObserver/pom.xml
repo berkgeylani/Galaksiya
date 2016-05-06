@@ -7,7 +7,7 @@
 	<build>
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>src/main/resource</directory>
 				<targetPath>${project.build.directory}</targetPath>
 				<includes>
 					<include>log4j.properties</include>
@@ -38,7 +38,7 @@
 								jar-lib config copy file -->
 							<resources>
 								<resource><!-- It helps to copy log4j.properties -->
-									<directory>${project.basedir}/src/main/resources</directory>
+									<directory>${project.basedir}/src/main/resource</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>

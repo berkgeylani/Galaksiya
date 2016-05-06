@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import database.MongoDb;
 

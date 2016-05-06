@@ -5,7 +5,15 @@
 	<artifactId>NewsObserver</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<targetPath>${project.build.directory}</targetPath>
+				<includes>
+					<include>log4j.properties</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -26,10 +34,11 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target/jarar</outputDirectory><!--it helps jar-lib config copy file  -->
+							<outputDirectory>${basedir}/target/jarar</outputDirectory><!--it helps 
+								jar-lib config copy file -->
 							<resources>
 								<resource><!-- It helps to copy log4j.properties -->
-									<directory>config</directory>
+									<directory>${project.basedir}/src/main/resources</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
@@ -48,7 +57,8 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/jarar/lib</outputDirectory><!-- in to the target -->
+							<outputDirectory>${project.build.directory}/jarar/lib</outputDirectory><!-- 
+								in to the target -->
 							<overWriteReleases>false</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
@@ -64,19 +74,24 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>main.Main</mainClass>
+							<mainClass>master.Main</mainClass>
 						</manifest>
 						<manifestEntries>
 							<Class-Path>.</Class-Path>
 						</manifestEntries>
 					</archive>
- 
 					<finalName>jarar/jarar</finalName>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -98,4 +113,7 @@
 			<version>1.0</version>
 		</dependency>
 	</dependencies>
+	<properties>
+		<log4j.configuration>log4j.properties</log4j.configuration>
+	</properties>
 </project>

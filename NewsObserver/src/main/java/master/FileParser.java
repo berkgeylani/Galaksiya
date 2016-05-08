@@ -6,6 +6,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -20,10 +23,17 @@ public class FileParser {
 		readerOfFile(filePath);
 	}
 
-	public void readerOfFile(String filePath) {
-		try (BufferedReader br = new BufferedReader(new FileReader("/home/francium/new.txt"));) {// ANSWER : http://stackoverflow.com/questions/17650970/am-i-using-the-java-7-try-with-resources-correctly
+	public boolean readerOfFile(String filePath) {
+		try {
+			Paths.get(filePath);
+		}catch(InvalidPathException | NullPointerException exception){
+			LOG.error("Given pathway is null or invalid.");;
+			return false;//path yoksa 0
+		}
+		try (BufferedReader br = new BufferedReader(new FileReader(filePath));) {// ANSWER : http://stackoverflow.com/questions/17650970/am-i-using-the-java-7-try-with-resources-correctly
 			String rssLink;
 			while ((rssLink = br.readLine()) != null) {
+				
 				// printing out each line in the file
 				URL url=null;
 				try{
@@ -35,12 +45,13 @@ public class FileParser {
 				if(url!=null)
 					rssLinksAL.add(url);
 			}
+			return true; // herşey okeyse return 1
 		} catch (FileNotFoundException e) {
 			LOG.error("File Not Found In Given Path",e);
 		} catch (IOException e) {
 			LOG.error("Input or output problem",e);
 		}
-		
+		return false; //catch girdiyse return 2;
 	}
 
 	public ArrayList<URL> getRssLinksAL() {// Return URLs of rss links

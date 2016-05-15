@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -27,7 +26,7 @@ public class FileParser {
 		try {
 			Paths.get(filePath);
 		}catch(InvalidPathException | NullPointerException exception){
-			LOG.error("Given pathway is null or invalid.");;
+			LOG.error("Given pathway is null or invalid.");
 			return false;//path yoksa 0
 		}
 		try (BufferedReader br = new BufferedReader(new FileReader(filePath));) {// ANSWER : http://stackoverflow.com/questions/17650970/am-i-using-the-java-7-try-with-resources-correctly

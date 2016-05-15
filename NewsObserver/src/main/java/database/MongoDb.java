@@ -7,12 +7,16 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
+
+import rssparser.FeedMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -42,18 +46,20 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public void save(String dateStr, String word, int frequency) { // insert
+	public boolean save(String dateStr, String word, int frequency) { // insert
 																	// process
 																	// date-word-frequency
 		try {
 			Date date = dateConverter(dateStr);
 			statisticsCollection
 					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
+			return true;
 
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 
 		}
+		return false;
 	}
 
 	@Override
@@ -69,18 +75,19 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public void update(String dateStr, String word, int frequency) { // update
-																		// and
-																		// increment
-																		// the
-																		// frequency
+	public boolean update(String dateStr, String word, int frequency) { // update  and increment the frequency
 		Date dateConverted = dateConverter(dateStr);
+		boolean updateSuccessful=false;
 		try {
-			statisticsCollection.updateOne(new Document("date", dateConverted).append("word", word),
+			UpdateResult result=statisticsCollection.updateOne(new Document("date", dateConverted).append("word", word),
 					new Document("$inc", new Document("frequency", frequency)));
+			updateSuccessful=result.wasAcknowledged();
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be updated.", e);
+			return updateSuccessful;
 		}
+		
+		return updateSuccessful;
 	}
 
 	@Override
@@ -120,7 +127,21 @@ public class MongoDb implements Database {
 				.sort(new Document().append("frequency", -1));
 		printerOfFindIterable(iterable);
 	}
+	public ArrayList<String> fetchWDocument() {
+		ArrayList<String> date_word_freq = new ArrayList<String>();
+		FindIterable<Document> search = statisticsCollection.find();
+		if (search == null) {
+			return null;
+		}
+		for(Document current : search){
+			date_word_freq.add(current.get("date").toString());
+			date_word_freq.add(current.get("word").toString());
+			date_word_freq.add(current.get("frequency").toString());
+			return date_word_freq;
 
+		}
+		return null;
+	}
 	private void printerOfFindIterable(FindIterable<Document> iterable) { // which
 																			// provide
 																			// to

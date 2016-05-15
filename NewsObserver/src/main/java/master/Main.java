@@ -1,20 +1,24 @@
 package master;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
 
 import database.MongoDb;
+import rssparser.FeedMessage;
 
 public class Main {
 		private static final Logger LOG = Logger.getLogger(Main.class);
 
 		public static void main(String[] args) throws IllegalArgumentException, IOException {
-			LOG.error("qwerqwerqwerqwerqwr");
-			final String FILE_PATH="/home/francium/new.txt";//txt file path
+			
+			final String FILE_PATH = "/home/francium/new.txt";  // jardan okumuyır şu anda dikkat et
 			MainProcess mainprocessor = new MainProcess();
 			FileParser fileParser = new FileParser(FILE_PATH); //process tx file and return ArrayList which contains URLs
 			Hashtable<String, String> lastNews = mainprocessor.getResult(fileParser.getRssLinksAL()); //it returns with hashtable rssLinks-Their last news

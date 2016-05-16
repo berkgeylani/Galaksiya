@@ -112,6 +112,11 @@
 			<artifactId>jdom</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>9.3.9.M1</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<log4j.configuration>log4j.properties</log4j.configuration>

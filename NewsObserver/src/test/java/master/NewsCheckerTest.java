@@ -10,8 +10,13 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.eclipse.jetty.http.HttpCompliance;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Server;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import database.MongoDb;
@@ -28,14 +33,24 @@ public class NewsCheckerTest {
 	private RssReader parserOfRss=new RssReader();
 	private String title=null;
 	private FeedMessage messsage = new FeedMessage();
+	private static Server server = new Server(8112);//static yaptık çünkü classın initialize'dan edilmeden önce çalıştırılması gerekiyor.
+	
+	@BeforeClass
+	public static void startJetty() throws Exception{
+        server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class).setHttpCompliance(HttpCompliance.LEGACY);
+        server.setHandler(new HelloHandler());
+        server.setStopAtShutdown(true);
+        server.start();
+	}
 	@Before
 	public void setUp() throws Exception {
-		rssLinksAL.add(new URL("http://www.sozcu.com.tr/rss.php"));
+		rssLinksAL.add(new URL("http://localhost:8112/"));
 		
 		messsage.setTitle("Erdoğan: Döviz rezervleri 150-165 milyar dolar olmalı");
 		messsage.setDescription(
 				"Cumhurbaşkanı Tayyip Erdoğan, Kocaeli Üniversitesinde toplu açılış ve fahri doktora töreninde yaptığı açıklamalarda, 27.5 milyar dolar döviz rezervi olan bir Merkez Bankası vardı. Şu anda 113 milyar dolar. Görevi bıraktığımda aslında 136 milyar dolara kadar yükselmişti ancak krizler falan şu anda 113 milyar dolar dedi  ve ekledi: Ama yeniden inanıyorum ki 136 milyar dolar da");
 		messsage.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		
 	}
 	@Test
 	public void updateActualNewsNullInput() {
@@ -49,7 +64,7 @@ public class NewsCheckerTest {
 		for (FeedMessage message : parserOfRss.feedParser(rssLinksAL.get(0))) {  //item to item reading
 			title=message.getTitle();
 		}
-		lastNews.put("http://www.sozcu.com.tr/rss.php", title);
+		lastNews.put("http://localhost:8112/", title);
 		assertTrue(newsChecker.updateActualNews(rssLinksAL, lastNews));
 	}
 	@Test
@@ -107,4 +122,8 @@ public class NewsCheckerTest {
 			fail("Can't get the same data which has same _id");
 		mongoDbHelper.update(date, word, -2);
 		}
+	@AfterClass
+	public static void stopJetty() throws Exception{
+		server.stop();
+	}
 }

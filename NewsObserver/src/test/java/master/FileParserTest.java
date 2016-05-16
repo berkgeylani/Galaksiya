@@ -11,9 +11,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import org.eclipse.jetty.http.HttpCompliance;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Server;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FileParserTest {
@@ -25,11 +30,19 @@ public class FileParserTest {
 	private String file = "fileParserTest.txt";
 	private FileParser testFileParser = new FileParser(file);
 	private ArrayList<String> rssLinksAL = new ArrayList<String>();
-
+	private static Server server = new Server(8112);//static yaptık çünkü classın initialize'dan edilmeden önce çalıştırılması gerekiyor.
+	
+	@BeforeClass
+	public static void startJetty() throws Exception{
+        server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class).setHttpCompliance(HttpCompliance.LEGACY);
+        server.setHandler(new HelloHandler());
+        server.setStopAtShutdown(true);
+        server.start();
+	}
 	@Before
 	public void setup() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
-			rssLinksAL.add("http://rss.cnn.com/rss/edition.rss");
+			rssLinksAL.add("http://localhost:8112/");
 			for (String rssLink : rssLinksAL) {
 				writer.write(rssLink);// We wrote a txt file
 			}
@@ -105,12 +118,8 @@ public class FileParserTest {
 			System.err.println(x);
 		}
 	}
-
+	@AfterClass
+	public static void stopJetty() throws Exception{
+		server.stop();
+	}
 }
-
-
-
-
-
-
-

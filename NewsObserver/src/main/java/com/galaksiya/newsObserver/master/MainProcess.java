@@ -1,4 +1,4 @@
-package master;
+package com.galaksiya.newsObserver.master;
 import java.net.URL;
 
 import java.util.ArrayList;
@@ -7,9 +7,9 @@ import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
 
-import database.MongoDb;
-import rssparser.FeedMessage;
-import rssparser.RssReader;
+import com.galaksiya.newsObserver.database.MongoDb;
+import com.galaksiya.newsObserver.parser.FeedMessage;
+import com.galaksiya.newsObserver.parser.RssReader;
 
 public class MainProcess {
 	private	Hashtable<String, Hashtable<String, Integer>> mainHashStatistics = new Hashtable<String, Hashtable<String, Integer>>();

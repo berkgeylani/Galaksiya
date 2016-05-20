@@ -1,17 +1,20 @@
-package master;
+package com.galaksiya.newsObserver.master;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
 
-import database.MongoDb;
-import rssparser.FeedMessage;
+import com.galaksiya.newsObserver.database.MongoDb;
+import com.galaksiya.newsObserver.parser.FeedMessage;
 
 public class Main {
 		private static final Logger LOG = Logger.getLogger(Main.class);
@@ -24,9 +27,10 @@ public class Main {
 			Hashtable<String, String> lastNews = mainprocessor.getResult(fileParser.getRssLinksAL()); //it returns with hashtable rssLinks-Their last news
 			mainprocessor.postToDatabase();//insert for all the news in all rss
 			IntervalFetcher intervalFetcher = new IntervalFetcher();
-			intervalFetcher.intervaller(fileParser.getRssLinksAL(),lastNews);//check the rss in every 5 min
+			intervalFetcher.intervaller(fileParser.getRssLinksAL(),lastNews);//check the rss in every 
 			menu();
 	    }
+		
 		private static void menu(){
 			BufferedReader input = new BufferedReader(new InputStreamReader(System.in));//kapat bunu
 			String dateChoosed = null;
@@ -53,8 +57,9 @@ public class Main {
 					case 0:
 						mongoHelper.fetch("03 May 2016");
 						System.out.println(" --Wait for Exit--");
-						break;
+						break;		
 					case 1:
+					
 						System.out.println("Insert a date of day like :  17 Mar 2016\n");
 			            dateChoosed=input.readLine();
 						System.out.println("10 most used word from " + dateChoosed);
@@ -84,5 +89,6 @@ public class Main {
 				mongoHelper.getMongoClient().close();
 			}
 		}
+		
 	
 		}

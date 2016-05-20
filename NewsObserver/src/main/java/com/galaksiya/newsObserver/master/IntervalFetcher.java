@@ -1,4 +1,4 @@
-package master;
+package com.galaksiya.newsObserver.master;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;

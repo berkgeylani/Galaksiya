@@ -1,19 +1,17 @@
-package master;
+package com.galaksiya.newsObserver.master;
 
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
 
-import database.MongoDb;
-
-import rssparser.FeedMessage;
-import rssparser.RssReader;
+import com.galaksiya.newsObserver.database.MongoDb;
+import com.galaksiya.newsObserver.parser.FeedMessage;
+import com.galaksiya.newsObserver.parser.RssReader;
 
 public class NewsChecker {
 
@@ -47,7 +45,7 @@ public class NewsChecker {
 					updateNew=false;
 					updated=true;
 					}	
-				messageHandling(message);
+				handleMessage(message);
 			} else {//if we come the lately new we can break
 				if (updated){ 
 					lastNews.put(lastNewsArray[0], lastNewsArray[1]);
@@ -56,14 +54,14 @@ public class NewsChecker {
 			}
 		}
 	}
-	public Hashtable<String, Integer> messageHandling( FeedMessage message ) {
-		//
+	public Hashtable<String, Integer> handleMessage( FeedMessage message ) {
 		WordProcessor processOfWords = new WordProcessor();
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
 		String datePerNew=dateCustomize(message.getpubDate());
 		wordFrequencyPerNew=processOfWords.splitAndHashing(message.getTitle()+ " " +  message.getDescription());//It Brıng us hashtable which contains word and freq hashtable per new
 		//wordFrequency test edecez
-		travelWordByWord(datePerNew,wordFrequencyPerNew);
+		if(travelWordByWord(datePerNew,wordFrequencyPerNew))
+			return null;
 		return wordFrequencyPerNew;
 	}
 	
@@ -78,11 +76,12 @@ public class NewsChecker {
 	}
 	
 	private boolean travelWordByWord(String datePerNew,Hashtable<String, Integer> wordFrequencyPerNew){
+		DbHelper dbHelper = new DbHelper();
 		boolean proccessSuccessful=false;
 		Enumeration<String> e = wordFrequencyPerNew.keys();
 		while (e.hasMoreElements()) { 
 			String key = (String) e.nextElement();//key:key   wordFrequencyPerNew.get(key):value
-			proccessSuccessful=addDatabase(datePerNew,key,wordFrequencyPerNew.get(key));
+			proccessSuccessful=dbHelper.addDatabase(datePerNew,key,wordFrequencyPerNew.get(key));
 		}
 		return proccessSuccessful;
 	}
@@ -100,28 +99,12 @@ public class NewsChecker {
 	
 	public boolean canConvert(String datePerNew){
 		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
-		Date date = null;
 		if(datePerNew.length()!=11) return false;
 		try {
-			date = format1.parse(datePerNew.replaceAll("\\s+", "-"));
-			
+			format1.parse(datePerNew.replaceAll("\\s+", "-"));
 			return true;
 		} catch (ParseException e) {
 			return false;
 		}		
 	}
-	
-	public boolean addDatabase(String datePerNew,String word,int frequency){//Mesela bu mainProcesstede var bu yüzden database helpder diyip böyle bir class açmamız faydalı olur
-		boolean flagSuccessful;
-		if(!canConvert(datePerNew)) return false;
-		boolean alreadyInsertedToDatabase=mongoDbHelper.fetchCount(datePerNew, word) >= 1;
-		if(alreadyInsertedToDatabase){  //check key value per new to increment or add  
-			flagSuccessful=mongoDbHelper.update(datePerNew, word, frequency);//if it has alreadt inserted just increment  
-		}
-		else {
-			flagSuccessful=mongoDbHelper.save(datePerNew, word, frequency);//if not insert it
-		}
-		return flagSuccessful;
-	}
-
 }

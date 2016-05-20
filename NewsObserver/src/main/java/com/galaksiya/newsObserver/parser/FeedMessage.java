@@ -1,4 +1,4 @@
-package rssparser;
+package com.galaksiya.newsObserver.parser;
 
 public class FeedMessage {
 

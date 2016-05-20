@@ -1,4 +1,4 @@
-package rssparser;
+package com.galaksiya.newsObserver.parser;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;

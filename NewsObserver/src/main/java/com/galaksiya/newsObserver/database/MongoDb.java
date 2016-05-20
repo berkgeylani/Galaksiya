@@ -1,15 +1,4 @@
-package database;
-
-import com.mongodb.Block;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
-import com.mongodb.MongoWriteException;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.result.UpdateResult;
-
-import rssparser.FeedMessage;
+package com.galaksiya.newsObserver.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,10 +12,19 @@ import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.Block;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
+import com.mongodb.MongoWriteException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.UpdateResult;
+
 public class MongoDb implements Database {
 	private MongoClient mongoClient;
 	private MongoDatabase mDatabase;
-	private MongoCollection<Document> statisticsCollection;
+	private MongoCollection<Document> collection;
 	private static final Logger LOG = Logger.getLogger(MongoDb.class);
 
 	// infos for mongodb
@@ -34,10 +32,18 @@ public class MongoDb implements Database {
 		try {
 			mongoClient = new MongoClient("localhost", 27017);
 			mDatabase = mongoClient.getDatabase("mydb");
-			statisticsCollection = mDatabase.getCollection("statistics");
+			collection = mDatabase.getCollection("statistics");
 		} catch (MongoException e) {
 			LOG.error("Mongo Connection Error", e);
-
+		}
+	}
+	public MongoDb(String collections) {
+		try {
+			mongoClient = new MongoClient("localhost", 27017);
+			mDatabase = mongoClient.getDatabase("mydb");
+			collection = mDatabase.getCollection(collections);
+		} catch (MongoException e) {
+			LOG.error("Mongo Connection Error", e);
 		}
 	}
 
@@ -46,12 +52,13 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public boolean save(String dateStr, String word, int frequency) { // insert
-																	// process
-																	// date-word-frequency
+	public boolean save(String dateStr, String word, int frequency) { // insert process date-word-frequency
+		if(word==null || word.equals("")){
+			return false;
+		}
 		try {
-			Date date = dateConverter(dateStr);
-			statisticsCollection
+			Date date = dateConvert(dateStr);
+			collection
 					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
 			return true;
 
@@ -63,85 +70,77 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public void delete() {// Delete All documents from collection Using blank
-							// BasicDBObject
+	public boolean delete() {// Delete All documents from collection :Using blank BasicDBObject
 		try {
-			statisticsCollection.deleteMany(new Document());
+			collection.deleteMany(new Document());
 			LOG.info("All data deleted");
+			return true;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be deleted.", e);
+			return false;
 		}
 
 	}
 
 	@Override
 	public boolean update(String dateStr, String word, int frequency) { // update  and increment the frequency
-		Date dateConverted = dateConverter(dateStr);
-		boolean updateSuccessful=false;
+		if(word==null || word.equals("")){
+			return false;
+		}
+		Date dateConverted = dateConvert(dateStr);
 		try {
-			UpdateResult result=statisticsCollection.updateOne(new Document("date", dateConverted).append("word", word),
+			UpdateResult result=collection.updateOne(new Document("date", dateConverted).append("word", word),
 					new Document("$inc", new Document("frequency", frequency)));
-			updateSuccessful=result.wasAcknowledged();
+			return result.wasAcknowledged();
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be updated.", e);
-			return updateSuccessful;
+			return false;
 		}
-		
-		return updateSuccessful;
 	}
 
 	@Override
-	public void fetch(String date) { // frequency sorted from a date for all
+	public FindIterable<Document> fetch(String date) { // frequency sorted from a date for all
 										// words
-		Date dateConverted = dateConverter(date);
+		
+		Date dateConverted = dateConvert(date);
 
-		FindIterable<Document> iterable = statisticsCollection.find(new Document().append("date", dateConverted))
-				.sort(new Document().append("frequency", -1));// filter in
-																// document
-																// example new
-																// Document("borough",
-																// "Manhattan")
-		printerOfFindIterable(iterable);
-
-	}
-
-	public void fetch(String date, int limit) { // frquency sorted for top 10
-												// word
-		Date dateConverted = dateConverter(date);
-
-		FindIterable<Document> iterable = statisticsCollection.find(new Document().append("date", dateConverted))
-				.sort(new Document().append("frequency", -1)).limit(limit);// filter
-																			// in
-																			// document
-																			// example
-																			// new
-																			// Document("borough",
-																			// "Manhattan")
-
-		printerOfFindIterable(iterable);
-	}
-
-	public void fetch() { // frequency sorted for all the world
-
-		FindIterable<Document> iterable = statisticsCollection.find(new Document())
+		FindIterable<Document> iterable = collection.find(new Document().append("date", dateConverted))
 				.sort(new Document().append("frequency", -1));
 		printerOfFindIterable(iterable);
+		return iterable;
+
 	}
-	public ArrayList<String> fetchWDocument() {
+
+	public FindIterable<Document> fetch(String date, int limit) { // frquency sorted for top 10
+												// word
+		Date dateConverted = dateConvert(date);
+
+		FindIterable<Document> iterable = collection.find(new Document().append("date", dateConverted))
+				.sort(new Document().append("frequency", -1)).limit(limit);
+
+		printerOfFindIterable(iterable);
+		return iterable;
+	}
+
+	public FindIterable<Document> fetch() { // frequency sorted for all the world
+
+		FindIterable<Document> iterable = collection.find(new Document())
+				.sort(new Document().append("frequency", -1));
+		printerOfFindIterable(iterable);
+		return iterable;
+	}
+	public ArrayList<String> fetchFirstWDocument() {
 		ArrayList<String> date_word_freq = new ArrayList<String>();
-		FindIterable<Document> search = statisticsCollection.find();
-		if (search == null) {
+		FindIterable<Document> search = collection.find();
+		if (search.first() == null) {
 			return null;
 		}
-		for(Document current : search){
-			date_word_freq.add(current.get("date").toString());
-			date_word_freq.add(current.get("word").toString());
-			date_word_freq.add(current.get("frequency").toString());
-			return date_word_freq;
-
-		}
-		return null;
+		date_word_freq.add(search.first().get("date").toString());
+		date_word_freq.add(search.first().get("word").toString());
+		date_word_freq.add(search.first().get("frequency").toString());
+		return date_word_freq;
 	}
+	
 	private void printerOfFindIterable(FindIterable<Document> iterable) { // which
 																			// provide
 																			// to
@@ -161,20 +160,22 @@ public class MongoDb implements Database {
 		});
 	}
 
-	public long fetchCount(String dateStr, String word) { // give a count from a
-															// date which
-															// contain "word"
-		Date date = dateConverter(dateStr);
+	public long contain(String dateStr, String word) { // return -1:problem
+		if(word==null || word.equals("")){
+			return -1;
+		}
+		Date date = dateConvert(dateStr);
 
 		Bson filter = new Document().append("date", date).append("word", word);
 
-		return statisticsCollection.count(filter);// sayısını
+		return collection.count(filter);// sayısını
 
 	}
-
-	private Date dateConverter(String dateStr) {
+	public long totalCount(){
+		return collection.count(new Document());
+	}
+	private Date dateConvert(String dateStr) {
 		Boolean flag = false;
-
 		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
 		Date date = null;

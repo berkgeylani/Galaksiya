@@ -1,4 +1,4 @@
-package master;
+package com.galaksiya.newsObserver.master;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

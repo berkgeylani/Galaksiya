@@ -1,4 +1,4 @@
-package master;
+package com.galaksiya.newsObserver.master;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -93,22 +93,12 @@ public class FileParserTest {
 															// check are they
 															// all URL?
 			{
-				URL checkerURL = new URL(URLs.toString());
+				new URL(URLs.toString());
 			}
 		} catch (MalformedURLException exception) {
 			Assert.fail("FileParrser.readerOFFile can't convert string to URL");
 		}
 	}
-
-	/*
-	 * @Test //should we change the methods process to test public void
-	 * emptyLine(){ //it should be last test because we changed the file in this
-	 * test try(BufferedWriter writer =
-	 * Files.newBufferedWriter(Paths.get(file))){ writer.write("");
-	 * writer.write("http://www.radikal.com.tr/d/rss/Rss_85.xml"); assertFalse(
-	 * testFileParser.readerOfFile(file) ); } catch (IOException e) { // TODO
-	 * Auto-generated catch block e.printStackTrace(); } }
-	 */
 	@After
 	public void deleteSetup() {
 		try {

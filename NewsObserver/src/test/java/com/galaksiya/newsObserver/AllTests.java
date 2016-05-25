@@ -1,4 +1,4 @@
-package com.galaksiya.newsObserver.mainTest;
+package com.galaksiya.newsObserver;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -12,8 +12,5 @@ import com.galaksiya.newsObserver.master.MasterTestSuite;
 	DatabaseTestSuite.class,
 	MasterTestSuite.class
 })
-public class MainTestClass {
-
-	
-
+public class AllTests {
 }

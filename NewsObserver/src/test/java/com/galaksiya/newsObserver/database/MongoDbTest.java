@@ -14,133 +14,149 @@ import org.junit.Test;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 
 public class MongoDbTest {
-	private MongoDb mongoDb ;
+	private MongoDb mongoDb;
 	private String date;
 	private String word;
+
 	@Before
-	public void before(){
+	public void before() {
 		mongoDb = new MongoDb("test");
-		word ="test";
-		date="17-May-2016";
+		word = "test";
+		date = "17-May-2016";
 	}
+
 	@After
-	public void After(){ 
+	public void After() {
 		mongoDb.delete();
 	}
+
 	@Test
-	public void containNullInput(){
-		assertEquals(-1, mongoDb.contain(date, null));		
+	public void containNullInput() {
+		assertEquals(-1, mongoDb.contain(date, null));
 	}
+
 	@Test
-	public void containInvalidInput(){
-		assertEquals(-1, mongoDb.contain(date, ""));		
+	public void containInvalidInput() {
+		assertEquals(-1, mongoDb.contain(date, ""));
 	}
-	
+
 	@Test
-	public void saveNullInput(){
+	public void saveNullInput() {
 		assertFalse(mongoDb.save(date, null, 2));
 	}
+
 	@Test
-	public void saveInvalidInput(){
+	public void saveInvalidInput() {
 		assertFalse(mongoDb.save(date, "", 2));
 	}
+
 	@Test
-	public void updateNullInput(){
-		assertFalse(mongoDb.update(date, null,2));
+	public void updateNullInput() {
+		assertFalse(mongoDb.update(date, null, 2));
 	}
+
 	@Test
-	public void updateInvalidInput(){
-		assertFalse(mongoDb.update(date, "",2));
+	public void updateInvalidInput() {
+		assertFalse(mongoDb.update(date, "", 2));
 	}
+
 	@Test
-	public void getMongoClient(){
-		assertTrue(mongoDb.getMongoClient() instanceof MongoClient);
-	}
-	
-	@Test
-	public void save(){
+	public void save() {
 		assertEquals(0, mongoDb.contain(date, word));
-		assertTrue(mongoDb.save(date,word, 2));
+		assertTrue(mongoDb.save(date, word, 2));
 		assertEquals(1, mongoDb.contain(date, word));
 	}
+
 	@Test
-	public void delete(){
-		mongoDb.save(date,word, 3 );
+	public void delete() {
+		mongoDb.save(date, word, 3);
 		mongoDb.save("17 Mar 2015", "test2", 4);
 		assertEquals(2, mongoDb.totalCount());
 		assertTrue(mongoDb.delete());
 		assertEquals(0, mongoDb.totalCount());
 	}
+
 	@Test
-	public void update(){
+	public void canUpdate() {
 		mongoDb.save(date, word, 2);
 		assertTrue(mongoDb.update(date, word, 2));
 	}
+
 	@Test
-	public void updateCanIncrement(){
+	public void updateCanIncrement() {
 		mongoDb.save(date, word, 2);
 		int frequencyLocal = Integer.parseInt(mongoDb.fetchFirstWDocument().get(2));
 		mongoDb.update(date, word, 2);
-		assertEquals(Integer.parseInt(mongoDb.fetchFirstWDocument().get(2)) , frequencyLocal + 2 );
+		assertEquals(Integer.parseInt(mongoDb.fetchFirstWDocument().get(2)), frequencyLocal + 2);
 	}
-	public int iterarorSize(FindIterable<Document> iterator){
-		int size=0;
-		for(Document current : iterator){
+
+	public int iterarorSize(FindIterable<Document> iterator) {
+		int size = 0;
+		MongoCursor<Document> cursor = iterator.iterator();
+		while (cursor.hasNext()) {
 			size++;
+			cursor.next();
 		}
 		return size;
 	}
+
 	@Test
-	public void overrideFetch(){
-		mongoDb.save(date, word, 2);
-		FindIterable<Document> iterable=mongoDb.fetch();
-		assertEquals( mongoDb.totalCount(),iterarorSize(iterable));
+	public void overrideFetch() {
+		for (int i = 0; i < 12; i++) {
+			mongoDb.save(date, word, 2);
+		}
+		assertEquals(mongoDb.totalCount(), iterarorSize(mongoDb.fetch()));
 	}
-	@Test 
-	public void overrideFetchDate(){
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		FindIterable<Document> iterable=mongoDb.fetch(date);
-		assertEquals(mongoDb.contain(date, word),iterarorSize(iterable));
-	}
+
 	@Test
-	public void overrideFetchDateLimit(){
+	public void overrideFetchDate() {
+
+		mongoDb.save(date, word, 2);
+		mongoDb.save(date, word, 2);
+		mongoDb.save(date, word, 2);
+		mongoDb.save(date, word, 2);
+		FindIterable<Document> iterable = mongoDb.fetch(date);
+		assertEquals(mongoDb.contain(date, word), iterarorSize(iterable));
+	}
+
+	@Test
+	public void overrideFetchDateLimit() {
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 
-		FindIterable<Document> iterable=mongoDb.fetch(date,2);
-		assertEquals(2,iterarorSize(iterable));
+		FindIterable<Document> iterable = mongoDb.fetch(date, 2);
+		assertEquals(2, iterarorSize(iterable));
 	}
+
 	@Test
-	public void fetchFirstWDOcument(){
-		ArrayList<String> firstDoc=mongoDb.fetchFirstWDocument();
-		if(firstDoc!=null)
-		  fail("fetchFirstDocument test has broken because of :" 
-				  			 +firstDoc.get(0)
-				  		+"\t"+firstDoc.get(1)
-				  		+"\t"+firstDoc.get(2));
+	public void fetchFirstWDOcument() {
+		ArrayList<String> firstDoc = mongoDb.fetchFirstWDocument();
+		if (firstDoc != null)
+			fail("fetchFirstDocument test has broken because of :" + firstDoc.get(0) + "\t" + firstDoc.get(1) + "\t"
+					+ firstDoc.get(2) + "\t in added database");
 		mongoDb.save(date, word, 2);
-		firstDoc=mongoDb.fetchFirstWDocument(); 
+		firstDoc = mongoDb.fetchFirstWDocument();
 		assertFalse(firstDoc.isEmpty());
 	}
+
 	@Test
 	public void contain() {
-		assertEquals(0,mongoDb.contain(date, word));
+		assertEquals(0, mongoDb.contain(date, word));
 		mongoDb.save(date, word, 2);
-		assertEquals(1,mongoDb.contain(date, word));
+		assertEquals(1, mongoDb.contain(date, word));
 	}
+
 	@Test
 	public void totalCount() {
-		assertEquals(0,mongoDb.totalCount());
+		assertEquals(0, mongoDb.totalCount());
 		for (int i = 0; i < 6; i++) {
 			mongoDb.save(date, word, 2);
 		}
-		assertEquals(6,mongoDb.totalCount());
+		assertEquals(6, mongoDb.totalCount());
 	}
 }

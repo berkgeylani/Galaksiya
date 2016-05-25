@@ -19,7 +19,17 @@ public class MainProcess {
 		MongoDb mongoHelper = new MongoDb();
 		mongoHelper.delete();//before get all the data from rss links we should clean our database.
 	}
-	
+	public Hashtable<String, String> getLastNews (ArrayList<URL> rssLinkAL){
+		Hashtable<String, String> lastNews = new Hashtable<String, String>();
+		RssReader parserOfRss = new RssReader();//--new
+		for(URL rssURL : rssLinkAL) { 
+			for (FeedMessage message : parserOfRss.parseFeed(rssURL)) {
+				lastNews.put(rssURL.toString(), message.getTitle());
+				
+			}
+		}
+		return lastNews;
+	}
 	public Hashtable<String, String> getResult(ArrayList<URL> rssLinkAL) {
 		 Hashtable<String, String> lastNews = new Hashtable<String, String>();
 		 Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String,Integer>();
@@ -31,7 +41,7 @@ public class MainProcess {
 					
 				    WordProcessor processOfWords = new WordProcessor();
 			    
-				    for (FeedMessage message : parserOfRss.feedParser(rssURLs)) {//for all new  -----new
+				    for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) {//for all new  -----new
 				      i++;
 			          if(i==1) lastNews.put(rssURLs.toString(),message.getTitle());
 			          String datePerNew=null;										
@@ -47,9 +57,6 @@ public class MainProcess {
 			        	  //Tue May 03 23:25:52 EEST 2016
 			          } catch (Exception e) {
 						LOG.error(message.getpubDate().toString()+"Substring process problem.",e);
-			          }
-			          if(datePerNew=="02 May 2016") {
-			        	  System.out.println("wqerq");
 			          }
 			          wordFrequencyPerNew=processOfWords.splitAndHashing(message.getTitle()+ " " +  message.getDescription());//It Brıng us hashtable which contains word and freq hashtable per new
 			          

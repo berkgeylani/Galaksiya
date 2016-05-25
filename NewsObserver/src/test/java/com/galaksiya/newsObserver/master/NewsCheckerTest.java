@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
 import com.galaksiya.newsObserver.parser.FeedMessage;
 import com.galaksiya.newsObserver.parser.RssReader;
 
@@ -32,7 +33,7 @@ public class NewsCheckerTest {
 		server = new Server(SERVER_PORT);
 		server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class)
 				.setHttpCompliance(HttpCompliance.LEGACY);
-		server.setHandler(new HelloHandler());
+		server.setHandler(new CreateRssJetty());
 		server.setStopAtShutdown(true);
 		server.start();
 	}
@@ -95,7 +96,7 @@ public class NewsCheckerTest {
 	}
 
 	private String getSampleTitle() {
-		return rssReader.feedParser(rssLinksAL.get(0)).get(0).getTitle();
+		return rssReader.parseFeed(rssLinksAL.get(0)).get(0).getTitle();
 	}
 
 	@Test

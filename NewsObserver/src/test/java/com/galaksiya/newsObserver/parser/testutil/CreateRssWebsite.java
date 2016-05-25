@@ -1,4 +1,4 @@
-package com.galaksiya.newsObserver.master;
+package com.galaksiya.newsObserver.parser.testutil;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -8,27 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler;
 
-public class HelloHandler extends AbstractHandler
+public class CreateRssWebsite extends AbstractHandler
 {
-    final String greeting;
-    final String body;
 
-    public HelloHandler()
-    {
-        this("Hello World"); 
-    }
-
-    public HelloHandler( String greeting )
-    {
-        this(greeting, null);
-    }
-
-    public HelloHandler( String greeting, String body )
-    {
-        this.greeting = greeting;
-        this.body = body;
-    }
 
     public void handle( String target,
                         Request baseRequest,
@@ -38,7 +22,8 @@ public class HelloHandler extends AbstractHandler
     {
         response.setContentType("text/xml; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-
+        ContextHandler contextHandler = new ContextHandler();
+        contextHandler.setContextPath( "/rss" );
         PrintWriter out = response.getWriter();
         String context = "<rss xmlns:dc=\"http://purl.org/dc/elements/1.1/\" version=\"2.0\">"
         		+"<channel>"

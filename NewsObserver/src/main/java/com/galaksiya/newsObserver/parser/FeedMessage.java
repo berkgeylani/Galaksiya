@@ -2,11 +2,9 @@ package com.galaksiya.newsObserver.parser;
 
 public class FeedMessage {
 
-  String title;
-  String link;
-  String description;
-  String pubDate;
-  String guid;
+  private String title;
+  private String description;
+  private String pubDate;
 
   public String getTitle() {
     return title;

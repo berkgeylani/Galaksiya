@@ -13,7 +13,7 @@ public class WordProcessor {
 
 	public Hashtable<String, Integer> splitAndHashing(String titleDescription){
 
-		List<String> processedStr=Arrays.asList(titleDescription.replaceAll("\\p{P}", "").toLowerCase().split("\\s+"));
+		List<String> processedStr=Arrays.asList(titleDescription.replaceAll("\\<[^>]*>","").replaceAll("\\p{P}", "").toLowerCase().split("\\s+"));
 		//splitting from " " and delete punctions or others without alphabet and lower case
 		Hashtable<String, Integer> wordFrequency = new Hashtable<String,Integer>();
 		Set<String> uniqueWords = new HashSet<String>(processedStr);//set provide we can save words uniqely

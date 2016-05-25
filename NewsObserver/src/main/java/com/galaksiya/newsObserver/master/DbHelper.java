@@ -1,10 +1,21 @@
 package com.galaksiya.newsObserver.master;
 
 
+
 import com.galaksiya.newsObserver.database.MongoDb;
 
 public class DbHelper {
 	private MongoDb mongoDbHelper;
+	
+	
+	private static class _DbHelperHold{
+		private final static DbHelper INSTANCE = new DbHelper();
+	}
+	public static DbHelper getInstance(){
+		return _DbHelperHold.INSTANCE;
+	}
+	
+	
 	private NewsChecker newsCheckerTest = new NewsChecker();
 	public DbHelper(){
 		mongoDbHelper = new MongoDb();

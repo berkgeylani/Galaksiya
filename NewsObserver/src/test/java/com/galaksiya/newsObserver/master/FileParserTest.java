@@ -21,6 +21,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
+
 public class FileParserTest {
 	/*
 	 * emptyPathWay:checks behaviour when inputs are null or empty string
@@ -35,7 +37,7 @@ public class FileParserTest {
 	@BeforeClass
 	public static void startJetty() throws Exception{
         server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class).setHttpCompliance(HttpCompliance.LEGACY);
-        server.setHandler(new HelloHandler());
+        server.setHandler(new CreateRssJetty());
         server.setStopAtShutdown(true);
         server.start();
 	}

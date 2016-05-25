@@ -14,7 +14,6 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -22,125 +21,169 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
 public class MongoDb implements Database {
-	private MongoClient mongoClient;
-	private MongoDatabase mDatabase;
-	private MongoCollection<Document> collection;
+
 	private static final Logger LOG = Logger.getLogger(MongoDb.class);
 
-	// infos for mongodb
+	private String collectionName;
+
 	public MongoDb() {
-		try {
-			mongoClient = new MongoClient("localhost", 27017);
-			mDatabase = mongoClient.getDatabase("mydb");
+	}
+
+	public MongoCollection<Document> getCollection(MongoClient client) {
+		MongoDatabase mDatabase = client.getDatabase("mydb");
+		MongoCollection<Document> collection = null;
+		if (collectionName == null) {
 			collection = mDatabase.getCollection("statistics");
-		} catch (MongoException e) {
-			LOG.error("Mongo Connection Error", e);
+		} else {
+			collection = mDatabase.getCollection(collectionName);
 		}
-	}
-	public MongoDb(String collections) {
-		try {
-			mongoClient = new MongoClient("localhost", 27017);
-			mDatabase = mongoClient.getDatabase("mydb");
-			collection = mDatabase.getCollection(collections);
-		} catch (MongoException e) {
-			LOG.error("Mongo Connection Error", e);
-		}
+		return collection;
 	}
 
-	public MongoClient getMongoClient() {
-		return mongoClient;
+	public MongoDb(String collectionName) {
+		this.collectionName = collectionName;
 	}
 
+	/**
+	 * insert
+	 * <p>
+	 * process
+	 * <p>
+	 * date-word-frequency
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#save(java.lang.String,
+	 *      java.lang.String, int)
+	 */
 	@Override
-	public boolean save(String dateStr, String word, int frequency) { // insert process date-word-frequency
-		if(word==null || word.equals("")){
-			return false;
-		}
-		try {
-			Date date = dateConvert(dateStr);
-			collection
-					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
-			return true;
+	public boolean save(String dateStr, String word, int frequency) {
+		try (MongoClient mongoClient = newClient()) {
+			if (word == null || word.equals("")) {
+				return false;
+			}
+			try {
+				Date date = dateConvert(dateStr);
+				getCollection(mongoClient).insertOne(
+						new Document().append("date", date).append("word", word).append("frequency", frequency));
+				return true;
 
-		} catch (MongoWriteException e) {
-			LOG.error("Data couldn't be inserted.", e);
+			} catch (MongoWriteException e) {
+				LOG.error("Data couldn't be inserted.", e);
 
+			}
+		} catch (Exception e) {
+			LOG.error("Mongo Connection Exception", e);
 		}
 		return false;
 	}
 
 	@Override
-	public boolean delete() {// Delete All documents from collection :Using blank BasicDBObject
-		try {
-			collection.deleteMany(new Document());
+	public boolean delete() {// Delete All documents from collection :Using
+								// blank BasicDBObject
+		try (MongoClient mongoClient = newClient()) {
+			getCollection(mongoClient).deleteMany(new Document());
 			LOG.info("All data deleted");
 			return true;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be deleted.", e);
-			return false;
+		} catch (Exception e) {
+			LOG.error("Mongo Connection Exception", e);
 		}
-
+		return false;
 	}
 
 	@Override
-	public boolean update(String dateStr, String word, int frequency) { // update  and increment the frequency
-		if(word==null || word.equals("")){
-			return false;
+	public boolean update(String dateStr, String word, int frequency) { // update
+																		// and
+																		// increment
+																		// the
+																		// frequency
+		try (MongoClient mongoClient = newClient()) {
+			if (word == null || word.equals("")) {
+				return false;
+			}
+			Date dateConverted = dateConvert(dateStr);
+			try {
+				UpdateResult result = getCollection(mongoClient).updateOne(
+						new Document("date", dateConverted).append("word", word),
+						new Document("$inc", new Document("frequency", frequency)));
+				return result.wasAcknowledged();
+			} catch (MongoWriteException e) {
+				LOG.error("Data couldn't be updated.", e);
+			}
+		} catch (Exception e) {
+			LOG.error("Mongo Connection Exception", e);
 		}
-		Date dateConverted = dateConvert(dateStr);
-		try {
-			UpdateResult result=collection.updateOne(new Document("date", dateConverted).append("word", word),
-					new Document("$inc", new Document("frequency", frequency)));
-			return result.wasAcknowledged();
-		} catch (MongoWriteException e) {
-			LOG.error("Data couldn't be updated.", e);
-			return false;
-		}
+		return false;
+	}
+
+	public MongoClient newClient() {
+		return new MongoClient("localhost", 27017);
 	}
 
 	@Override
-	public FindIterable<Document> fetch(String date) { // frequency sorted from a date for all
-										// words
-		
-		Date dateConverted = dateConvert(date);
-
-		FindIterable<Document> iterable = collection.find(new Document().append("date", dateConverted))
-				.sort(new Document().append("frequency", -1));
-		printerOfFindIterable(iterable);
-		return iterable;
-
+	public FindIterable<Document> fetch(String date) { // frequency sorted from
+														// a date for all
+		// words
+		try (MongoClient mongoClient = newClient()) {
+			Date dateConverted = dateConvert(date);
+			FindIterable<Document> iterable = getCollection(mongoClient)
+					.find(new Document().append("date", dateConverted)).sort(new Document().append("frequency", -1));
+			printerOfFindIterable(iterable);
+			return iterable;
+		} catch (Exception e) {
+			LOG.error("Mongo Connection Exception", e);
+		}
+		return null;
 	}
 
-	public FindIterable<Document> fetch(String date, int limit) { // frquency sorted for top 10
-												// word
-		Date dateConverted = dateConvert(date);
-
-		FindIterable<Document> iterable = collection.find(new Document().append("date", dateConverted))
-				.sort(new Document().append("frequency", -1)).limit(limit);
-
-		printerOfFindIterable(iterable);
-		return iterable;
+	public FindIterable<Document> fetch(String date, int limit) { // frquency
+																	// sorted
+																	// for top
+																	// 10
+		// word
+		try (MongoClient mongoClient = newClient()) {
+			Date dateConverted = dateConvert(date);
+			FindIterable<Document> iterable = getCollection(mongoClient)
+					.find(new Document().append("date", dateConverted)).sort(new Document().append("frequency", -1))
+					.limit(limit);
+			printerOfFindIterable(iterable);
+			return iterable;
+		} catch (Exception e) {
+			LOG.error("Mongo Connection Exception", e);
+		}
+		return null;
 	}
 
-	public FindIterable<Document> fetch() { // frequency sorted for all the world
+	public FindIterable<Document> fetch() { // frequency sorted for all the
+											// world
+		try (MongoClient mongoClient = newClient()) {
 
-		FindIterable<Document> iterable = collection.find(new Document())
-				.sort(new Document().append("frequency", -1));
-		printerOfFindIterable(iterable);
-		return iterable;
+			FindIterable<Document> iterable = getCollection(mongoClient).find(new Document())
+					.sort(new Document().append("frequency", -1));
+			printerOfFindIterable(iterable);
+			return iterable;
+		} catch (Exception e) {
+			LOG.error("Mongo Connection Exception", e);
+		}
+		return null;
 	}
+
 	public ArrayList<String> fetchFirstWDocument() {
-		ArrayList<String> date_word_freq = new ArrayList<String>();
-		FindIterable<Document> search = collection.find();
-		if (search.first() == null) {
-			return null;
+		try (MongoClient mongoClient = newClient()) {
+			ArrayList<String> date_word_freq = new ArrayList<String>();
+			FindIterable<Document> search = getCollection(mongoClient).find();
+			if (search.first() == null) {
+				return null;
+			}
+			date_word_freq.add(search.first().get("date").toString());
+			date_word_freq.add(search.first().get("word").toString());
+			date_word_freq.add(search.first().get("frequency").toString());
+			return date_word_freq;
+		} catch (Exception e) {
 		}
-		date_word_freq.add(search.first().get("date").toString());
-		date_word_freq.add(search.first().get("word").toString());
-		date_word_freq.add(search.first().get("frequency").toString());
-		return date_word_freq;
+		return null;
 	}
-	
+
 	private void printerOfFindIterable(FindIterable<Document> iterable) { // which
 																			// provide
 																			// to
@@ -161,44 +204,53 @@ public class MongoDb implements Database {
 	}
 
 	public long contain(String dateStr, String word) { // return -1:problem
-		if(word==null || word.equals("")){
+		if (word == null || word.equals("")) {
 			return -1;
 		}
 		Date date = dateConvert(dateStr);
 
 		Bson filter = new Document().append("date", date).append("word", word);
 
-		return collection.count(filter);// sayısını
+		try (MongoClient mongoClient = newClient();) {
+			return getCollection(mongoClient).count(filter);
+		} // sayısını
 
 	}
-	public long totalCount(){
-		return collection.count(new Document());
+
+	public long totalCount() {
+		try (MongoClient mongoClient = newClient()) {
+			return getCollection(mongoClient).count(new Document());
+		}
 	}
+
 	private Date dateConvert(String dateStr) {
 		Boolean flag = false;
-		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
 		Date date = null;
 		do {
-			if (flag) {
-				System.out.println("BE CAREFUL.Insert a date of day like :  17 Mar 2016\n");
-				try {
-					dateStr = input.readLine();
-				} catch (IOException e) {
-					LOG.error("Input(String) couldn't convert to date. ",e);
-				}
-			}
+			dateStr = askAgain(dateStr, flag);
 			try {
 				date = format1.parse(dateStr.replaceAll("\\s+", "-"));
 				flag = false;
 				LOG.debug("Input(String) converted date successfully.");
 
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				flag = true;
-				LOG.error("Input(String) couldn't convert to date.It will be requested again. ",e);
+				LOG.error("Input(String) couldn't convert to date.It will be requested again. ", e);
 			} // date is the our object's date
 		} while (flag);
 		return date;
+	}
+
+	public String askAgain(String dateStr, Boolean flag) {
+		if (flag) {
+			System.out.println("BE CAREFUL.Insert a date of day like :  17 Mar 2016\n");
+			try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in))) {
+				dateStr = input.readLine();
+			} catch (IOException e) {
+				LOG.error("Input(String) couldn't convert to date. ", e);
+			}
+		}
+		return dateStr;
 	}
 }

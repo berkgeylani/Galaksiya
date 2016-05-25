@@ -1,5 +1,0 @@
-http://www.sozcu.com.tr/rss.php
-http://www.yenisafak.com/rss
-http://www.hurriyet.com.tr/rss/gundem
-http://www.radikal.com.tr/d/rss/Rss_85.xml
-http://www.radikal.com.tr/d/rss/Rss_83.xml

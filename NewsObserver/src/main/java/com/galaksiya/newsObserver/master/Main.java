@@ -1,7 +1,6 @@
 package com.galaksiya.newsObserver.master;
 
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -19,20 +18,21 @@ public class Main {
 			Scanner sc = new Scanner(System.in);
 			System.out.println("Give a path like:  /home/francium/new.txt");
 			filePath = sc.nextLine();
-			sc.close();
 		} else
 			filePath = args[0]; // jardan okumuyır şu anda dikkat et
-		MainProcess mainprocessor = new MainProcess();
+		MongoDb mongoHelper = new MongoDb();
+		mongoHelper.delete();
+//		MainProcess mainprocessor = new MainProcess();
 		FileParser fileParser = new FileParser(filePath); // process tx file and
 															// return ArrayList
 															// which contains
 															// URLs
 
-		Hashtable<String, String> lastNews = mainprocessor.getResult(fileParser.getRssLinksAL());
-//		 with hashtable rssLinks-Their last news
-		 mainprocessor.postToDatabase();// insert for all the news in all rss
+//		Hashtable<String, String> lastNews = mainprocessor.getResult(fileParser.getRssLinksAL());
+//		 with hashtable rssLinks-Their last newsx
+//		 mainprocessor.postToDatabase();// insert for all the news in all rss
 		IntervalFetcher intervalFetcher = new IntervalFetcher();
-		intervalFetcher.intervaller(fileParser.getRssLinksAL(), lastNews);// check
+		intervalFetcher.intervaller(fileParser.getRssLinksAL());// check
 		
 		menu();
 	}
@@ -52,6 +52,7 @@ public class Main {
 				System.out.println();
 
 				try {
+					
 					flagMenu = sc.nextInt();// when read it's always 48 more and
 											// then...(WILL SEARCH)
 					dateChoosed = sc.nextLine();// eating the line for reading
@@ -64,7 +65,7 @@ public class Main {
 						System.out.println("Insert a date of day like :  17 Mar 2016\n");
 						dateChoosed = sc.nextLine();
 						System.out.println("10 most used word from " + dateChoosed);
-						mongoHelper.fetch(dateChoosed);// from a day coming
+						mongoHelper.fetch(dateChoosed,10);// from a day coming
 														// limited our is top 10
 														// and sorted(frequency)
 						break;
@@ -72,7 +73,7 @@ public class Main {
 						System.out.println("Insert a date of day like :  17 Mar 2016\n");
 						dateChoosed = sc.nextLine();
 						System.out.println("Sorted By Frequency from " + dateChoosed);
-						mongoHelper.fetch(dateChoosed, 10);// from a
+						mongoHelper.fetch(dateChoosed);// from a
 															// date,printing
 															// all,our document
 															// is top 10 and
@@ -93,5 +94,6 @@ public class Main {
 				}
 			} while (flagMenu != 0);
 		}
+		LOG.info("Menu Hazır");
 	}
 }

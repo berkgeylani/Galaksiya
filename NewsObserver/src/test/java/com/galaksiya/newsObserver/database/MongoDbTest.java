@@ -7,14 +7,9 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
-import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCursor;
 
 public class MongoDbTest {
 	private MongoDb mongoDb;
@@ -93,22 +88,13 @@ public class MongoDbTest {
 		assertEquals(Integer.parseInt(mongoDb.fetchFirstWDocument().get(2)), frequencyLocal + 2);
 	}
 
-	public int iterarorSize(FindIterable<Document> iterator) {
-		int size = 0;
-		MongoCursor<Document> cursor = iterator.iterator();
-		while (cursor.hasNext()) {
-			size++;
-			cursor.next();
-		}
-		return size;
-	}
 
 	@Test
 	public void overrideFetch() {
 		for (int i = 0; i < 12; i++) {
 			mongoDb.save(date, word, 2);
 		}
-		assertEquals(mongoDb.totalCount(), iterarorSize(mongoDb.fetch()));
+		assertEquals(mongoDb.totalCount(), (mongoDb.fetch()));
 	}
 
 	@Test
@@ -118,8 +104,7 @@ public class MongoDbTest {
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
-		FindIterable<Document> iterable = mongoDb.fetch(date);
-		assertEquals(mongoDb.contain(date, word), iterarorSize(iterable));
+		assertEquals(mongoDb.contain(date, word), mongoDb.fetch(date));
 	}
 
 	@Test
@@ -129,8 +114,7 @@ public class MongoDbTest {
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 
-		FindIterable<Document> iterable = mongoDb.fetch(date, 2);
-		assertEquals(2, iterarorSize(iterable));
+		assertEquals(2, mongoDb.fetch(date, 2));
 	}
 
 	@Test

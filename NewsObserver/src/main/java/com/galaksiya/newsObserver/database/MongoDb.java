@@ -17,6 +17,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
@@ -78,7 +79,7 @@ public class MongoDb implements Database {
 
 	@Override
 	public boolean delete() {// Delete All documents from collection :Using
-								// blank BasicDBObject
+		// blank BasicDBObject
 		try (MongoClient mongoClient = newClient()) {
 			getCollection(mongoClient).deleteMany(new Document());
 			LOG.info("All data deleted");
@@ -93,10 +94,10 @@ public class MongoDb implements Database {
 
 	@Override
 	public boolean update(String dateStr, String word, int frequency) { // update
-																		// and
-																		// increment
-																		// the
-																		// frequency
+		// and
+		// increment
+		// the
+		// frequency
 		try (MongoClient mongoClient = newClient()) {
 			if (word == null || word.equals("")) {
 				return false;
@@ -119,53 +120,33 @@ public class MongoDb implements Database {
 	public MongoClient newClient() {
 		return new MongoClient("localhost", 27017);
 	}
-
-	@Override
-	public FindIterable<Document> fetch(String date) { // frequency sorted from
-														// a date for all
-		// words
-		try (MongoClient mongoClient = newClient()) {
-			Date dateConverted = dateConvert(date);
-			FindIterable<Document> iterable = getCollection(mongoClient)
-					.find(new Document().append("date", dateConverted)).sort(new Document().append("frequency", -1));
-			printerOfFindIterable(iterable);
-			return iterable;
-		} catch (Exception e) {
-			LOG.error("Mongo Connection Exception", e);
-		}
-		return null;
+	public int fetch() { // frequency sorted for all the words
+		return fetchMain(new Document(), new Document().append("frequency", 1), -1);
 	}
 
-	public FindIterable<Document> fetch(String date, int limit) { // frquency
-																	// sorted
-																	// for top
-																	// 10
-		// word
-		try (MongoClient mongoClient = newClient()) {
-			Date dateConverted = dateConvert(date);
-			FindIterable<Document> iterable = getCollection(mongoClient)
-					.find(new Document().append("date", dateConverted)).sort(new Document().append("frequency", -1))
-					.limit(limit);
-			printerOfFindIterable(iterable);
-			return iterable;
-		} catch (Exception e) {
-			LOG.error("Mongo Connection Exception", e);
-		}
-		return null;
+	public int fetch(String date) { 
+		Date dateConverted = dateConvert(date);
+		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
+
 	}
 
-	public FindIterable<Document> fetch() { // frequency sorted for all the
-											// world
+	public int fetch(String date, int limit) { 
+		Date dateConverted = dateConvert(date);
+		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
+	}
+	private int fetchMain(Document find,Document sort,int limit){
+		// world
 		try (MongoClient mongoClient = newClient()) {
-
-			FindIterable<Document> iterable = getCollection(mongoClient).find(new Document())
-					.sort(new Document().append("frequency", -1));
+			FindIterable<Document> iterable = getCollection(mongoClient).find(find)
+					.sort(sort);
+			if(limit>=0)
+				iterable=iterable.limit(limit);
 			printerOfFindIterable(iterable);
-			return iterable;
+			return iteratorSize(iterable);
 		} catch (Exception e) {
 			LOG.error("Mongo Connection Exception", e);
 		}
-		return null;
+		return -1;
 	}
 
 	public ArrayList<String> fetchFirstWDocument() {
@@ -183,14 +164,28 @@ public class MongoDb implements Database {
 		}
 		return null;
 	}
+	public int iteratorSize(FindIterable<Document> iterable){
+		try (MongoClient mongoClient = newClient()) {
+			int size = 0;
+			MongoCursor<Document> cursor = iterable.iterator();
+			while (cursor.hasNext()) {
+				size++;
+				cursor.next();
+			}
+			return size;
+		}
+		catch (Exception e) {
+			return -1;
+		}
+	}
 
 	private void printerOfFindIterable(FindIterable<Document> iterable) { // which
-																			// provide
-																			// to
-																			// print
-																			// document
-																			// in
-																			// collection
+		// provide
+		// to
+		// print
+		// document
+		// in
+		// collection
 		// TODO if nothing to show say in here There is nothing to show
 		System.out.println("----Date----" + "\t\t\t\t" + "----Word----" + "\t" + "----Frequency----");
 

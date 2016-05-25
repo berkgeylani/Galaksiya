@@ -101,14 +101,14 @@ public class NewsCheckerTest {
 
 	@Test
 	public void updateActualNewsNullInput() {
-		assertFalse(newsChecker.updateActualNews(null, null));
+		assertFalse(newsChecker.updateActualNews(null));
 	}
 
 	@Test
 	public void updateActualNewsValidInput() {
 		Hashtable<String, String> lastNews = new Hashtable<String, String>();
 		lastNews.put("http://localhost:"+8112+"/", getSampleTitle());
-		assertTrue(newsChecker.updateActualNews(rssLinksAL, lastNews));
+		assertTrue(newsChecker.updateActualNews(rssLinksAL));
 	}
 
 	private FeedMessage createSampleMessage() {

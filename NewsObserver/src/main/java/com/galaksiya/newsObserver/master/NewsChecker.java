@@ -16,14 +16,15 @@ public class NewsChecker {
 
 	private final static Logger LOG = Logger.getLogger(NewsChecker.class);
 
-	public boolean updateActualNews(ArrayList<URL> RssLinksAL, Hashtable<String, String> lastNews) {
-		if (RssLinksAL == null || RssLinksAL.isEmpty() || lastNews == null || lastNews.isEmpty())
+	private static  Hashtable<String, String> lastNews = new Hashtable<String, String>();//bütün classlarda ortak olmasını istediğimiz bir hashtable
+	
+	
+	public boolean updateActualNews(ArrayList<URL> RssLinksAL) {
+		if (RssLinksAL == null || RssLinksAL.isEmpty() )
 			return false;
+
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
-			if (containNewsTitle(lastNews.get(rssURLs), rssURLs)) {
-				LOG.error("There is no title in this rss.");
-				return false;
-			}
+			lastNews.put(rssURLs.toString(), "");
 			travelInNews(lastNews, rssURLs);
 			LOG.debug(rssURLs + " checked.");
 		}

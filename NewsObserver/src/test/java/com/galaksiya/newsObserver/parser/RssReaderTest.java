@@ -1,24 +1,20 @@
 package com.galaksiya.newsObserver.parser;
 
-import org.eclipse.jetty.http.HttpCompliance;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+
 import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-
-import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
 import com.galaksiya.newsObserver.parser.testutil.CreateNoNewRssWebsite;
 import com.galaksiya.newsObserver.parser.testutil.CreateNonRssWebsite;
 import com.galaksiya.newsObserver.parser.testutil.CreateRssWebsite;

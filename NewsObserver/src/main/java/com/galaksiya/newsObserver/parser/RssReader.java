@@ -39,7 +39,6 @@ public class RssReader {
 			@SuppressWarnings("unchecked")
 			List<SyndEntry> entries = feed.getEntries();
 			Iterator<SyndEntry> itEntries = entries.iterator();
-			String description=null;
 			while (itEntries.hasNext()) {
 				FeedMessage message = new FeedMessage();
 				SyndEntry entry = itEntries.next();

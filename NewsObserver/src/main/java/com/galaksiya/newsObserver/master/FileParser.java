@@ -21,7 +21,12 @@ public class FileParser {
 		rssLinksAL = new ArrayList<URL>();
 		readerOfFile(filePath);
 	}
-
+	/**
+	 * It takes file path and handle the file which is in given file path then push all the urls
+	 * to an arraylist.
+	 * @param filePath will be read file's path
+	 * @return 0:fault 1:success
+	 */
 	public boolean readerOfFile(String filePath) {
 		try {
 			Paths.get(filePath);
@@ -52,7 +57,10 @@ public class FileParser {
 		}
 		return false; //catch girdiyse return 2;
 	}
-
+	/**
+	 * If you call after readerOfFile function,it returns arraylist which occurs urls.
+	 * @return  It returns an arraylist which occurs url's(rss links).
+	 */
 	public ArrayList<URL> getRssLinksAL() {// Return URLs of rss links
 		return rssLinksAL;
 	}

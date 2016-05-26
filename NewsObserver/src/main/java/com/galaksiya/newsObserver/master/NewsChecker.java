@@ -18,7 +18,11 @@ public class NewsChecker {
 
 	private static  Hashtable<String, String> lastNews = new Hashtable<String, String>();//bütün classlarda ortak olmasını istediğimiz bir hashtable
 	
-	
+	/**
+	 * It takes rss links and give one by one to travelInNews.
+	 * @param RssLinksAL This arraylist is rss links list.
+	 * @return true :success false :fail
+	 */
 	public boolean updateActualNews(ArrayList<URL> RssLinksAL) {
 		if (RssLinksAL == null || RssLinksAL.isEmpty() )
 			return false;
@@ -30,7 +34,13 @@ public class NewsChecker {
 		}
 		return true;
 	}
-	
+	/**
+	 * It travel news in url which is given with param.
+	 * It gives news one by one to handleMessage.
+	 * Also this function save the last news.
+	 * @param lastNews  It is hashtable which occurs rssLink-lastNew for this link.
+	 * @param rssURLs This is the url which will be read.
+	 */
 	public void travelInNews(Hashtable<String, String> lastNews, URL rssURLs) {
 		String[] lastNewsArray = new String[2];
 		boolean updateNew = true, updated = false;
@@ -56,7 +66,11 @@ public class NewsChecker {
 			}
 		}
 	}
-
+	/**
+	 * It takes message and handle it to date-word-frequency.Then,It increment(update) or insert it.
+	 * @param message It is only one new with title-description-pubdate.
+	 * @return wordFrequencyPerNew It is a hash table which occurs word-frequency
+	 */
 	public Hashtable<String, Integer> handleMessage(FeedMessage message) {
 		WordProcessor processOfWords = new WordProcessor();
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
@@ -67,37 +81,41 @@ public class NewsChecker {
 			return null;
 		return wordFrequencyPerNew;
 	}
-
+	/**
+	 * It controls 'Is this new in rss link?'
+	 * @param title A new of title
+	 * @param rssURLs A URL to read.
+	 * @return true :Success false :fail
+	 */
 	public boolean containNewsTitle(String title, URL rssURLs) {
 		RssReader parserOfRss = new RssReader();
-		for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) { // item to
-																		// item
-																		// reading
+		for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) { 
 			if (message.getTitle().equals(title)) {
 				return true;
 			}
 		}
 		return false;
 	}
-
-	public String dateCustomize(String pubDate) {// buda duplicated mongoda date
-													// işlemleri yapan bir tane
-													// daha var bir clas açıp
-													// date işlemleri yapan
-													// yapmamız lazım
+	/**
+	 * It convert a String which occurs date like 'Fri May 13 10:24:56 EEST 2016' to 13 May 2016.
+	 * @param pubDate A date string like 'Fri May 13 10:24:56 EEST 2016'
+	 * @return ıt returns a String like '13 May 2016'.(date-month-year)
+	 */
+	public String dateCustomize(String pubDate) {
 		String datePerNew;
-		if (pubDate.length() == 29)// Fri May 13 10:24:56 EEST 2016 13 May 2016
+		if (pubDate.length() == 29)
 			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
-					+ pubDate.toString().substring(25, 29);// date of new
+					+ pubDate.toString().substring(25, 29);
 		else
 			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
-					+ pubDate.toString().substring(24, 28);// date of new
-		// Mon May 02 20:03:40 EEST 2016 -456-Month //-89-day //25-8 year
-		// 2016-01-21
-		// Tue Mar 22 14:15:00 EET 2016 EET,EEST, 2016-01-21
+					+ pubDate.toString().substring(24, 28);
 		return datePerNew;
 	}
-
+	/**
+	 * It controls is given String can convertable to date.
+	 * @param datePerNew String occurs date
+	 * @return true :Success false :fail
+	 */
 	public boolean canConvert(String datePerNew) {
 		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
 		if (datePerNew.length() != 11)
@@ -109,7 +127,14 @@ public class NewsChecker {
 			return false;
 		}
 	}
-
+	/**
+	 * It travel word by word and control the database has it already inserted.
+	 * If yes,then increment it to database.
+	 * If not,the insert it.
+	 * @param datePerNew A hash table occurs message's pubdate.
+	 * @param wordFrequencyPerNew It occurs from word-frequency.
+	 * @return true :Success false :fail
+	 */
 	private boolean travelWordByWord(String datePerNew, Hashtable<String, Integer> wordFrequencyPerNew) {
 		DbHelper dbHelper = DbHelper.getInstance();
 		boolean proccessSuccessful = false;

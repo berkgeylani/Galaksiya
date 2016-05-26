@@ -21,10 +21,16 @@ public class RssReader {
 	
 	private ArrayList<FeedMessage> itemsAL = new ArrayList<FeedMessage>();
 	private static final Logger LOG = Logger.getLogger(RssReader.class);
-
+/**
+ * It parse the rss which is given with param with using ROME library.It converts news to messages.
+ * These messages push to an arraylist to return.
+ * @param url The url which will be read
+ * @return Arraylist occurs from messages and these messages occurs from news.
+ */
 	public ArrayList<FeedMessage> parseFeed(URL url) {
 		if( url==null )
 			return null;
+		
 		
 		try {
 			HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
@@ -59,7 +65,10 @@ public class RssReader {
 		}
 		return null;
 	}
-	
+	/**
+	 * 
+	 * @return It returns count of a news in URL
+	 */
 	public int getItemsCount() {
 		
 		return itemsAL.size();

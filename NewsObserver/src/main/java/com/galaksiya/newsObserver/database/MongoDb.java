@@ -29,7 +29,11 @@ public class MongoDb implements Database {
 
 	public MongoDb() {
 	}
-
+	/**
+	 * It returns MongoCollection with selected collection name(Default: statistics).It set when initialize MongoDb.
+	 * @param client Get a MongoClient which is set "localhost", 27017.
+	 * @return collection : Default: initialize statistics collection. You can set when create MongoDb(//here).
+	 */
 	public MongoCollection<Document> getCollection(MongoClient client) {
 		MongoDatabase mDatabase = client.getDatabase("mydb");
 		MongoCollection<Document> collection = null;
@@ -40,20 +44,21 @@ public class MongoDb implements Database {
 		}
 		return collection;
 	}
-
+	
+	/**
+	 * It provide us to select collection name.
+	 * @param collectionName String to set collection name.
+	 */
 	public MongoDb(String collectionName) {
 		this.collectionName = collectionName;
 	}
 
 	/**
-	 * insert
-	 * <p>
-	 * process
-	 * <p>
-	 * date-word-frequency
+	 * It insert to mongoDb which is selected date-word-frequency
 	 * 
 	 * @see com.galaksiya.newsObserver.database.Database#save(java.lang.String,
 	 *      java.lang.String, int)
+	 * @return true:if process has been successfully done. false: If it fault.
 	 */
 	@Override
 	public boolean save(String dateStr, String word, int frequency) {
@@ -76,7 +81,11 @@ public class MongoDb implements Database {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * Delete all the data from database
+	 * @return true:if process has been successfully done. false: If it fault.
+	 */
 	@Override
 	public boolean delete() {// Delete All documents from collection :Using
 		// blank BasicDBObject
@@ -91,13 +100,15 @@ public class MongoDb implements Database {
 		}
 		return false;
 	}
-
+	/**
+	 * It increment frequency of a selected word,date.
+	 * @param dateStr Date which will be search.
+	 * @param word	Word which will be search.
+	 * @param frequency Frequency of a word.
+	 * @return true : Successful process. | false : It fault.
+	 */
 	@Override
-	public boolean update(String dateStr, String word, int frequency) { // update
-		// and
-		// increment
-		// the
-		// frequency
+	public boolean update(String dateStr, String word, int frequency) {
 		try (MongoClient mongoClient = newClient()) {
 			if (word == null || word.equals("")) {
 				return false;
@@ -116,24 +127,47 @@ public class MongoDb implements Database {
 		}
 		return false;
 	}
-
+	/**
+	 * Fabric of a MongoClient
+	 * @return a MongoClient which parameters are "localhost",27017 (dbAdress,port).
+	 */
 	public MongoClient newClient() {
 		return new MongoClient("localhost", 27017);
 	}
+	/**
+	 * Prints all the words sorted in frequency
+	 * @return a size(int) which will be printed
+	 */
 	public int fetch() { // frequency sorted for all the words
 		return fetchMain(new Document(), new Document().append("frequency", 1), -1);
 	}
-
+	/**
+	 * Prints all the words sorted in frequency in a selected date
+	 * @param date A date(String) which will be selected. 
+	 * @return a size(int) which will be printed
+	 */
 	public int fetch(String date) { 
 		Date dateConverted = dateConvert(date);
 		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
 
 	}
-
+	/**
+	 * Belirli bir günün limitli olarak verileri çeker
+	 * @param date A date(String) which will be selected. 
+	 * @param limit : It limits size of data which will be printed
+	 * @return a size(int) which will be printed
+	 */
 	public int fetch(String date, int limit) { 
 		Date dateConverted = dateConvert(date);
 		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
+	/**
+	 * All fetch function uses this and this is query creator.
+	 * @param find  : document creator of find query
+	 * @param sort  : document creator of sort query
+	 * @param limit : It limits size of data which will be printed 
+	 * @return -1 : fault | result is bigger than "0" it is success
+	 */
 	private int fetchMain(Document find,Document sort,int limit){
 		// world
 		try (MongoClient mongoClient = newClient()) {
@@ -148,7 +182,10 @@ public class MongoDb implements Database {
 		}
 		return -1;
 	}
-
+	/**
+	 * It provides us to get sample from database(first).
+	 * @return null : fault | arraylist indexes: 0-date   1-word  2-frequency
+	 */
 	public ArrayList<String> fetchFirstWDocument() {
 		try (MongoClient mongoClient = newClient()) {
 			ArrayList<String> date_word_freq = new ArrayList<String>();
@@ -164,6 +201,11 @@ public class MongoDb implements Database {
 		}
 		return null;
 	}
+	/**
+	 * It gives count of documents in FindIterable which is param
+	 * @param iterable It is a Mongo query response object.
+	 * @return A int which is count of documents.
+	 */
 	public int iteratorSize(FindIterable<Document> iterable){
 		try (MongoClient mongoClient = newClient()) {
 			int size = 0;
@@ -178,14 +220,11 @@ public class MongoDb implements Database {
 			return -1;
 		}
 	}
-
-	private void printerOfFindIterable(FindIterable<Document> iterable) { // which
-		// provide
-		// to
-		// print
-		// document
-		// in
-		// collection
+	/**
+	 * It prints documents(date-word-freq) in FindIterable(param).
+	 * @param iterable It is a Mongo query response object.
+	 */
+	private void printerOfFindIterable(FindIterable<Document> iterable) {
 		// TODO if nothing to show say in here There is nothing to show
 		System.out.println("----Date----" + "\t\t\t\t" + "----Word----" + "\t" + "----Frequency----");
 
@@ -197,8 +236,13 @@ public class MongoDb implements Database {
 			}
 		});
 	}
-
-	public long contain(String dateStr, String word) { // return -1:problem
+	/**
+	 * It search in selected date and word and return count of it.
+	 * @param dateStr Date which will be search.
+	 * @param word	Word which will be search.
+	 * @return -1: Fault Others: Success
+	 */
+	public long contain(String dateStr, String word) { 
 		if (word == null || word.equals("")) {
 			return -1;
 		}
@@ -211,19 +255,26 @@ public class MongoDb implements Database {
 		} // sayısını
 
 	}
-
+	/**
+	 * It gives total count of a data in database.
+	 * @return Count of a data.
+	 */
 	public long totalCount() {
 		try (MongoClient mongoClient = newClient()) {
 			return getCollection(mongoClient).count(new Document());
 		}
 	}
-
+	/**
+	 * It converts String to Date format to search in query.
+	 * @param dateStr Given date in String format.
+	 * @return Return Date format(dd-MMM-yy).
+	 */
 	private Date dateConvert(String dateStr) {
 		Boolean flag = false;
 		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
 		Date date = null;
 		do {
-			dateStr = askAgain(dateStr, flag);
+			dateStr = askAgain(dateStr);
 			try {
 				date = format1.parse(dateStr.replaceAll("\\s+", "-"));
 				flag = false;
@@ -236,16 +287,18 @@ public class MongoDb implements Database {
 		} while (flag);
 		return date;
 	}
-
-	public String askAgain(String dateStr, Boolean flag) {
-		if (flag) {
+	/**
+	 * It asks date again for wrong input.
+	 * @param dateStr Given date in String format.
+	 * @return It returns date in String format.
+	 */
+	public String askAgain(String dateStr) {
 			System.out.println("BE CAREFUL.Insert a date of day like :  17 Mar 2016\n");
 			try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in))) {
 				dateStr = input.readLine();
 			} catch (IOException e) {
 				LOG.error("Input(String) couldn't convert to date. ", e);
 			}
-		}
 		return dateStr;
 	}
 }

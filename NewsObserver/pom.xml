@@ -116,6 +116,26 @@
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 		</dependency>
+		<dependency>
+		     <groupId>org.glassfish.jersey.core</groupId>
+		     <artifactId>jersey-server</artifactId>
+		     <version>2.7</version>
+		 </dependency>
+		<dependency>
+		     <groupId>org.glassfish.jersey.containers</groupId>
+		     <artifactId>jersey-container-servlet-core</artifactId>
+		     <version>2.7</version>
+		 </dependency>
+		<dependency>
+		 <groupId>org.glassfish.jersey.containers</groupId>
+		     <artifactId>jersey-container-jetty-http</artifactId>
+		     <version>2.7</version>
+		 </dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<version>9.3.9.M1</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<log4j.configuration>log4j.properties</log4j.configuration>

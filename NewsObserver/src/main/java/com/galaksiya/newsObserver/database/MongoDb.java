@@ -14,8 +14,6 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -147,7 +145,7 @@ public class MongoDb implements Database {
 	 * Prints all the words sorted in frequency
 	 * @return a size(int) which will be printed
 	 */
-	public int fetch() { // frequency sorted for all the words
+	public ArrayList<Document> fetch() { // frequency sorted for all the words
 		return fetchMain(new Document(), new Document().append("frequency", 1), -1);
 	}
 	/**
@@ -155,7 +153,7 @@ public class MongoDb implements Database {
 	 * @param date A date(String) which will be selected. 
 	 * @return a size(int) which will be printed
 	 */
-	public int fetch(String date) { 
+	public ArrayList<Document> fetch(String date) { 
 		Date dateConverted = dateConvert(date);
 		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
 
@@ -166,7 +164,7 @@ public class MongoDb implements Database {
 	 * @param limit : It limits size of data which will be printed
 	 * @return a size(int) which will be printed
 	 */
-	public int fetch(String date, int limit) { 
+	public ArrayList<Document> fetch(String date, int limit) { 
 		Date dateConverted = dateConvert(date);
 		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
@@ -178,7 +176,7 @@ public class MongoDb implements Database {
 	 * @param limit : It limits size of data which will be printed 
 	 * @return -1 : fault | result is bigger than "0" it is success
 	 */
-	private int fetchMain(Document find,Document sort,int limit){
+	private ArrayList<Document> fetchMain(Document find,Document sort,int limit){
 		// world
 		try (MongoClient mongoClient = newClient()) {
 			FindIterable<Document> iterable = getCollection(mongoClient).find(find)
@@ -190,7 +188,7 @@ public class MongoDb implements Database {
 		} catch (Exception e) {
 			LOG.error("Mongo Connection Exception", e);
 		}
-		return -1;
+		return null;
 	}
 	/**
 	 * It provides us to get sample from database(first).
@@ -216,18 +214,18 @@ public class MongoDb implements Database {
 	 * @param iterable It is a Mongo query response object.
 	 * @return A int which is count of documents.
 	 */
-	public int iteratorSize(FindIterable<Document> iterable){
+	public ArrayList<Document> iteratorSize(FindIterable<Document> iterable){
 		try (MongoClient mongoClient = newClient()) {
-			int size = 0;
+			ArrayList<Document> dataAL = new ArrayList<Document>();
 			MongoCursor<Document> cursor = iterable.iterator();
 			while (cursor.hasNext()) {
-				size++;
-				cursor.next();
+				Document document = cursor.next();
+				dataAL.add(document);
 			}
-			return size;
+			return dataAL;
 		}
 		catch (Exception e) {
-			return -1;
+			return null;
 		}
 	}
 	/**

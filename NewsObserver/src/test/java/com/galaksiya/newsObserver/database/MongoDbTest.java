@@ -88,13 +88,14 @@ public class MongoDbTest {
 		assertEquals(Integer.parseInt(mongoDb.fetchFirstWDocument().get(2)), frequencyLocal + 2);
 	}
 
-
+	
 	@Test
 	public void overrideFetch() {
 		for (int i = 0; i < 12; i++) {
 			mongoDb.save(date, word, 2);
 		}
-		assertEquals(mongoDb.totalCount(), (mongoDb.fetch()));
+		
+		assertEquals(mongoDb.totalCount(), (mongoDb.fetch().size()));
 	}
 
 	@Test
@@ -104,7 +105,7 @@ public class MongoDbTest {
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
-		assertEquals(mongoDb.contain(date, word), mongoDb.fetch(date));
+		assertEquals(mongoDb.contain(date, word), mongoDb.fetch(date).size());
 	}
 
 	@Test
@@ -114,7 +115,7 @@ public class MongoDbTest {
 		mongoDb.save(date, word, 2);
 		mongoDb.save(date, word, 2);
 
-		assertEquals(2, mongoDb.fetch(date, 2));
+		assertEquals(2, mongoDb.fetch(date, 2).size());
 	}
 
 	@Test

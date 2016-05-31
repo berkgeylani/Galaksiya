@@ -31,8 +31,6 @@ public class NewsCheckerTest {
 	@BeforeClass
 	public static void startJetty() throws Exception {
 		server = new Server(SERVER_PORT);
-		server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class)
-				.setHttpCompliance(HttpCompliance.LEGACY);
 		server.setHandler(new CreateRssJetty());
 		server.setStopAtShutdown(true);
 		server.start();

@@ -14,6 +14,9 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
+import com.mongodb.MongoOptions;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -134,6 +137,16 @@ public class MongoDb implements Database {
 	public MongoClient newClient() {
 		return new MongoClient("localhost", 27017);
 	}
+	
+	
+	
+	
+	/*public MongoClient newClient() {
+		MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+		builder.connectionsPerHost(100);
+		new MongoClientURI(uri, builder);
+		return new MongoClient("localhost", 27017);
+	}*/
 	/**
 	 * Prints all the words sorted in frequency
 	 * @return a size(int) which will be printed

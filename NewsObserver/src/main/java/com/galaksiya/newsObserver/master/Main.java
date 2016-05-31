@@ -59,11 +59,10 @@ public class Main {
 			System.out.println();
 
 			try {
-
-				flagMenu = sc.nextInt();// when read it's always 48 more and
-										// then...(WILL SEARCH)
-				dateChoosed = sc.nextLine();// eating the line for reading
-											// error
+				do{
+				flagMenu = sc.nextInt();
+				dateChoosed = sc.nextLine();
+				}while(flagMenu>=0 && flagMenu<=3 && dateChoosed!= null);
 				switch (flagMenu) {
 				case 0:
 					System.out.println(" --Wait for Exit--");
@@ -72,11 +71,7 @@ public class Main {
 					System.out.println("Insert a date of day like :  17 Mar 2016\n");
 					dateChoosed = sc.nextLine();
 					System.out.println("10 most used word from " + dateChoosed);
-					mongoHelper.fetch(dateChoosed, 10);// from a day coming
-														// limited our is
-														// top 10
-														// and
-														// sorted(frequency)
+					mongoHelper.fetch(dateChoosed, 10);
 					break;
 				case 2:
 					System.out.println("Insert a date of day like :  17 Mar 2016\n");

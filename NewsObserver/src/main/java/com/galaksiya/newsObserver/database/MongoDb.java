@@ -14,6 +14,8 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -131,9 +133,16 @@ public class MongoDb implements Database {
 	 * Fabric of a MongoClient
 	 * @return a MongoClient which parameters are "localhost",27017 (dbAdress,port).
 	 */
+	
 	public MongoClient newClient() {
 		return new MongoClient("localhost", 27017);
 	}
+	/*public MongoClient newClient() {
+//		MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+//		builder.connectionsPerHost(100);
+		MongoClientURI mongoClientURI = new MongoClientURI("mongodb://accountUser:password@localhost:27017/mydb?maxPoolSize=100");
+		return new MongoClient(mongoClientURI);
+	}*/
 	/**
 	 * Prints all the words sorted in frequency
 	 * @return a size(int) which will be printed
@@ -161,6 +170,7 @@ public class MongoDb implements Database {
 		Date dateConverted = dateConvert(date);
 		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
+	
 	/**
 	 * All fetch function uses this and this is query creator.
 	 * @param find  : document creator of find query
@@ -271,10 +281,12 @@ public class MongoDb implements Database {
 	 */
 	private Date dateConvert(String dateStr) {
 		Boolean flag = false;
+		int i=0;
 		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
 		Date date = null;
 		do {
-			dateStr = askAgain(dateStr);
+			if(i>=1) 
+				dateStr = askAgain(dateStr);
 			try {
 				date = format1.parse(dateStr.replaceAll("\\s+", "-"));
 				flag = false;
@@ -282,6 +294,7 @@ public class MongoDb implements Database {
 
 			} catch (ParseException e) {
 				flag = true;
+				i++;
 				LOG.error("Input(String) couldn't convert to date.It will be requested again. ", e);
 			} // date is the our object's date
 		} while (flag);

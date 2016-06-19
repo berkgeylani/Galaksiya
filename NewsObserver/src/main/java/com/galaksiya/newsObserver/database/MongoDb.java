@@ -177,7 +177,6 @@ public class MongoDb implements Database {
 	 * @return -1 : fault | result is bigger than "0" it is success
 	 */
 	private ArrayList<Document> fetchMain(Document find,Document sort,int limit){
-		// world
 		try (MongoClient mongoClient = newClient()) {
 			FindIterable<Document> iterable = getCollection(mongoClient).find(find)
 					.sort(sort);

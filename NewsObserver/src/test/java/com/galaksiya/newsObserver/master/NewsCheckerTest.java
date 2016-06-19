@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.eclipse.jetty.http.HttpCompliance;
-import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.junit.AfterClass;
 import org.junit.Before;

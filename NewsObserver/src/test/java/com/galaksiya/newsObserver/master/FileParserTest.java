@@ -31,8 +31,10 @@ public class FileParserTest {
 	 */
 	private String file = "fileParserTest.txt";
 	private FileParser testFileParser = new FileParser(file);
+	private static final int SERVER_PORT = 8119;
+
 	private ArrayList<String> rssLinksAL = new ArrayList<String>();
-	private static Server server = new Server(8112);//static yaptık çünkü classın initialize'dan edilmeden önce çalıştırılması gerekiyor.
+	private static Server server = new Server(SERVER_PORT);//static yaptık çünkü classın initialize'dan edilmeden önce çalıştırılması gerekiyor.
 	
 	@BeforeClass
 	public static void startJetty() throws Exception{

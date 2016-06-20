@@ -23,7 +23,7 @@ public class NewsCheckerTest {
 
 	private static Server server;
 
-	private static final int SERVER_PORT = 8112;
+	private static final int SERVER_PORT = 8111;
 	
 
 	@BeforeClass

@@ -47,7 +47,7 @@ public class Main {
         // Tells the Jersey Servlet which REST service/class to load.
         jerseyServlet.setInitParameter(
            "jersey.config.server.provider.classnames",
-           new WebsiteContentCreator().getClass().getCanonicalName());
+           WebsiteContentCreator.class.getCanonicalName());
             jettyServer.start();
             LOG.info("Jetty has been started.");
 	}

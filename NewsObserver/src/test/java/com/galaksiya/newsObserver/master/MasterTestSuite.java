@@ -7,8 +7,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
    NewsCheckerTest.class,
    FileParserTest.class,
-   DbHelperTest.class
-   
+   DbHelperTest.class,
+   WebsiteContentCreatorTest.class
 })
 public class MasterTestSuite {
  

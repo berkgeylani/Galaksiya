@@ -1,5 +1,6 @@
 package com.galaksiya.newsObserver.database;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,6 +15,8 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientURI;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -24,6 +27,8 @@ import com.mongodb.client.result.UpdateResult;
 public class MongoDb implements Database {
 
 	private static final Logger LOG = Logger.getLogger(MongoDb.class);
+
+	private static MongoClient mongoClient;
 
 	private String collectionName;
 
@@ -44,7 +49,7 @@ public class MongoDb implements Database {
 		}
 		return collection;
 	}
-	
+
 	/**
 	 * It provide us to select collection name.
 	 * @param collectionName String to set collection name.
@@ -62,7 +67,7 @@ public class MongoDb implements Database {
 	 */
 	@Override
 	public boolean save(String dateStr, String word, int frequency) {
-		try (MongoClient mongoClient = newClient()) {
+		MongoClient mongoClient = getInstance();
 			if (word == null || word.equals("")) {
 				return false;
 			}
@@ -76,12 +81,9 @@ public class MongoDb implements Database {
 				LOG.error("Data couldn't be inserted.", e);
 
 			}
-		} catch (Exception e) {
-			LOG.error("Mongo Connection Exception", e);
-		}
 		return false;
 	}
-	
+
 	/**
 	 * Delete all the data from database
 	 * @return true:if process has been successfully done. false: If it fault.
@@ -89,7 +91,8 @@ public class MongoDb implements Database {
 	@Override
 	public boolean delete() {// Delete All documents from collection :Using
 		// blank BasicDBObject
-		try (MongoClient mongoClient = newClient()) {
+		MongoClient mongoClient = getInstance();
+		try{
 			getCollection(mongoClient).deleteMany(new Document());
 			LOG.info("All data deleted");
 			return true;
@@ -109,7 +112,8 @@ public class MongoDb implements Database {
 	 */
 	@Override
 	public boolean update(String dateStr, String word, int frequency) {
-		try (MongoClient mongoClient = newClient()) {
+		MongoClient mongoClient = getInstance();
+		try{
 			if (word == null || word.equals("")) {
 				return false;
 			}
@@ -131,22 +135,31 @@ public class MongoDb implements Database {
 	 * Fabric of a MongoClient
 	 * @return a MongoClient which parameters are "localhost",27017 (dbAdress,port).
 	 */
-	
-	public MongoClient newClient() {
-		return new MongoClient("localhost", 27017);
+	public static MongoClient getInstance() {
+        if (mongoClient == null) {
+            synchronized (MongoClient.class) {
+                if (mongoClient == null) { // yes double check
+                	MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+                	builder.connectionsPerHost(100);
+                	MongoClientURI mongoClientURI = new MongoClientURI("mongodb://accountUser:password@localhost:27017/mydb?maxPoolSize=100");
+                	mongoClient = new MongoClient(mongoClientURI);
+                }
+            }
+        }
+		return mongoClient;
 	}
 	/*public MongoClient newClient() {
-//		MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-//		builder.connectionsPerHost(100);
-		MongoClientURI mongoClientURI = new MongoClientURI("mongodb://accountUser:password@localhost:27017/mydb?maxPoolSize=100");
-		return new MongoClient(mongoClientURI);
-	}*/
+//	MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+//	builder.connectionsPerHost(100);
+	MongoClientURI mongoClientURI = new MongoClientURI("mongodb://accountUser:password@localhost:27017/mydb?maxPoolSize=100");
+	return new MongoClient(mongoClientURI);
+}*/
 	/**
 	 * Prints all the words sorted in frequency
 	 * @return a size(int) which will be printed
 	 */
 	public ArrayList<Document> fetch() { // frequency sorted for all the words
-		return fetchMain(new Document(), new Document().append("frequency", 1), -1);
+		return fetch(new Document(), new Document().append("frequency", 1), -1);
 	}
 	/**
 	 * Prints all the words sorted in frequency in a selected date
@@ -155,7 +168,7 @@ public class MongoDb implements Database {
 	 */
 	public ArrayList<Document> fetch(String date) { 
 		Date dateConverted = dateConvert(date);
-		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
+		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
 
 	}
 	/**
@@ -166,9 +179,9 @@ public class MongoDb implements Database {
 	 */
 	public ArrayList<Document> fetch(String date, int limit) { 
 		Date dateConverted = dateConvert(date);
-		return fetchMain(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
+		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
-	
+
 	/**
 	 * All fetch function uses this and this is query creator.
 	 * @param find  : document creator of find query
@@ -176,13 +189,14 @@ public class MongoDb implements Database {
 	 * @param limit : It limits size of data which will be printed 
 	 * @return -1 : fault | result is bigger than "0" it is success
 	 */
-	private ArrayList<Document> fetchMain(Document find,Document sort,int limit){
-		try (MongoClient mongoClient = newClient()) {
+	private ArrayList<Document> fetch(Document find,Document sort,int limit){
+		MongoClient mongoClient = getInstance();
+		try{
 			FindIterable<Document> iterable = getCollection(mongoClient).find(find)
 					.sort(sort);
 			if(limit>=0)
 				iterable=iterable.limit(limit);
-			printerOfFindIterable(iterable);
+			//printerOfFindIterable(iterable);
 			return iteratorSize(iterable);
 		} catch (Exception e) {
 			LOG.error("Mongo Connection Exception", e);
@@ -194,7 +208,8 @@ public class MongoDb implements Database {
 	 * @return null : fault | arraylist indexes: 0-date   1-word  2-frequency
 	 */
 	public ArrayList<String> fetchFirstWDocument() {
-		try (MongoClient mongoClient = newClient()) {
+		MongoClient mongoClient = getInstance();
+		try{
 			ArrayList<String> date_word_freq = new ArrayList<String>();
 			FindIterable<Document> search = getCollection(mongoClient).find();
 			if (search.first() == null) {
@@ -214,18 +229,14 @@ public class MongoDb implements Database {
 	 * @return A int which is count of documents.
 	 */
 	public ArrayList<Document> iteratorSize(FindIterable<Document> iterable){
-		try (MongoClient mongoClient = newClient()) {
-			ArrayList<Document> dataAL = new ArrayList<Document>();
-			MongoCursor<Document> cursor = iterable.iterator();
-			while (cursor.hasNext()) {
-				Document document = cursor.next();
-				dataAL.add(document);
-			}
-			return dataAL;
+		ArrayList<Document> dataAL = new ArrayList<Document>();
+		MongoCursor<Document> cursor = iterable.iterator();
+		while (cursor.hasNext()) {
+			Document document = cursor.next();
+			dataAL.add(document);
 		}
-		catch (Exception e) {
-			return null;
-		}
+		return dataAL;
+
 	}
 	/**
 	 * It prints documents(date-word-freq) in FindIterable(param).
@@ -257,19 +268,15 @@ public class MongoDb implements Database {
 
 		Bson filter = new Document().append("date", date).append("word", word);
 
-		try (MongoClient mongoClient = newClient();) {
+		MongoClient mongoClient = getInstance();
 			return getCollection(mongoClient).count(filter);
-		} // sayısını
-
 	}
 	/**
 	 * It gives total count of a data in database.
 	 * @return Count of a data.
 	 */
 	public long totalCount() {
-		try (MongoClient mongoClient = newClient()) {
-			return getCollection(mongoClient).count(new Document());
-		}
+			return getCollection(getInstance()).count(new Document());
 	}
 	/**
 	 * It converts String to Date format to search in query.
@@ -303,12 +310,12 @@ public class MongoDb implements Database {
 	 * @return It returns date in String format.
 	 */
 	public String askAgain(String dateStr) {
-			System.out.println("BE CAREFUL.Insert a date of day like :  17 Mar 2016\n");
-			try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in))) {
-				dateStr = input.readLine();
-			} catch (IOException e) {
-				LOG.error("Input(String) couldn't convert to date. ", e);
-			}
+		System.out.println("BE CAREFUL.Insert a date of day like :  17 Mar 2016\n");
+		try (BufferedReader input = new BufferedReader(new InputStreamReader(System.in))) {
+			dateStr = input.readLine();
+		} catch (IOException e) {
+			LOG.error("Input(String) couldn't convert to date. ", e);
+		}
 		return dateStr;
 	}
 }

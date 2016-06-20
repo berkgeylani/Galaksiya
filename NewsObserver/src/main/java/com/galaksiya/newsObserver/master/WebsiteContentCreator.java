@@ -23,12 +23,11 @@ import com.galaksiya.newsObserver.database.MongoDb;
 public class WebsiteContentCreator {
 
 	private MongoDb mongoDbHelper ;
-
 	public WebsiteContentCreator(){
-		mongoDbHelper = new MongoDb();
+			mongoDbHelper = new MongoDb();
 	}
-	public WebsiteContentCreator(String collectionName){
-		mongoDbHelper = new MongoDb(collectionName);
+	public WebsiteContentCreator(MongoDb mongoHelper){
+		mongoDbHelper=mongoHelper;
 	}
 	public String createContext(ArrayList<Document> dataAl){
 		if(dataAl==null || dataAl.size()==0) return null;
@@ -39,10 +38,10 @@ public class WebsiteContentCreator {
 				+"<body>"
 				+"<h4>Data</h4>";
 		for (Document document : dataAl) {
-			content+="<ul class = \"item\">"
-					+"<li \"date\">"+newsChecker.dateCustomize(document.get("date").toString())+"</li>"
-					+"<li \"word\">"+document.get("word").toString()+"</li>"
-					+"<li \"frequency\">"+document.get("frequency").toString()+"</li>"
+			content+="<ul>"
+					+"<li>"+newsChecker.dateCustomize(document.get("date").toString())+"</li>"
+					+"<li>"+document.get("word").toString()+"</li>"
+					+"<li>"+document.get("frequency").toString()+"</li>"
 					+"</ul>";
 		}
 		content+="</body>"
@@ -59,9 +58,9 @@ public class WebsiteContentCreator {
 	 * @return A html content
 	 */
 	@GET
-	@Path("topLimitforday/{day}/{month}/{year}/{limit}")
+	@Path("topLimitforday/{year}/{month}/{day}/{limit}")
 	@Produces(MediaType.TEXT_HTML)
-	public Response topLimitForADay(@PathParam("day") String day,@PathParam("month") String month,@PathParam("year") String year,@PathParam("limit") int limit) {
+	public Response topLimitForADay(@PathParam("year") String day,@PathParam("month") String month,@PathParam("day") String year,@PathParam("limit") int limit) {
 		NewsChecker newsChecker = new NewsChecker();
 		if(day==null || month==null ||year==null || !newsChecker.canConvert(day+" "+month+" "+year) || limit < 1 )
 			return Response.status(Status.BAD_REQUEST).entity("BAD REQUEST </br>"
@@ -87,9 +86,9 @@ public class WebsiteContentCreator {
 	 * @return A html content
 	 */
 	@GET
-	@Path("perday/{day}/{month}/{year}")
+	@Path("perday/{year}/{month}/{day}")
 	@Produces(MediaType.TEXT_HTML)
-	public Response forADay(@PathParam("day") String day,@PathParam("month") String month,@PathParam("year") String year) {
+	public Response forADay(@PathParam("year") String day,@PathParam("month") String month,@PathParam("day") String year) {
 		NewsChecker newsChecker = new NewsChecker();
 		if(day==null || month==null ||year==null || !newsChecker.canConvert(day+" "+month+" "+year))
 			return Response.status(Status.BAD_REQUEST).entity("BAD REQUEST </br>"
@@ -97,7 +96,8 @@ public class WebsiteContentCreator {
 					+ "First Parameter : Add a acceptable day 1-(30 | 31) on here</br>"
 					+ "Second Parameter : Add a acceptable month 1-12 on here.ıt should be in text  and abbrevitaion from like: May,Jun</br>"
 					+ "Third Parameter : Add a acceptable year on here</br>"
-					+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.").build();		ArrayList<Document> dataAl = mongoDbHelper.fetch(day+" "+month+" "+year);
+					+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.").build();		
+		ArrayList<Document> dataAl = mongoDbHelper.fetch(day+" "+month+" "+year);
 					if(dataAl==null)
 						return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>"
 								+ "We have a problem in our databases.Please come back later again.").build();
@@ -122,7 +122,6 @@ public class WebsiteContentCreator {
 		else if(dataAl.size()==0)
 			return Response.status(Response.Status.NO_CONTENT).entity("NO CONTENT </br>We haven't got any data to show you."
 					+ "Please try any other parameter.").build();
-		return Response.ok(createContext(mongoDbHelper.fetch())).build(); 
+		return Response.ok(createContext(dataAl)).build(); 
 	}
-
 }

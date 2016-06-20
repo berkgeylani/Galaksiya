@@ -18,6 +18,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoWriteException;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -141,8 +142,7 @@ public class MongoDb implements Database {
                 if (mongoClient == null) { // yes double check
                 	MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
                 	builder.connectionsPerHost(100);
-                	MongoClientURI mongoClientURI = new MongoClientURI("mongodb://accountUser:password@localhost:27017/mydb?maxPoolSize=100");
-                	mongoClient = new MongoClient(mongoClientURI);
+                	mongoClient = new MongoClient(new ServerAddress("localhost"), builder.build());
                 }
             }
         }

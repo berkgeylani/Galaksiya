@@ -46,7 +46,7 @@ public class FileParserTest {
 	@Before
 	public void setup() throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
-			rssLinksAL.add("http://localhost:8112/");
+			rssLinksAL.add("http://localhost:"+SERVER_PORT+"/");
 			for (String rssLink : rssLinksAL) {
 				writer.write(rssLink);// We wrote a txt file
 			}

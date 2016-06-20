@@ -23,11 +23,12 @@ public class RssReaderTest {
 
 	private static Server server;
 	
-	private static final int SERVER_PORT = 8112;
+	private static final int SERVER_PORT = 4000;
 
 	@BeforeClass
 	public static void startJetty() throws Exception {
 		server = new Server(SERVER_PORT);
+
 		ContextHandler context = new ContextHandler("/nonew");
         context.setContextPath("/nonew");
         context.setHandler(new CreateNoNewRssWebsite());
@@ -63,7 +64,7 @@ public class RssReaderTest {
 	}
 	@Test
 	public void rssReaderWrongURL() throws MalformedURLException{ //wrong url 1
-		assertEquals(null,rssRead.parseFeed(new URL("http:/localhost:8112/rss"))); 
+		assertEquals(null,rssRead.parseFeed(new URL("http:/localhost:"+SERVER_PORT+"/rss"))); 
 	}
 	private boolean areEqual(FeedMessage message,FeedMessage message2){
 		boolean isDescriptionEqual = message.getDescription().equals(message2.getDescription());
@@ -73,10 +74,9 @@ public class RssReaderTest {
 	}
 	@Test
 	public void canReadrssReader() throws MalformedURLException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:8112/rss"));
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rss"));
 		FeedMessage message = new FeedMessage();
-		System.out.println(itemsAL.get(0).getpubDate()
-				);
+		System.out.println(itemsAL.get(0).getpubDate());
 		message.setTitle("New York Times Ortadoğu’nun sınırlarını yeniden çizdi; Türkiye’yi böldü");
 		message.setDescription(
 				"New York Times gazetesi, Osmanlı topraklarının paylaşılmasını öngören ve tüm taraflarla imzalanan Sykes-Picot Anlaşmasının 100. yıldönümünde arşivinden yeni bir harita çıkardı. Haritalar ise İngiltere ve Fransanın hazırladığı Sykes-Picotun alternatifleri. ORTADOĞU HARİTASI BU ŞEKİLDE ÇİZİLSEYDİ Haberde dönemin ABD Başkanı Woodrow Wilson tarafından hazırlatılan haritayla birlikte,1920lerde sınırlar bu şekilde çizilseydi Ortadoğu kurtarılabilir miydi? sorusu da yer alıyor. []");
@@ -86,11 +86,11 @@ public class RssReaderTest {
 	}
 	@Test
 	public void rssReaderNonRssInput() throws MalformedURLException{ //true link,false rss 2
-		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:8112/nonrss"))); 
+		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonrss"))); 
 	}
 	@Test
 	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
-		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:8112/nonew"))); 
+		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew"))); 
 	}
 	
 }

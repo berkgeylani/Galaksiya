@@ -60,7 +60,7 @@ public class WebsiteContentCreator {
 	@GET
 	@Path("topLimitforday/{year}/{month}/{day}/{limit}")
 	@Produces(MediaType.TEXT_HTML)
-	public Response topLimitForADay(@PathParam("year") String day,@PathParam("month") String month,@PathParam("day") String year,@PathParam("limit") int limit) {
+	public Response topLimitForADay(@PathParam("year") String year,@PathParam("month") String month,@PathParam("day") String day,@PathParam("limit") int limit) {
 		NewsChecker newsChecker = new NewsChecker();
 		if(day==null || month==null ||year==null || !newsChecker.canConvert(day+" "+month+" "+year) || limit < 1 )
 			return Response.status(Status.BAD_REQUEST).entity("BAD REQUEST </br>"
@@ -88,7 +88,7 @@ public class WebsiteContentCreator {
 	@GET
 	@Path("perday/{year}/{month}/{day}")
 	@Produces(MediaType.TEXT_HTML)
-	public Response forADay(@PathParam("year") String day,@PathParam("month") String month,@PathParam("day") String year) {
+	public Response forADay(@PathParam("year") String year,@PathParam("month") String month,@PathParam("day") String day) {
 		NewsChecker newsChecker = new NewsChecker();
 		if(day==null || month==null ||year==null || !newsChecker.canConvert(day+" "+month+" "+year))
 			return Response.status(Status.BAD_REQUEST).entity("BAD REQUEST </br>"

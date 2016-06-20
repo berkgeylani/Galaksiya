@@ -2,12 +2,13 @@ package com.galaksiya.newsObserver.master;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.mockito.Matchers.*;
 import java.util.ArrayList;
 
-import javax.validation.constraints.AssertTrue;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -16,11 +17,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import com.galaksiya.newsObserver.database.MongoDb;
-import com.sun.syndication.feed.atom.Content;
 
 public class WebsiteContentCreatorTest {
 	private MongoDb mongoDb = new MongoDb("test");
@@ -145,7 +143,7 @@ public class WebsiteContentCreatorTest {
 	@Test
 	public void forADayContentTest() throws Exception {
 		mongoDb.save("01 Jun 2000", "Galaksiya", 5);
-		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.forADay("01", "Jun", "2000").getEntity().toString());
+		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.forADay( "2000", "Jun","01").getEntity().toString());
 		Elements ul = doc.select("ul");
 		Elements li = ul.select("li"); // select all li from ul
 		boolean isAllEquals=false;
@@ -157,7 +155,7 @@ public class WebsiteContentCreatorTest {
 	@Test
 	public void topLimitForADayContentTest() throws Exception {
 		mongoDb.save("01 Jun 2000", "Galaksiya", 5);
-		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.topLimitForADay("01", "Jun", "2000",1).getEntity().toString());
+		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.topLimitForADay( "2000", "Jun","01",1).getEntity().toString());
 		Elements ul = doc.select("ul");
 		Elements li = ul.select("li"); // select all li from ul
 		boolean isAllEquals=false;

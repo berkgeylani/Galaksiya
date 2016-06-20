@@ -49,7 +49,7 @@ public class CreateRssWebsite extends AbstractHandler
         		+"<description>"
         		+"New York Times gazetesi, Osmanlı topraklarının paylaşılmasını öngören ve tüm taraflarla imzalanan Sykes-Picot Anlaşmasının 100. yıldönümünde arşivinden yeni bir harita çıkardı. Haritalar ise İngiltere ve Fransanın hazırladığı Sykes-Picotun alternatifleri. ORTADOĞU HARİTASI BU ŞEKİLDE ÇİZİLSEYDİ Haberde dönemin ABD Başkanı Woodrow Wilson tarafından hazırlatılan haritayla birlikte,1920lerde sınırlar bu şekilde çizilseydi Ortadoğu kurtarılabilir miydi? sorusu da yer alıyor. []"
         		+"</description>"
-        		+"<pubDate>Mon, 16 May 2016 13:27:22 +0000</pubDate>"
+        		+"<pubDate>Mon, 16 May 2016 16:27:22 +0000</pubDate>"
         		+"<enclosure url=\"http://i.sozcu.com.tr/wp-content/uploads/2016/05/5-new-york-times-sykes-picot-ortadogu-880.jpg\" length=\"50000\" type=\"image/jpeg\"/>"
         		+"<link>"
         		+"http://www.sozcu.com.tr/2016/dunya/farkli-sinirlar-ortadoguyu-kurtarabilir-mi-1232284/"

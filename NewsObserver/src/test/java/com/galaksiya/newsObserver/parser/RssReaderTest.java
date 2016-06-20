@@ -63,7 +63,7 @@ public class RssReaderTest {
 		assertEquals(null,rssRead.parseFeed(null)); 
 	}
 	@Test
-	public void rssReaderWrongURL() throws MalformedURLException{ //wrong url 1
+	public void rssReaderWrongURL() throws MalformedURLException{ //wrong url
 		assertEquals(null,rssRead.parseFeed(new URL("http:/localhost:"+SERVER_PORT+"/rss"))); 
 	}
 	private boolean areEqual(FeedMessage message,FeedMessage message2){

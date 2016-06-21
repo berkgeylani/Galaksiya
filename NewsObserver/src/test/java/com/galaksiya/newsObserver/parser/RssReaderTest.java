@@ -71,11 +71,11 @@ public class RssReaderTest {
 		boolean isTitleEqual = message.getTitle().equals(message2.getTitle());
 		System.out.println(message.getpubDate()+message2.getpubDate());
 		String message1pubdate=message.getpubDate().substring(5, 7)+message.getpubDate().substring(8, 11)+message.getpubDate().substring(12, 16);
-		String message2pubdate=message2.getpubDate().substring(8, 10)+message2.getpubDate().substring(4, 7)+message2.getpubDate().substring(25, 28);
-		throw new IndexOutOfBoundsException(message.getpubDate()+"------"+message2.getpubDate()+"----"+message1pubdate+"----"+message2pubdate);
-//		boolean isPubDateEqual = message1pubdate.equals(message2pubdate);
-//		System.out.println(isPubDateEqual+"-------"+message1pubdate+"----------"+message2pubdate);
-//		return isDescriptionEqual && isTitleEqual && isPubDateEqual;
+		String message2pubdate=message2.getpubDate().substring(8, 10)+message2.getpubDate().substring(4, 7)+message2.getpubDate().substring(25, 29);
+		//throw new IndexOutOfBoundsException(message.getpubDate()+"------"+message2.getpubDate()+"----"+message1pubdate+"----"+message2pubdate);
+		boolean isPubDateEqual = message1pubdate.equals(message2pubdate);//Tue, 21 Jun 2016 13:16:16----Tue Jun 21 13:16:16 EEST 2016
+		System.out.println(isPubDateEqual+"-------"+message1pubdate+"----------"+message2pubdate);
+		return isDescriptionEqual && isTitleEqual && isPubDateEqual;
 	}
 	@Test
 	public void canReadrssReader() throws MalformedURLException{ // true rss,link,new 4
@@ -84,7 +84,7 @@ public class RssReaderTest {
 		message.setTitle("New York Times Ortadoğu’nun sınırlarını yeniden çizdi; Türkiye’yi böldü");
 		message.setDescription(
 				"New York Times gazetesi, Osmanlı topraklarının paylaşılmasını öngören ve tüm taraflarla imzalanan Sykes-Picot Anlaşmasının 100. yıldönümünde arşivinden yeni bir harita çıkardı. Haritalar ise İngiltere ve Fransanın hazırladığı Sykes-Picotun alternatifleri. ORTADOĞU HARİTASI BU ŞEKİLDE ÇİZİLSEYDİ Haberde dönemin ABD Başkanı Woodrow Wilson tarafından hazırlatılan haritayla birlikte,1920lerde sınırlar bu şekilde çizilseydi Ortadoğu kurtarılabilir miydi? sorusu da yer alıyor. []");
-		message.setPubDate("Mon, 16 May 2016 16:27:22"
+		message.setPubDate("Tue, 21 Jun 2016 13:16:16"
 				+ "");
 		assertTrue(areEqual(message, itemsAL.get(0)));
 	}

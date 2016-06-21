@@ -71,7 +71,7 @@ public class RssReaderTest {
 		boolean isTitleEqual = message.getTitle().equals(message2.getTitle());
 		System.out.println(message.getpubDate()+message2.getpubDate());
 		String message1pubdate=message.getpubDate().substring(5, 7)+message.getpubDate().substring(8, 11)+message.getpubDate().substring(12, 16);
-		String message2pubdate=message2.getpubDate().substring(8, 10)+message2.getpubDate().substring(4, 7)+message2.getpubDate().substring(25, 29);
+		String message2pubdate=message2.getpubDate().substring(8, 10)+message2.getpubDate().substring(4, 7)+message2.getpubDate().substring(25, 28);
 		throw new IndexOutOfBoundsException(message.getpubDate()+"------"+message2.getpubDate()+"----"+message1pubdate+"----"+message2pubdate);
 //		boolean isPubDateEqual = message1pubdate.equals(message2pubdate);
 //		System.out.println(isPubDateEqual+"-------"+message1pubdate+"----------"+message2pubdate);

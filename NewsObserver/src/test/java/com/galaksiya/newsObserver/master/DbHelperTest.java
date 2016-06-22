@@ -31,13 +31,13 @@ public class DbHelperTest {
 
 	@Test
 	public void updateDatabaseControl() {
-		NewsChecker newsChecker = new NewsChecker();
+		DateUtils dateUtils = new DateUtils();
 		dbHelper.addDatabase("17 May 2016", "test", 2);
 		ArrayList<String> dateWordFreq = mongo.fetchFirstWDocument();
 		String date = dateWordFreq.get(0);
 		String word = dateWordFreq.get(1);
 		int frequency = Integer.parseInt(dateWordFreq.get(2));
-		date = newsChecker.dateCustomize(date);
+		date = dateUtils.dateCustomize(date);
 		dbHelper.addDatabase(date, word, 2);
 		dateWordFreq = mongo.fetchFirstWDocument();
 		int frequencyNew = Integer.parseInt(dateWordFreq.get(2));

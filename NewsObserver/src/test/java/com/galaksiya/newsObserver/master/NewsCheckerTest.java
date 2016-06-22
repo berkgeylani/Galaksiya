@@ -24,7 +24,8 @@ public class NewsCheckerTest {
 	private static Server server;
 
 	private static final int SERVER_PORT = 8111;
-	
+	private	DateUtils dateUtils = new DateUtils();
+
 
 	@BeforeClass
 	public static void startJetty() throws Exception {
@@ -47,22 +48,22 @@ public class NewsCheckerTest {
 
 	@Test
 	public void canConvert() {
-		assertTrue(newsChecker.canConvert("02-May-2016"));
-		assertTrue(newsChecker.canConvert("02-May 2016"));
-		assertTrue(newsChecker.canConvert("02 May 2016"));
+		assertTrue(dateUtils.canConvert("02-May-2016"));
+		assertTrue(dateUtils.canConvert("02-May 2016"));
+		assertTrue(dateUtils.canConvert("02 May 2016"));
 	}
 	@Test
 	public void canConvertInvalidInput() {
-		assertFalse(newsChecker.canConvert("02 May3 2016"));
+		assertFalse(dateUtils.canConvert("02 May3 2016"));
 	}
 	@Test 
 	public void canConvertWithoutBlankInput(){
-		assertFalse(newsChecker.canConvert("21 May!2011"));
+		assertFalse(dateUtils.canConvert("21 May!2011"));
 	}
 	@Test
 	public void dateCustomizeValidInput() {
-		assertEquals("13 May 2016", newsChecker.dateCustomize("Fri May 13 10:24:56 EEST 2016"));
-		assertEquals("22 Mar 2016", newsChecker.dateCustomize("Tue Mar 22 14:15:00 EET 2016"));
+		assertEquals("13 May 2016", dateUtils.dateCustomize("Fri May 13 10:24:56 EEST 2016"));
+		assertEquals("22 Mar 2016", dateUtils.dateCustomize("Tue Mar 22 14:15:00 EET 2016"));
 	}
 
 	@Test

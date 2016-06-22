@@ -1,8 +1,6 @@
 package com.galaksiya.newsObserver.master;
 
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -16,7 +14,7 @@ public class NewsChecker {
 
 	private final static Logger LOG = Logger.getLogger(NewsChecker.class);
 
-	private static  Hashtable<String, String> lastNews = new Hashtable<String, String>();//bütün classlarda ortak olmasını istediğimiz bir hashtable
+	private static  Hashtable<String, String> lastNews = new Hashtable<String, String>();//her newsCheckerda ortak olmasını istediğmiz bir field.
 	
 	/**
 	 * It takes rss links and give one by one to travelInNews.
@@ -72,9 +70,10 @@ public class NewsChecker {
 	 * @return wordFrequencyPerNew It is a hash table which occurs word-frequency
 	 */
 	public Hashtable<String, Integer> handleMessage(FeedMessage message) {
+		DateUtils dateUtils = new DateUtils();
 		WordProcessor processOfWords = new WordProcessor();
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
-		String datePerNew = dateCustomize(message.getpubDate());
+		String datePerNew = dateUtils.dateCustomize(message.getpubDate());
 		wordFrequencyPerNew = processOfWords.splitAndHashing(message.getTitle() + " " + message.getDescription());
 		// wordFrequency test edecez
 		if (!(travelWordByWord(datePerNew, wordFrequencyPerNew)))
@@ -96,37 +95,7 @@ public class NewsChecker {
 		}
 		return false;
 	}
-	/**
-	 * It convert a String which occurs date like 'Fri May 13 10:24:56 EEST 2016' to 13 May 2016.
-	 * @param pubDate A date string like 'Fri May 13 10:24:56 EEST 2016'
-	 * @return ıt returns a String like '13 May 2016'.(date-month-year)
-	 */
-	public String dateCustomize(String pubDate) {
-		String datePerNew;
-		if (pubDate.length() == 29)
-			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
-					+ pubDate.toString().substring(25, 29);
-		else
-			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
-					+ pubDate.toString().substring(24, 28);
-		return datePerNew;
-	}
-	/**
-	 * It controls is given String can convertable to date.
-	 * @param datePerNew String occurs date
-	 * @return true :Success false :fail
-	 */
-	public boolean canConvert(String datePerNew) {
-		SimpleDateFormat format1 = new SimpleDateFormat("dd-MMM-yy");
-		if (datePerNew.length() != 11)
-			return false;
-		try {
-			format1.parse(datePerNew.replaceAll("\\s+", "-"));
-			return true;
-		} catch (ParseException e) {
-			return false;
-		}
-	}
+	
 	/**
 	 * It travel word by word and control the database has it already inserted.
 	 * If yes,then increment it to database.

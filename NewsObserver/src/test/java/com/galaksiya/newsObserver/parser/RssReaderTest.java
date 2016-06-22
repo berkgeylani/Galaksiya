@@ -25,7 +25,7 @@ import com.galaksiya.newsObserver.parser.testutil.CreateRssWebsite;
 public class RssReaderTest {
 
 	private static Server server;
-	
+
 	private static final int SERVER_PORT = 4000;
 
 	@BeforeClass
@@ -33,19 +33,19 @@ public class RssReaderTest {
 		server = new Server(SERVER_PORT);
 
 		ContextHandler context = new ContextHandler("/nonew");
-        context.setContextPath("/nonew");
-        context.setHandler(new CreateNoNewRssWebsite());
+		context.setContextPath("/nonew");
+		context.setHandler(new CreateNoNewRssWebsite());
 
-        ContextHandler context1 = new ContextHandler("/nonrss");
-        context1.setHandler(new CreateNonRssWebsite());
+		ContextHandler context1 = new ContextHandler("/nonrss");
+		context1.setHandler(new CreateNonRssWebsite());
 
-        ContextHandler context2 = new ContextHandler("/rss");
-        context2.setHandler(new CreateRssWebsite());
-        
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[] { context, context1, context2 });
+		ContextHandler context2 = new ContextHandler("/rss");
+		context2.setHandler(new CreateRssWebsite());
 
-        server.setHandler(contexts);
+		ContextHandlerCollection contexts = new ContextHandlerCollection();
+		contexts.setHandlers(new Handler[] { context, context1, context2 });
+
+		server.setHandler(contexts);
 
 		server.setStopAtShutdown(true);
 		server.start();
@@ -72,22 +72,15 @@ public class RssReaderTest {
 	private boolean areEqual(FeedMessage message,FeedMessage message2) throws ParseException{
 		boolean isDescriptionEqual = message.getDescription().equals(message2.getDescription());
 		boolean isTitleEqual = message.getTitle().equals(message2.getTitle());
-		System.out.println(message.getpubDate()+message2.getpubDate());
 		SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
 		Date date1,date2;
 		try {//Tue Jun 21 13:16:16 EEST 2016
 			date1=formatter.parse(message.getpubDate());
 			date2=formatter.parse(message2.getpubDate());
-
 		} catch (ParseException e) {
-			throw new ParseException(message.getpubDate()+"-1----2-"+message2.getpubDate(), 0);
+			throw new ParseException(message.getpubDate()+"-1----2-"+message2.getpubDate() +"couldn't parse one of them.", 0);
 		}
-//		String message1pubdate=message.getpubDate().substring(5, 7)+message.getpubDate().substring(8, 11)+message.getpubDate().substring(12, 16);
-//		String message2pubdate=message2.getpubDate().substring(8, 10)+message2.getpubDate().substring(4, 7)+message2.getpubDate().substring(24, 28);
-		//throw new IndexOutOfBoundsException(message.getpubDate()+"------"+message2.getpubDate()+"----"+message1pubdate+"----"+message2pubdate);
 		boolean isPubDateEqual =date1.equals(date2);//Tue, 21 Jun 2016 13:16:16----Tue Jun 21 13:16:16 EEST 2016
-		
-		System.out.println(isPubDateEqual+"-------"+date1.toString()+"----------"+date2.toString());
 		return isDescriptionEqual && isTitleEqual && isPubDateEqual;
 	}
 	@Test
@@ -109,5 +102,5 @@ public class RssReaderTest {
 	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
 		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew"))); 
 	}
-	
+
 }

@@ -24,7 +24,6 @@ public class IntervalFetcher {
 				// Every 5 min this which controlling a 
 				newsChecker.updateActualNews(RssLinksAL);
 				LOG.info("Checked all the rss links.");
-				System.out.println("Checked All Rss Links");
 			}
 		};
 		executor.scheduleAtFixedRate(periodicTask, 0, 5, TimeUnit.MINUTES);

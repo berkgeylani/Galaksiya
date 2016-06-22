@@ -18,8 +18,6 @@ public class WordProcessor {
 
 		List<String> processedStr = Arrays.asList(
 				titleDescription.replaceAll("\\<[^>]*>", "").replaceAll("\\p{P}", "").toLowerCase().split("\\s+"));
-		// splitting from " " and delete punctions or others without alphabet
-		// and lower case
 		Hashtable<String, Integer> wordFrequency = new Hashtable<String, Integer>();
 		Set<String> uniqueWords = new HashSet<String>(processedStr);
 		for (String word : uniqueWords) {

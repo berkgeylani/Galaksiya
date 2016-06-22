@@ -46,9 +46,9 @@ public class WebsiteContentCreatorTest {
 
 	@Test
 	public void canCreate() {
-		NewsChecker newsChecker = new NewsChecker();
+		DateUtils dateUtils = new DateUtils();
 		Document document = new Document();
-		document.append("date", newsChecker.dateCustomize("Wed Jun 01 00:00:00 EEST 2016").toString());
+		document.append("date", dateUtils.dateCustomize("Wed Jun 01 00:00:00 EEST 2016").toString());
 		document.append("word", "Atalay");
 		document.append("frequency", "6");
 		dataAl = new ArrayList<Document>();
@@ -63,16 +63,14 @@ public class WebsiteContentCreatorTest {
 
 	@Test
 	public void createContextZeroCanCreate() {
-		NewsChecker newsChecker = new NewsChecker();
+		DateUtils dateUtils = new DateUtils();
 		Document document = new Document();
-		document.append("date", "Wed Jun 01 00:00:00 EEST 2016");
-		document.append("word", "Atalay");
-		document.append("frequency", "6");
+		document.append("date", "Wed Jun 01 00:00:00 EEST 2016").append("word", "Atalay").append("frequency", "6");
 		dataAl.add(document);
 		String content = "<html>"
 				+ "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data</title></head>"
 				+ "<body>" + "<h4>Data</h4>" + "<ul>" + "<li>"
-				+ newsChecker.dateCustomize(document.get("date").toString()) + "</li>" + "<li>"
+				+ dateUtils.dateCustomize(document.get("date").toString()) + "</li>" + "<li>"
 				+ document.get("word").toString() + "</li>" + "<li>" + document.get("frequency").toString() + "</li>"
 				+ "</ul>" + "</body>" + "</html>";
 		assertEquals(content, contentCreator.createContext(dataAl));
@@ -122,7 +120,6 @@ public class WebsiteContentCreatorTest {
 		assertEquals(Response.status(Status.NO_CONTENT).build().getStatus(),
 				contentCreator.forADay( "2016", "Jun", "01").getStatus());// status
 	}
-
 	@Test
 	public void forDayNoContent() {
 		assertEquals(Response.status(Status.NO_CONTENT).build().getStatus(),

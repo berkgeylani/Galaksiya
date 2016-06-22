@@ -5,21 +5,13 @@ package com.galaksiya.newsObserver.master;
 import com.galaksiya.newsObserver.database.MongoDb;
 
 public class DbHelper {
-	private MongoDb mongoDbHelper;
-	
-	private static class _DbHelperHold{
-		private final static DbHelper INSTANCE = new DbHelper();
-	}
 	/**
 	 * It return a singleton MongoDb object
 	 */
 	public static DbHelper getInstance(){
 		return _DbHelperHold.INSTANCE;
 	}
-	
-	
-	private NewsChecker newsCheckerTest = new NewsChecker();
-	
+	private MongoDb mongoDbHelper;
 	/**
 	 * It provide us to create default MongoDb collection name which is statistics.
 	 */
@@ -34,6 +26,7 @@ public class DbHelper {
 	public DbHelper(String collection){
 		mongoDbHelper = new MongoDb(collection);
 	}
+	
 	/**
 	 * It takes date-word and frequency then if it is in database,it increments.If not it inserts it.
 	 * @param datePerNew Date which will be search.
@@ -43,7 +36,8 @@ public class DbHelper {
 	 */
 	public boolean addDatabase(String datePerNew,String word,int frequency){
 		boolean flagSuccessful;
-		if(!newsCheckerTest.canConvert(datePerNew)) return false;
+		DateUtils dateUtils = new DateUtils();
+		if(!dateUtils.canConvert(datePerNew)) return false;
 		boolean alreadyInsertedToDatabase=mongoDbHelper.contain(datePerNew, word) >= 1;
 		if(alreadyInsertedToDatabase){  
 			flagSuccessful=mongoDbHelper.update(datePerNew, word, frequency);
@@ -52,5 +46,8 @@ public class DbHelper {
 			flagSuccessful=mongoDbHelper.save(datePerNew, word, frequency);
 		}
 		return flagSuccessful;
+	}
+	private static class _DbHelperHold{
+		private final static DbHelper INSTANCE = new DbHelper();
 	}
 }

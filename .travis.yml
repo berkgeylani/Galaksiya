@@ -20,3 +20,4 @@ before_install:
 -  chmod 400 BerkUbuntu.pem
 after_success:
 -  scp -i "BerkUbuntu.pem" README.md ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.
+-  sh sshconnector.sh

@@ -15,5 +15,5 @@ env:
 before_install:
 -  echo jae7Viyogheeyiet | gpg --passphrase-fd 0 BerkUbuntu.pem.gpg
 after_success:
--  scp -i "BerkUbuntu.pem.pgp" README.md ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.
+-  yes | scp -i "BerkUbuntu.pem.pgp" README.md ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.
 -  echo "blablablabla"

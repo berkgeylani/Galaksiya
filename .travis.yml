@@ -17,5 +17,6 @@ env:
     secure: Z9aZhAnlwgc0UvAdaMhfMCIpV+GmJLUHdfc4MiFIrWnkL+KeX/5Xd/Z24XO0mfphRpPlfGG0+iWlunvgfIgNOhCYSOAb+NhAMPRLnxuYcq7D6OnmhKb0889pMs0rLEC2jD6MCkF7Fu4oZ/ZQQBpzs4mKRFG/FynqFIjMk24voa1AKskoM1pgbKWVhzSZgrzRUuqzz6DyUDbK2V2vgYhwIUOjlbuzL663cENgAjrklK94bdllGvVenvwWb9g0Ys5r9afjKnhyfZMOFxGqMCAWhg6H/2Hq+p6PqMOnhlaW/tHfvt5kBMq97tJyhDLrO5al1TZir1PqIwLo6lAiXGQH7OMIvvGCScMwpjq7juzkaooyxXa2n986bfZBfOj6px1S16oyEcBYwmG6sfFfqwoFQbyKMBmelUkf/GBq8NWVb7zZE9FUDnr1WMSVAfyOIaiGGnMKOErOgMVsqpBwyWe8WmKSjEbnWjf1L3E5Z08NMhhRHxZqVtjcaOnWHdxrCKMlH3vx3ifxpq+ZNbpYqXTCXRrNDsP0ZHDMg2LuccCJmrKWDnsFM74xyHttvYMXln+LK9BKVuQcU1MW/49iVMxhHCjNDS5MhXdag+kheYVjlia3ZGk4a37ldM/DYBju4U0zz/94iRlJKuHmezzAivwsD7aj5KyokPGBhOX5xfkWkiQ=
 before_install:
 -  echo $super_secret_password | gpg --batch --yes --passphrase-fd 0 BerkUbuntu.pem.gpg
+-  chmod 400 BerkUbuntu.pem
 after_success:
 -  scp -i "BerkUbuntu.pem" README.md ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.

@@ -16,7 +16,7 @@ env:
   global:
     secure: ${super_secret_secure_from_website}
 before_install:
--  echo $super_secret_password | gpg --batch --yes --passphrase-fd 0 BerkUbuntu.pem.gpg
+-  echo ${super_secret_password} | gpg --batch --yes --passphrase-fd 0 BerkUbuntu.pem.gpg
 -  chmod 400 BerkUbuntu.pem
 after_success:
 -  scp -i "BerkUbuntu.pem" -r NewsObserver/target/jarar ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.

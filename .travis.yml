@@ -14,7 +14,7 @@ addons:
   - ec2-52-58-228-209.eu-central-1.compute.amazonaws.com
 env:
   global:
-    secure: ${encrypted_key_fromwebsite}
+    secure: ${super_secret_secure_from_website}
 before_install:
 -  echo $super_secret_password | gpg --batch --yes --passphrase-fd 0 BerkUbuntu.pem.gpg
 -  chmod 400 BerkUbuntu.pem

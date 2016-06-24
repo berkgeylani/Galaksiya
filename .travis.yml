@@ -13,9 +13,9 @@ addons:
   ssh_known_hosts:
   - ec2-52-58-228-209.eu-central-1.compute.amazonaws.com
 env:
--secureCode=$uber_secure_password
   global:
-    secure: $secureCode
+    -  secureCode=$uber_secure_password
+    -secure: $secureCode
 before_install:
 -  echo $super_secret_password | gpg --batch --yes --passphrase-fd 0 BerkUbuntu.pem.gpg
 -  chmod 400 BerkUbuntu.pem

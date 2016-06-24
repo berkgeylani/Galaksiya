@@ -21,7 +21,7 @@ public class Main {
 	private Server jettyServer;
 
  /**
-  * It is the main of a program.
+  * It is the main of a program..
   * @param args File path which will be read for URLs
  * @throws Exception 
   */

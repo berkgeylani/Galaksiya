@@ -43,7 +43,7 @@ public class DateUtils {
 			try {
 				date = format1.parse(dateStr.replaceAll("\\s+", "-"));
 				flag = false;
-				LOG.debug("Input(String) converted date successfully.");
+				//LOG.debug("Input(String) converted date successfully.");
 	
 			} catch (ParseException e) {
 				flag = true;

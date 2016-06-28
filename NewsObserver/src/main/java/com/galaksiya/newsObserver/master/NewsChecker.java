@@ -28,6 +28,8 @@ public class NewsChecker {
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
 			if(!(lastNews.containsKey(rssURLs)))
 				lastNews.put(rssURLs.toString(), "");
+			else 
+				System.out.println("qwerwer");
 			travelInNews(lastNews, rssURLs);
 			LOG.debug(rssURLs + " checked.");
 		}

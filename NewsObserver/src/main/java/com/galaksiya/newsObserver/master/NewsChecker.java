@@ -26,7 +26,8 @@ public class NewsChecker {
 			return false;
 
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
-			lastNews.put(rssURLs.toString(), "");
+			if(!(lastNews.containsKey(rssURLs)))
+				lastNews.put(rssURLs.toString(), "");
 			travelInNews(lastNews, rssURLs);
 			LOG.debug(rssURLs + " checked.");
 		}
@@ -43,12 +44,9 @@ public class NewsChecker {
 		String[] lastNewsArray = new String[2];
 		boolean updateNew = true, updated = false;
 		RssReader parserOfRss = new RssReader();
-		for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) { // item to
-																		// item
-																		// reading
+		for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) { 
 			boolean isThereAnyNewNews = !message.getTitle().equals(lastNews.get(rssURLs.toString()));
 			if (isThereAnyNewNews) { // if there is a new news we should insert
-										// or increment it
 				if (updateNew) {
 					lastNewsArray[0] = rssURLs.toString();
 					lastNewsArray[1] = message.getTitle();

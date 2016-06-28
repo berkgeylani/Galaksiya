@@ -44,7 +44,11 @@ public class NewsChecker {
 		String[] lastNewsArray = new String[2];
 		boolean updateNew = true, updated = false;
 		RssReader parserOfRss = new RssReader();
-		for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) { 
+		ArrayList<FeedMessage> itemsAL = parserOfRss.parseFeed(rssURLs);
+		if (itemsAL.isEmpty()) {
+			return;
+		}
+		for (FeedMessage message : itemsAL) { 
 			boolean isThereAnyNewNews = !message.getTitle().equals(lastNews.get(rssURLs.toString()));
 			if (isThereAnyNewNews) { // if there is a new news we should insert
 				if (updateNew) {

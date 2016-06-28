@@ -59,6 +59,7 @@ public class RssReader {
 			} else {
 				//TODO kendi throwunu ekleyebilirsin.
 				LOG.error("There is no news.");
+				return itemsAL;
 			}
 		} catch (IllegalArgumentException | IOException e) {
 			LOG.error("RSS reader problem.",e);

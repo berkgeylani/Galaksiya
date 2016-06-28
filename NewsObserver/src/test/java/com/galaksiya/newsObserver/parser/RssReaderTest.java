@@ -100,6 +100,6 @@ public class RssReaderTest {
 	}
 	@Test
 	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
-		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew"))); 
+		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew")).isEmpty()) ; 
 	}
 }

@@ -7,7 +7,7 @@ done
 PSPATH='jarar/jarar.jar'
 PSID=$(ps -ax | grep jarar )
 var=$(echo $PSID | cut -f7 -d" ")
-sleep 3
+sleep 15
 if [ "$var" == "" ] || [ "$var" != "$PSPATH" ]
 then
 	echo "App will be started"

@@ -61,11 +61,11 @@ public class NewsChecker {
 				}
 				handleMessage(message);
 			} else {// if we come the lately new we can break
-				if (updated) {
-					lastNews.put(lastNewsArray[0], lastNewsArray[1]);
-				}
 				break;
 			}
+		}
+		if(updateNew==false && updated == true){
+			lastNews.put(lastNewsArray[0], lastNewsArray[1]);
 		}
 	}
 	/**

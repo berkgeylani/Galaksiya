@@ -11,7 +11,7 @@ sleep 3
 if [ "$var" == "" ] || [ "$var" != "$PSPATH" ]
 then
 	echo "App will be started"
-	nohup java -jar jarar/jarar.jar /home/francium/new.txt > /home/ubuntu/mylog.log 2>&1 & 
+	nohup java -jar jarar/jarar.jar /home/ubuntu/new.txt > /home/ubuntu/mylog.log 2>&1 & 
 	echo "Terminal is working in background."
 else 
 	echo "App already working on back side."

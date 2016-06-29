@@ -26,7 +26,7 @@ public class NewsChecker {
 			return false;
 
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
-			if(!(lastNews.containsKey(rssURLs)))
+			if(!(lastNews.containsKey(rssURLs.toString())))
 				lastNews.put(rssURLs.toString(), "");
 			else 
 				System.out.println("qwerwer");

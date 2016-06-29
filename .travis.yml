@@ -20,5 +20,6 @@ before_install:
 -  chmod 400 BerkUbuntu.pem
 after_success:
 -  scp -i "BerkUbuntu.pem" -r NewsObserver/target/jarar ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.
+-  scp -i "BerkUbuntu.pem" -r installation.sh ubuntu@ec2-52-58-228-209.eu-central-1.compute.amazonaws.com:~/.
 -  chmod -x sshconnector.sh
 -  sh sshconnector.sh

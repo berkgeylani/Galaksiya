@@ -1,6 +1,14 @@
 #!/bin/bash
-echo "Screen's sessions killed."
-pkill screen
-echo "Screen's sessions created."
-echo "app will be run."
-screen -d -m -S bla bash -c 'java -jar jarar.jar /home/ubuntu/new.txt 2>&1  | tee output.txt'
+
+for OUTPUT in $(ps -ax | grep jarar | cut -c1-5)
+do
+	echo killed with this processID $OUTPUT
+	kill $OUTPUT
+done
+
+cd jarar
+echo "In jarar directory"
+echo "App will be started"
+java -jar jarar/jarar.jar /home/ubuntu/new.txt 2>&1  | tee output.txt & << 'ENDAPP'
+disown
+ENDAPP

@@ -9,6 +9,6 @@ done
 
 echo "In jarar directory"
 echo "App will be started"
-java -jar jarar/jarar.jar /home/ubuntu/new.txt 2>&1  | tee output.txt & << 'ENDAPP'
+java -jar github/Galaksiya/NewsObserver/target/jarar/jarar.jar /home/francium/new.txt 2>&1  | tee output.txt & << 'ENDAPP'
 disown
 ENDAPP

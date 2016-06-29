@@ -33,23 +33,26 @@ public class NewsChecker {
 		}
 		return true;
 	}
+
 	/**
-	 * It travel news in url which is given with param.
-	 * It gives news one by one to handleMessage.
-	 * Also this function save the last news.
-	 * @param lastNews  It is hashtable which occurs rssLink-lastNew for this link.
-	 * @param rssURLs This is the url which will be read.
+	 * It travel news in url which is given with param. It gives news one by one
+	 * to handleMessage. Also this function save the last news.
+	 * 
+	 * @param lastNews
+	 *            It is hashtable which occurs rssLink-lastNew for this link.
+	 * @param rssURLs
+	 *            This is the url which will be read.
 	 */
 	public void travelInNews(Hashtable<String, String> lastNews, URL rssURLs) {
 		String[] lastNewsArray = new String[2];
 		boolean updateNew = true, updated = false;
 		RssReader parserOfRss = new RssReader();
 		ArrayList<FeedMessage> itemsAL = parserOfRss.parseFeed(rssURLs);
-		if (itemsAL.isEmpty()) {
+		if (itemsAL == null || itemsAL.isEmpty()) {
 			LOG.error("There no news to handle.");
 			return;
 		}
-		for (FeedMessage message : itemsAL) { 
+		for (FeedMessage message : itemsAL) {
 			boolean isThereAnyNewNews = !message.getTitle().equals(lastNews.get(rssURLs.toString()));
 			if (isThereAnyNewNews) { // if there is a new news we should insert
 				if (updateNew) {
@@ -63,7 +66,7 @@ public class NewsChecker {
 				break;
 			}
 		}
-		if(updateNew==false && updated == true){
+		if (updateNew == false && updated == true) {
 			lastNews.put(lastNewsArray[0], lastNewsArray[1]);
 		}
 	}

@@ -40,6 +40,7 @@ public class RssReader {
 			try {
 				feed = input.build(new XmlReader(httpcon));
 			} catch (FeedException | IOException e) {
+				LOG.error("Cant read this url:"+url,e);
 				return null;
 			}
 			@SuppressWarnings("unchecked")

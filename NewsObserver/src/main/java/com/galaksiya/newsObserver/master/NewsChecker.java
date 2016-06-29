@@ -28,8 +28,6 @@ public class NewsChecker {
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
 			if(!(lastNews.containsKey(rssURLs.toString())))
 				lastNews.put(rssURLs.toString(), "");
-			else 
-				System.out.println("qwerwer");
 			travelInNews(lastNews, rssURLs);
 			LOG.debug(rssURLs + " checked.");
 		}
@@ -48,6 +46,7 @@ public class NewsChecker {
 		RssReader parserOfRss = new RssReader();
 		ArrayList<FeedMessage> itemsAL = parserOfRss.parseFeed(rssURLs);
 		if (itemsAL.isEmpty()) {
+			LOG.error("There no news to handle.");
 			return;
 		}
 		for (FeedMessage message : itemsAL) { 

@@ -16,4 +16,5 @@ then
 else 
 	echo "App already working on back side."
 	echo "please control yourscript cause it can't stop your background app."
+        $(basename $0) && exit
 fi

@@ -39,7 +39,6 @@ public class Main {
         context.setContextPath("/");
  
         jettyServer = new Server(SERVER_PORT);
-        jettyServer.setStopTimeout(1_000_000);
         jettyServer.setHandler(context);
         
         ServletHolder jerseyServlet = context.addServlet(

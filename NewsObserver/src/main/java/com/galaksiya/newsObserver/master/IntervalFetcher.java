@@ -31,7 +31,7 @@ public class IntervalFetcher {
 				LOG.info("Checked all the rss links.");
 			}
 		};
-		executor.scheduleAtFixedRate(periodicTask, 0, 5, TimeUnit.MINUTES);
+		executor.scheduleAtFixedRate(periodicTask, 0, 6, TimeUnit.MINUTES);
 	}
 
 	/**

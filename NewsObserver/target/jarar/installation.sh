@@ -6,7 +6,7 @@ do
 	kill $OUTPUT
 done
 
-cd jarar
+
 echo "In jarar directory"
 echo "App will be started"
 java -jar jarar/jarar.jar /home/ubuntu/new.txt 2>&1  | tee output.txt & << 'ENDAPP'

@@ -65,6 +65,8 @@ public class Main {
 			filePath = args[0]; 
 		MongoDb mongoHelper = new MongoDb();
 		mongoHelper.delete();
+		MongoDb mongoDbNewsHelper = new MongoDb("news");
+		mongoDbNewsHelper.delete();
 		FileParser fileParser = new FileParser(filePath);
 		IntervalFetcher intervalFetcher = new IntervalFetcher();
 		intervalFetcher.intervaller(fileParser.getRssLinksAL());

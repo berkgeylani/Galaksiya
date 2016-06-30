@@ -9,6 +9,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.galaksiya.newsObserver.master.DateUtils;
+import com.galaksiya.newsObserver.parser.FeedMessage;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoWriteException;
@@ -42,7 +43,7 @@ public class MongoDb implements Database {
 		return mongoClient;
 	}
 
-	private DateUtils data = new DateUtils();
+	private DateUtils dateUtils = new DateUtils();
 
 	public MongoDb() {
 	}
@@ -52,7 +53,7 @@ public class MongoDb implements Database {
 	 * @param collectionName String to set collection name.
 	 */
 	public MongoDb(String collectionName) {
-		this.data.collectionName = collectionName;
+		this.dateUtils.collectionName = collectionName;
 	}
 
 	
@@ -67,7 +68,7 @@ public class MongoDb implements Database {
 		if (word == null || word.equals("")) {
 			return -1;
 		}
-		Date date = data.dateConvert(dateStr);
+		Date date = dateUtils.dateConvert(dateStr);
 
 		Bson filter = new Document().append("date", date).append("word", word);
 
@@ -106,18 +107,18 @@ public class MongoDb implements Database {
 	 * @return a size(int) which will be printed
 	 */
 	public ArrayList<Document> fetch(String date) { 
-		Date dateConverted = data.dateConvert(date);
+		Date dateConverted = dateUtils.dateConvert(date);
 		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
 
 	}
 	/**
-	 * Belirli bir günün limitli olarak verileri çeker
+	 * Prints all the words sorted in frequency in a selected date with a limit
 	 * @param date A date(String) which will be selected. 
 	 * @param limit : It limits size of data which will be printed
 	 * @return a size(int) which will be printed
 	 */
 	public ArrayList<Document> fetch(String date, int limit) { 
-		Date dateConverted = data.dateConvert(date);
+		Date dateConverted = dateUtils.dateConvert(date);
 		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
 	/**
@@ -135,6 +136,7 @@ public class MongoDb implements Database {
 			date_word_freq.add(search.first().get("date").toString());
 			date_word_freq.add(search.first().get("word").toString());
 			date_word_freq.add(search.first().get("frequency").toString());
+			
 			return date_word_freq;
 		} catch (Exception e) {
 		}
@@ -149,10 +151,10 @@ public class MongoDb implements Database {
 	public MongoCollection<Document> getCollection(MongoClient client) {
 		MongoDatabase mDatabase = client.getDatabase("mydb");
 		MongoCollection<Document> collection = null;
-		if (data.collectionName == null) {
+		if (dateUtils.collectionName == null) {
 			collection = mDatabase.getCollection("statistics");
 		} else {
-			collection = mDatabase.getCollection(data.collectionName);
+			collection = mDatabase.getCollection(dateUtils.collectionName);
 		}
 		return collection;
 	}
@@ -185,7 +187,7 @@ public class MongoDb implements Database {
 			return false;
 		}
 		try {
-			Date date = data.dateConvert(dateStr);
+			Date date = dateUtils.dateConvert(dateStr);
 			getCollection(mongoClient).insertOne(
 					new Document().append("date", date).append("word", word).append("frequency", frequency));
 			return true;
@@ -193,6 +195,29 @@ public class MongoDb implements Database {
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 
+		}
+		return false;
+	}
+	/**
+	 * It insert news to mongoDb one by one.
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#save(java.lang.String,
+	 *      java.lang.String, int)
+	 * @return true:if process has been successfully done. false: If it fault.
+	 */
+	public boolean saveNews(FeedMessage message) {
+		
+		MongoClient mongoClient = getInstance();
+		if (message.getTitle() == null || message.getTitle().equals("") || message.getDescription() == null || message.getDescription().equals("") || message.getpubDate() == null || message.getpubDate().equals("")) {
+			return false;
+		}
+		try {
+			Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
+			getCollection(mongoClient).insertOne(
+					new Document().append("title", message.getTitle()).append("description", message.getDescription()).append("pubDate", date));
+			return true;
+		} catch (MongoWriteException e) {
+			LOG.error("Data couldn't be inserted.", e);
 		}
 		return false;
 	}
@@ -217,7 +242,7 @@ public class MongoDb implements Database {
 			if (word == null || word.equals("")) {
 				return false;
 			}
-			Date dateConverted = data.dateConvert(dateStr);
+			Date dateConverted = dateUtils.dateConvert(dateStr);
 			try {
 				UpdateResult result = getCollection(mongoClient).updateOne(
 						new Document("date", dateConverted).append("word", word),

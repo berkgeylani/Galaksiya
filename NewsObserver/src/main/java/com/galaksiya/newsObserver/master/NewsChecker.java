@@ -7,6 +7,8 @@ import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
 
+import com.galaksiya.newsObserver.database.Database;
+import com.galaksiya.newsObserver.database.MongoDb;
 import com.galaksiya.newsObserver.parser.FeedMessage;
 import com.galaksiya.newsObserver.parser.RssReader;
 
@@ -28,7 +30,10 @@ public class NewsChecker {
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
 			if(!(lastNews.containsKey(rssURLs.toString())))
 				lastNews.put(rssURLs.toString(), "");
-			travelInNews(lastNews, rssURLs);
+			else {
+				System.out.println("werqwer");
+			}
+			travelInNews( rssURLs);
 			LOG.debug(rssURLs + " checked.");
 		}
 		return true;
@@ -43,7 +48,7 @@ public class NewsChecker {
 	 * @param rssURLs
 	 *            This is the url which will be read.
 	 */
-	public void travelInNews(Hashtable<String, String> lastNews, URL rssURLs) {
+	public void travelInNews(URL rssURLs) {
 		String[] lastNewsArray = new String[2];
 		boolean updateNew = true, updated = false;
 		RssReader parserOfRss = new RssReader();
@@ -60,6 +65,7 @@ public class NewsChecker {
 					lastNewsArray[1] = message.getTitle();
 					updateNew = false;
 					updated = true;
+					System.out.println(message.getTitle());
 				}
 				handleMessage(message);
 			} else {// if we come the lately new we can break
@@ -77,6 +83,9 @@ public class NewsChecker {
 	 */
 	public Hashtable<String, Integer> handleMessage(FeedMessage message) {
 		DateUtils dateUtils = new DateUtils();
+		//TODO burada messageları database gönderebilirriz.
+		MongoDb mongoDbNews = new MongoDb("news");
+		mongoDbNews.saveNews(message);
 		WordProcessor processOfWords = new WordProcessor();
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
 		String datePerNew = dateUtils.dateCustomize(message.getpubDate());

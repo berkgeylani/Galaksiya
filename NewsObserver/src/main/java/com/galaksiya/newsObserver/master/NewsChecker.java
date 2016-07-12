@@ -30,9 +30,6 @@ public class NewsChecker {
 		for (URL rssURLs : RssLinksAL) { // it read all rss urls
 			if(!(lastNews.containsKey(rssURLs.toString())))
 				lastNews.put(rssURLs.toString(), "");
-			else {
-				System.out.println("werqwer");
-			}
 			travelInNews( rssURLs);
 			LOG.debug(rssURLs + " checked.");
 		}
@@ -65,7 +62,6 @@ public class NewsChecker {
 					lastNewsArray[1] = message.getTitle();
 					updateNew = false;
 					updated = true;
-					System.out.println(message.getTitle());
 				}
 				handleMessage(message);
 			} else {// if we come the lately new we can break

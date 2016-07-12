@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import org.bson.Document;
 
 import com.galaksiya.newsObserver.parser.FeedMessage;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 
 public interface Database {
 

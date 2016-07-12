@@ -6,7 +6,8 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	MongoDbTest.class
+	MongoDbTest.class,
+	DerbyDbTest.class
 })
 
 public class DatabaseTestSuite {

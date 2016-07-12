@@ -1,6 +1,5 @@
 package com.galaksiya.newsObserver.database;
 
-
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -24,11 +23,15 @@ public class MongoDb implements Database {
 
 	static final Logger LOG = Logger.getLogger(MongoDb.class);
 
+	private String collectionName;
+
 	private static MongoClient mongoClient;
 
 	/**
 	 * Fabric of a MongoClient
-	 * @return a MongoClient which parameters are "localhost",27017 (dbAdress,port).
+	 * 
+	 * @return a MongoClient which parameters are "localhost",27017
+	 *         (dbAdress,port).
 	 */
 	public static MongoClient getInstance() {
 		if (mongoClient == null) {
@@ -50,21 +53,23 @@ public class MongoDb implements Database {
 
 	/**
 	 * It provide us to select collection name.
-	 * @param collectionName String to set collection name.
+	 * 
+	 * @param collectionName
+	 *            String to set collection name.
 	 */
 	public MongoDb(String collectionName) {
-		this.dateUtils.collectionName = collectionName;
+		this.collectionName = collectionName;
 	}
 
-	
-
-	/**
-	 * It search in selected date and word and return count of it.
-	 * @param dateStr Date which will be search.
-	 * @param word	Word which will be search.
-	 * @return -1: Fault Others: Success
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.galaksiya.newsObserver.database.Database#contain(java.lang.String,
+	 * java.lang.String)
 	 */
-	public long contain(String dateStr, String word) { 
+	@Override
+	public long contain(String dateStr, String word) {
 		if (word == null || word.equals("")) {
 			return -1;
 		}
@@ -75,15 +80,17 @@ public class MongoDb implements Database {
 		MongoClient mongoClient = getInstance();
 		return getCollection(mongoClient).count(filter);
 	}
-	/**
-	 * Delete all the data from database
-	 * @return true:if process has been successfully done. false: If it fault.
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#delete()
 	 */
 	@Override
 	public boolean delete() {// Delete All documents from collection :Using
 		// blank BasicDBObject
 		MongoClient mongoClient = getInstance();
-		try{
+		try {
 			getCollection(mongoClient).deleteMany(new Document());
 			LOG.info("All data deleted");
 			return true;
@@ -94,40 +101,50 @@ public class MongoDb implements Database {
 		}
 		return false;
 	}
-	/**
-	 * Prints all the words sorted in frequency
-	 * @return a size(int) which will be printed
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#fetch()
 	 */
+	@Override
 	public ArrayList<Document> fetch() { // frequency sorted for all the words
 		return fetch(new Document(), new Document().append("frequency", 1), -1);
 	}
-	/**
-	 * Prints all the words sorted in frequency in a selected date
-	 * @param date A date(String) which will be selected. 
-	 * @return a size(int) which will be printed
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#fetch(java.lang.String)
 	 */
-	public ArrayList<Document> fetch(String date) { 
+	@Override
+	public ArrayList<Document> fetch(String date) {
 		Date dateConverted = dateUtils.dateConvert(date);
 		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
 
 	}
-	/**
-	 * Prints all the words sorted in frequency in a selected date with a limit
-	 * @param date A date(String) which will be selected. 
-	 * @param limit : It limits size of data which will be printed
-	 * @return a size(int) which will be printed
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#fetch(java.lang.String,
+	 * int)
 	 */
-	public ArrayList<Document> fetch(String date, int limit) { 
+	@Override
+	public ArrayList<Document> fetch(String date, int limit) {
 		Date dateConverted = dateUtils.dateConvert(date);
 		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
-	/**
-	 * It provides us to get sample from database(first).
-	 * @return null : fault | arraylist indexes: 0-date   1-word  2-frequency
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#fetchFirstWDocument()
 	 */
+	@Override
 	public ArrayList<String> fetchFirstWDocument() {
 		MongoClient mongoClient = getInstance();
-		try{
+		try {
 			ArrayList<String> date_word_freq = new ArrayList<String>();
 			FindIterable<Document> search = getCollection(mongoClient).find();
 			if (search.first() == null) {
@@ -136,7 +153,7 @@ public class MongoDb implements Database {
 			date_word_freq.add(search.first().get("date").toString());
 			date_word_freq.add(search.first().get("word").toString());
 			date_word_freq.add(search.first().get("frequency").toString());
-			
+
 			return date_word_freq;
 		} catch (Exception e) {
 		}
@@ -144,41 +161,44 @@ public class MongoDb implements Database {
 	}
 
 	/**
-	 * It returns MongoCollection with selected collection name(Default: statistics).It set when initialize MongoDb.
-	 * @param client Get a MongoClient which is set "localhost", 27017.
-	 * @return collection : Default: initialize statistics collection. You can set when create MongoDb(//here).
+	 * It returns MongoCollection with selected collection name(Default:
+	 * statistics).It set when initialize MongoDb.
+	 * 
+	 * @param client
+	 *            Get a MongoClient which is set "localhost", 27017.
+	 * @return collection : Default: initialize statistics collection. You can
+	 *         set when create MongoDb(//here).
 	 */
 	public MongoCollection<Document> getCollection(MongoClient client) {
 		MongoDatabase mDatabase = client.getDatabase("mydb");
 		MongoCollection<Document> collection = null;
-		if (dateUtils.collectionName == null) {
+		if (this.collectionName == null) {
 			collection = mDatabase.getCollection("statistics");
 		} else {
-			collection = mDatabase.getCollection(dateUtils.collectionName);
+			collection = mDatabase.getCollection(collectionName);
 		}
 		return collection;
 	}
+
 	/**
 	 * It gives count of documents in FindIterable which is param
 	 * @param iterable It is a Mongo query response object.
 	 * @return A int which is count of documents.
 	 */
-	public ArrayList<Document> iteratorSize(FindIterable<Document> iterable){
+	public ArrayList<Document> findIterableToArraylist(FindIterable<Document> iterable) {
 		ArrayList<Document> dataAL = new ArrayList<Document>();
 		MongoCursor<Document> cursor = iterable.iterator();
 		while (cursor.hasNext()) {
-			Document document = cursor.next();
-			dataAL.add(document);
+			dataAL.add(cursor.next());
 		}
 		return dataAL;
-
 	}
-	/**
-	 * It insert to mongoDb which is selected date-word-frequency
+
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.galaksiya.newsObserver.database.Database#save(java.lang.String,
-	 *      java.lang.String, int)
-	 * @return true:if process has been successfully done. false: If it fault.
+	 * java.lang.String, int)
 	 */
 	@Override
 	public boolean save(String dateStr, String word, int frequency) {
@@ -188,8 +208,8 @@ public class MongoDb implements Database {
 		}
 		try {
 			Date date = dateUtils.dateConvert(dateStr);
-			getCollection(mongoClient).insertOne(
-					new Document().append("date", date).append("word", word).append("frequency", frequency));
+			getCollection(mongoClient)
+					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
 			return true;
 
 		} catch (MongoWriteException e) {
@@ -198,47 +218,66 @@ public class MongoDb implements Database {
 		}
 		return false;
 	}
-	/**
-	 * It insert news to mongoDb one by one.
+
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @see com.galaksiya.newsObserver.database.Database#save(java.lang.String,
-	 *      java.lang.String, int)
-	 * @return true:if process has been successfully done. false: If it fault.
+	 * @see com.galaksiya.newsObserver.database.Database#saveNews(com.galaksiya.
+	 * newsObserver.parser.FeedMessage)
 	 */
+	@Override
 	public boolean saveNews(FeedMessage message) {
-		
+
 		MongoClient mongoClient = getInstance();
-		if (message.getTitle() == null || message.getTitle().equals("") || message.getDescription() == null || message.getDescription().equals("") || message.getpubDate() == null || message.getpubDate().equals("")) {
+		if (message == null || message.getTitle() == null || message.getTitle().equals("")
+				|| message.getDescription() == null || message.getDescription().equals("")
+				|| message.getpubDate() == null || message.getpubDate().equals("")) {
 			return false;
 		}
 		try {
 			Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
-			getCollection(mongoClient).insertOne(
-					new Document().append("title", message.getTitle()).append("description", message.getDescription()).append("pubDate", date));
+			getCollection(mongoClient).insertOne(new Document().append("title", message.getTitle())
+					.append("description", message.getDescription()).append("pubDate", date));
 			return true;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 		}
 		return false;
 	}
-	/**
-	 * It gives total count of a data in database.
-	 * @return Count of a data.
+	@Override
+	public ArrayList<Document> getNews() {
+		MongoClient mongoClient = getInstance();
+		try {
+			FindIterable<Document> iterable = getCollection(mongoClient).find();
+			ArrayList<Document> newsAl = findIterableToArraylist(iterable);
+			return newsAl;
+		} catch (MongoWriteException e) {
+			LOG.error("Data couldn't be inserted.", e);
+		}
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#totalCount()
 	 */
+	@Override
 	public long totalCount() {
 		return getCollection(getInstance()).count(new Document());
 	}
-	/**
-	 * It increment frequency of a selected word,date.
-	 * @param dateStr Date which will be search.
-	 * @param word	Word which will be search.
-	 * @param frequency Frequency of a word.
-	 * @return true : Successful process. | false : It fault.
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.galaksiya.newsObserver.database.Database#update(java.lang.String,
+	 * java.lang.String, int)
 	 */
 	@Override
 	public boolean update(String dateStr, String word, int frequency) {
 		MongoClient mongoClient = getInstance();
-		try{
+		try {
 			if (word == null || word.equals("")) {
 				return false;
 			}
@@ -256,23 +295,21 @@ public class MongoDb implements Database {
 		}
 		return false;
 	}
-	
-	/**
-	 * All fetch function uses this and this is query creator.
-	 * @param find  : document creator of find query
-	 * @param sort  : document creator of sort query
-	 * @param limit : It limits size of data which will be printed 
-	 * @return -1 : fault | result is bigger than "0" it is success
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#fetch(Document
+	 * find,Document sort,int limit)
 	 */
-	private ArrayList<Document> fetch(Document find,Document sort,int limit){
+	@Override
+	public ArrayList<Document> fetch(Document find, Document sort, int limit) {
 		MongoClient mongoClient = getInstance();
-		try{
-			FindIterable<Document> iterable = getCollection(mongoClient).find(find)
-					.sort(sort);
-			if(limit>=0)
-				iterable=iterable.limit(limit);
-			//printerOfFindIterable(iterable);
-			return iteratorSize(iterable);
+		try {
+			FindIterable<Document> iterable = getCollection(mongoClient).find(find).sort(sort);
+			if (limit >= 0)
+				iterable = iterable.limit(limit);
+			return findIterableToArraylist(iterable);
 		} catch (Exception e) {
 			LOG.error("Mongo Connection Exception", e);
 		}

@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.database.Database;
 import com.galaksiya.newsObserver.database.MongoDb;
 
 public class DbHelperTest {
@@ -16,7 +17,7 @@ public class DbHelperTest {
 	
 	private DbHelper dbHelper;
 	
-	private MongoDb mongo ;
+	private Database mongo ;
 	
 	@Before 
 	public void before(){

@@ -7,12 +7,15 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
+import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.parser.FeedMessage;
+
 public class MongoDbTest {
-	private MongoDb mongoDb;
+	private Database mongoDb;
 	private String date;
 	private String word;
 
@@ -140,5 +143,87 @@ public class MongoDbTest {
 			mongoDb.save(date, word, 2);
 		}
 		assertEquals(6, mongoDb.totalCount());
+	}
+	@Test
+	public void saveNewsNullTitle(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		FeedMessage message = new FeedMessage();
+		message.setTitle(null);
+		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		assertFalse(mongoDb.saveNews(message));
+	}
+	@Test
+	public void saveNewsNullDescription(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		FeedMessage message = new FeedMessage();
+		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
+		message.setDescription(null);
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		assertFalse(mongoDb.saveNews(message));
+	}
+	@Test
+	public void saveNewsNullPubdate(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		FeedMessage message = new FeedMessage();
+		message.setTitle("");
+		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setPubDate(null);
+		assertFalse(mongoDb.saveNews(message));
+	}
+	@Test
+	public void saveNewsEmptyTitle(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		FeedMessage message = new FeedMessage();
+		message.setTitle("");
+		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		assertFalse(mongoDb.saveNews(message));
+	}
+	@Test
+	public void saveNewsEmptyDescription(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		FeedMessage message = new FeedMessage();
+		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
+		message.setDescription("");
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");		
+		assertFalse(mongoDb.saveNews(message));
+	}
+	@Test
+	public void saveNewsEmptyPubDate(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		FeedMessage message = new FeedMessage();
+		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
+		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setPubDate("");
+		assertFalse(mongoDb.saveNews(message));
+	}
+	@Test
+	public void saveNewscanInsert(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		mongoDb.delete();
+		FeedMessage message = new FeedMessage();
+		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
+		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		mongoDb.saveNews(message);
+		assertEquals( 1 , mongoDb.totalCount());
+	}
+	@Test
+	public void saveNewInsertDataControl(){
+		MongoDb mongoDb = new MongoDb("newsTest");
+		mongoDb.delete();
+		FeedMessage message = new FeedMessage();
+		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
+		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		mongoDb.saveNews(message);
+		ArrayList<Document> newsAL = mongoDb.getNews();
+		if(newsAL == null)
+			fail("Couldn't insert.");
+		Document document = newsAL.get(0);
+		boolean isTitleDescPubDateEqualsWithDatabase = document.get("title").equals(message.getTitle()) && document.get("description").equals(message.getDescription());
+		assertEquals(document.get("pubDate").toString(),"Mon May 02 00:00:00 EEST 2016");
+		assertTrue(isTitleDescPubDateEqualsWithDatabase);
 	}
 }

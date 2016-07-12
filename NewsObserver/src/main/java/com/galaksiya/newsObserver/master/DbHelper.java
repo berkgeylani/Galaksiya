@@ -2,6 +2,7 @@ package com.galaksiya.newsObserver.master;
 
 
 
+import com.galaksiya.newsObserver.database.Database;
 import com.galaksiya.newsObserver.database.MongoDb;
 
 public class DbHelper {
@@ -11,7 +12,7 @@ public class DbHelper {
 	public static DbHelper getInstance(){
 		return _DbHelperHold.INSTANCE;
 	}
-	private MongoDb mongoDbHelper;
+	private Database mongoDbHelper;
 	/**
 	 * It provide us to create default MongoDb collection name which is statistics.
 	 */

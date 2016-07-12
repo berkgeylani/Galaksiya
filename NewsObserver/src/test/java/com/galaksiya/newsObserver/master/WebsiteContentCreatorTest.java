@@ -18,10 +18,11 @@ import org.jsoup.select.Elements;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.database.Database;
 import com.galaksiya.newsObserver.database.MongoDb;
 
 public class WebsiteContentCreatorTest {
-	private MongoDb mongoDb = new MongoDb("test");
+	private Database mongoDb = new MongoDb("test");
 
 	private WebsiteContentCreator contentCreator = new WebsiteContentCreator(mongoDb);
 
@@ -39,7 +40,7 @@ public class WebsiteContentCreatorTest {
 
 	@Before
 	public void Before() {
-		MongoDb mongoDb = new MongoDb("test");
+		Database mongoDb = new MongoDb("test");
 		mongoDb.delete();
 		dataAl = new ArrayList<Document>();
 	}
@@ -53,7 +54,7 @@ public class WebsiteContentCreatorTest {
 		document.append("frequency", "6");
 		dataAl = new ArrayList<Document>();
 		dataAl.add(document);
-		MongoDb mongoDbHelper = new MongoDb("test");
+		Database mongoDbHelper = new MongoDb("test");
 		mongoDbHelper.save(document.get("date").toString(), document.get("word").toString(),
 				Integer.parseInt(document.get("frequency").toString()));
 		// şimdi database kaydettik
@@ -164,7 +165,7 @@ public class WebsiteContentCreatorTest {
 	
 	@Test
 	public void TopLimitForDayConnectWithoutMongoDbConnection() throws Exception {
-		MongoDb mockedMongo = mock(MongoDb.class);
+		Database mockedMongo = mock(MongoDb.class);
 		when(mockedMongo.fetch(anyString(), anyInt())).thenReturn(null);
 		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
 		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),
@@ -172,7 +173,7 @@ public class WebsiteContentCreatorTest {
 	}
 	@Test
 	public void ForADayConnectWithoutMongoDbConnection() throws Exception {
-		MongoDb mockedMongo = mock(MongoDb.class);
+		Database mockedMongo = mock(MongoDb.class);
 		when(mockedMongo.fetch(anyString())).thenReturn(null);
 		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
 		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),
@@ -180,7 +181,7 @@ public class WebsiteContentCreatorTest {
 	}
 	@Test
 	public void sortedAllConnectWithoutMongoDbConnection() throws Exception {
-		MongoDb mockedMongo = mock(MongoDb.class);
+		Database mockedMongo = mock(MongoDb.class);
 		when(mockedMongo.fetch()).thenReturn(null);
 		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
 		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),

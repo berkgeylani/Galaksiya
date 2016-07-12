@@ -9,8 +9,7 @@ import org.apache.log4j.Logger;
 import com.galaksiya.newsObserver.database.MongoDb;
 
 public class DateUtils {
-	public String collectionName;
-	static final Logger LOG = Logger.getLogger(MongoDb.class);
+	static final Logger LOG = Logger.getLogger(DateUtils.class);
 	
 	public DateUtils() {
 	}

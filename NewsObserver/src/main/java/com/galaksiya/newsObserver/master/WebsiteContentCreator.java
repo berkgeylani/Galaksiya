@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.bson.Document;
 
+import com.galaksiya.newsObserver.database.Database;
 import com.galaksiya.newsObserver.database.MongoDb;
 
 /**
@@ -21,12 +22,12 @@ import com.galaksiya.newsObserver.database.MongoDb;
 @Path("/newsobserver")
 public class WebsiteContentCreator {
 
-	private MongoDb mongoDbHelper ;
+	private Database mongoDbHelper ;
 	private DateUtils dateUtils = new DateUtils();
 	public WebsiteContentCreator(){
 		mongoDbHelper = new MongoDb();
 	}
-	public WebsiteContentCreator(MongoDb mongoHelper){
+	public WebsiteContentCreator(Database mongoHelper){
 		mongoDbHelper=mongoHelper;
 	}
 	public String createContext(ArrayList<Document> dataAl){

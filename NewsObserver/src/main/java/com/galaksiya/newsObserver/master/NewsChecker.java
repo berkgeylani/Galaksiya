@@ -84,7 +84,7 @@ public class NewsChecker {
 	public Hashtable<String, Integer> handleMessage(FeedMessage message) {
 		DateUtils dateUtils = new DateUtils();
 		//TODO burada messageları database gönderebilirriz.
-		MongoDb mongoDbNews = new MongoDb("news");
+		Database mongoDbNews = new MongoDb("news");
 		mongoDbNews.saveNews(message);
 		WordProcessor processOfWords = new WordProcessor();
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();

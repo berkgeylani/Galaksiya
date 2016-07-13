@@ -72,7 +72,7 @@ public class Main {
 			System.exit(0);
 		}if(args.length==2){
 			filePath=args[0];
-			databaseFactory.setDatabaseType(selectDatabase(args[2]));
+			databaseFactory.setDatabaseType(selectDatabase(args[1]));
 		}
 		Database dbHelper = databaseFactory.getDatabase();
 		dbHelper.delete();

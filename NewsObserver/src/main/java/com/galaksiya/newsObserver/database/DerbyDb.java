@@ -21,6 +21,7 @@ public class DerbyDb implements Database {
 	private static Connection conn = null;
 
 	private static final Logger LOG = Logger.getLogger(MongoDb.class);
+	private final static String DATABASE_NAME = "Db.db";
 
 	/**
 	 * Fabric of a MongoClient
@@ -34,8 +35,7 @@ public class DerbyDb implements Database {
 				if (conn == null) { // yes double check
 					// setting for conn will be here
 					try {
-						String DATABASE_NAME = "myDb.db";
-						String DB_URL = "jdbc:derby:/home/francium/github/Galaksiya/" + DATABASE_NAME + ";create=true";
+						String DB_URL = "jdbc:derby:" + DATABASE_NAME + ";create=true";
 						Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 						conn = DriverManager.getConnection(DB_URL);
 					} catch (Exception except) {
@@ -362,7 +362,7 @@ public class DerbyDb implements Database {
 		Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
 		java.sql.Date sqlDate = new java.sql.Date(date.getTime());
 		try {
-			PreparedStatement findEmp = getInstance().prepareStatement("SELECT COUNT(*) FROM " + tableName + " WHERE PUBLISHDATE= ? TITLE= ?  DESCRIPTION= ?");
+			PreparedStatement findEmp = getInstance().prepareStatement("SELECT COUNT(*) FROM " + tableName + " WHERE PUBLISHDATE= ? AND TITLE= ? AND DESCRIPTION= ?");
 			findEmp.setString(1, sqlDate.toString());
 			findEmp.setString(2, message.getTitle());
 			findEmp.setString(3, message.getDescription());
@@ -374,7 +374,7 @@ public class DerbyDb implements Database {
 				return true;
 			}
 		} catch (SQLException e) {
-			LOG.error("News find process have a troble.",e);
+			LOG.error("News find process have a trouble.",e);
 		}
 		
 		return false;

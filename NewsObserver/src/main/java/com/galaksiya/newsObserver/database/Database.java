@@ -21,11 +21,7 @@ public interface Database {
 	 * @return true:if process has been successfully done. false: If it fault.
 	 */
 	boolean delete();
-	/**
-	 * Delete just today.
-	 * @return true:if process has been successfully done. false: If it fault.
-	 */
-	boolean deleteToday();
+	
 	
 	/**
 	 * Prints all the words sorted in frequency
@@ -76,12 +72,18 @@ public interface Database {
 	 * @return It returns with arrayList which contains title-description-pubdate.
 	 */
 	public ArrayList<Document> getNews();
+	/**
+	 * It find the new which is given in message.
+	 * @param message It occurs from publishDate-Title-Description
+	 * @return true: It find false: There is no new in database like in message.
+	 */
+	public boolean findNew(FeedMessage message);
 	
 	/**
 	 * It gives total count of a data in database.
 	 * @return Count of a data.
 	 */
-	long totalCount();
+	public long totalCount();
 
 	/**
 	 * It increment frequency of a selected word,date.

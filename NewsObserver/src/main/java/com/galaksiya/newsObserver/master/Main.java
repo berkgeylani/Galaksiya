@@ -16,7 +16,7 @@ public class Main {
 	private static final Logger LOG = Logger.getLogger(Main.class);
 	
 	public static String _DatabaseType ;
-	
+	 
 	private static final int SERVER_PORT = 8112;
 
 	private Scanner sc;

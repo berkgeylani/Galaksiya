@@ -14,11 +14,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.galaksiya.newsObserver.database.DatabaseFactory;
 import com.galaksiya.newsObserver.database.MongoDb;
@@ -46,8 +41,8 @@ public class NewsCheckerTest {
 	public static void stopJetty() throws Exception {
 		server.stop();
 	}
-	
-	private NewsChecker newsChecker = new NewsChecker(new MongoDb("Test"));
+
+	private NewsChecker newsChecker = new NewsChecker();
 
 	private ArrayList<URL> rssLinksAL = new ArrayList<URL>();
 
@@ -67,14 +62,11 @@ public class NewsCheckerTest {
 	public void canConvertWithoutBlankInput(){
 		assertFalse(dateUtils.canConvert("21 May!2011"));
 	}
+	
 	@Test
-	public void dateCustomizeValidInput() {
-		assertEquals("13 May 2016", dateUtils.dateCustomize("Fri May 13 10:24:56 EEST 2016"));
-		assertEquals("22 Mar 2016", dateUtils.dateCustomize("Tue Mar 22 14:15:00 EET 2016"));
-	}
-
-	@Test
-	public void handleMessage() {		
+	public void handleMessage() {
+		MongoDb mongoDb = new MongoDb("newsTest");
+		mongoDb.delete();
 		int sumOffreq = 0;
 		FeedMessage messsage = createSampleMessage();
 		Hashtable<String, Integer> wordFrequencyPerNew = newsChecker.handleMessage(messsage);
@@ -86,10 +78,19 @@ public class NewsCheckerTest {
 		}
 		assertEquals(62, sumOffreq);
 	}
+	@Test
+	public void dateCustomizeValidInput() {
+		assertEquals("13 May 2016", dateUtils.dateCustomize("Fri May 13 10:24:56 EEST 2016"));
+		assertEquals("22 Mar 2016", dateUtils.dateCustomize("Tue Mar 22 14:15:00 EET 2016"));
+	}
+
 
 	@Before
 	public void before() throws Exception {
 		rssLinksAL.add(new URL("http://localhost:" + SERVER_PORT + "/"));
+		DatabaseFactory.setInstance(null);
+		MongoDb mongoDbtest = new MongoDb("Test"); 
+		mongoDbtest.delete();
 	}
 	
 	@Test

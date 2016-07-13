@@ -153,17 +153,6 @@
 			<artifactId>derby</artifactId>
 			<version>10.12.1.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>1.6.5</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.powermock</groupId>
-		    <artifactId>powermock-module-junit4</artifactId>
-		    <version>1.6.5</version>
-		</dependency>
-		
 	</dependencies>
 	<properties>
 		<log4j.configuration>log4j.properties</log4j.configuration>

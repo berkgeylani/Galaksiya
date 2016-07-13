@@ -175,7 +175,7 @@ public class MongoDb implements Database {
 		if (this.collectionName == null) {
 			collection = mDatabase.getCollection("statistics");
 		} else {
-			collection = mDatabase.getCollection(collectionName);
+			collection = mDatabase.getCollection(this.collectionName);
 		}
 		return collection;
 	}
@@ -317,8 +317,24 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public boolean deleteToday() {
-		// TODO Auto-generated method stub
+	public boolean findNew(FeedMessage message) {
+		if (message == null || message.getTitle() == null || message.getTitle().equals("")
+				|| message.getDescription() == null || message.getDescription().equals("")
+				|| message.getpubDate() == null || message.getpubDate().equals("")) {
+			return false;
+		}
+		long count=0;
+		Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
+		try {
+			Bson filter = new Document().append("pubDate", date).append("title", message.getTitle()).append("description", message.getDescription());
+			MongoClient mongoClient = getInstance();
+			count =  getCollection(mongoClient).count(filter);
+			if (count > 0) {
+				return true;
+			}
+		} catch (Exception e) {
+			LOG.error("News find process have a troble.",e);
+		}
 		return false;
 	}
 }

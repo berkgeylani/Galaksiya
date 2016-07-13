@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import javax.xml.crypto.Data;
-
 import org.apache.log4j.Logger;
 
 import com.galaksiya.newsObserver.database.Database;
@@ -75,7 +73,8 @@ public class NewsChecker {
 					updateNew = false;
 					updated = true;
 				}
-				handleMessage(message);
+				if(handleMessage(message)==null)
+					continue;
 			} else {// if we come the lately new we can break
 				break;
 			}
@@ -93,6 +92,7 @@ public class NewsChecker {
 		WordProcessor processOfWords = new WordProcessor();
 		databaseFactory =  DatabaseFactory.getInstance();
 		DateUtils dateUtils = new DateUtils();
+		String datePerNew = dateUtils.dateCustomize(message.getpubDate());
 		Database dbForNews;
 		if(databaseFactory.getDatabaseType()==null){
 			databaseFactory.setDatabaseType("mongo");//for test
@@ -102,9 +102,11 @@ public class NewsChecker {
 			dbForNews = databaseFactory.getDatabase("news");
 		}
 		FeedMessage messageNews = processOfWords.cleanMessageForNews(message);
+		if (dbForNews.findNew(messageNews)) {
+			return null;
+		}
 		dbForNews.saveNews(message);
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
-		String datePerNew = dateUtils.dateCustomize(message.getpubDate());
 		wordFrequencyPerNew = processOfWords.splitAndHashing(message.getTitle() + " " + message.getDescription());
 		// wordFrequency test edecez
 		if (!(travelWordByWord(datePerNew, wordFrequencyPerNew)))

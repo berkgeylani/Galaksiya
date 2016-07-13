@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.master.DateUtils;
 import com.galaksiya.newsObserver.parser.FeedMessage;
 
 public class MongoDbTest {
@@ -210,7 +211,8 @@ public class MongoDbTest {
 		assertEquals( 1 , mongoDb.totalCount());
 	}
 	@Test
-	public void saveNewInsertDataControl(){
+	public void saveNewInsertDataControl(){  ////////////////////////////
+		DateUtils dateUtils = new DateUtils();
 		MongoDb mongoDb = new MongoDb("newsTest");
 		mongoDb.delete();
 		FeedMessage message = new FeedMessage();
@@ -223,7 +225,7 @@ public class MongoDbTest {
 			fail("Couldn't insert.");
 		Document document = newsAL.get(0);
 		boolean isTitleDescPubDateEqualsWithDatabase = document.get("title").equals(message.getTitle()) && document.get("description").equals(message.getDescription());
-		assertEquals(document.get("pubDate").toString(),"Mon May 02 00:00:00 EEST 2016");
+		assertEquals(dateUtils.dateCustomize(document.get("pubDate").toString()),dateUtils.dateCustomize("Mon May 02 00:00:00 EEST 2016"));
 		assertTrue(isTitleDescPubDateEqualsWithDatabase);
 	}
 }

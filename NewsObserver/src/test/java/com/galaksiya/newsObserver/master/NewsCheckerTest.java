@@ -14,7 +14,14 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.galaksiya.newsObserver.database.DatabaseFactory;
+import com.galaksiya.newsObserver.database.MongoDb;
 import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
 import com.galaksiya.newsObserver.parser.FeedMessage;
 import com.galaksiya.newsObserver.parser.RssReader;
@@ -39,8 +46,8 @@ public class NewsCheckerTest {
 	public static void stopJetty() throws Exception {
 		server.stop();
 	}
-
-	private NewsChecker newsChecker = new NewsChecker();
+	
+	private NewsChecker newsChecker = new NewsChecker(new MongoDb("Test"));
 
 	private ArrayList<URL> rssLinksAL = new ArrayList<URL>();
 
@@ -67,7 +74,7 @@ public class NewsCheckerTest {
 	}
 
 	@Test
-	public void handleMessage() {
+	public void handleMessage() {		
 		int sumOffreq = 0;
 		FeedMessage messsage = createSampleMessage();
 		Hashtable<String, Integer> wordFrequencyPerNew = newsChecker.handleMessage(messsage);

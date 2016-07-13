@@ -5,10 +5,12 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import javax.xml.crypto.Data;
+
 import org.apache.log4j.Logger;
 
 import com.galaksiya.newsObserver.database.Database;
-import com.galaksiya.newsObserver.database.MongoDb;
+import com.galaksiya.newsObserver.database.DatabaseFactory;
 import com.galaksiya.newsObserver.parser.FeedMessage;
 import com.galaksiya.newsObserver.parser.RssReader;
 
@@ -18,6 +20,16 @@ public class NewsChecker {
 
 	private static  Hashtable<String, String> lastNews = new Hashtable<String, String>();//her newsCheckerda ortak olmasını istediğmiz bir field.
 	
+	private Database db;
+	private DatabaseFactory databaseFactory;
+	public NewsChecker(){
+	}
+	public NewsChecker(Database dbObject){
+		db=dbObject;
+	}
+	public NewsChecker(DatabaseFactory databaseFactory){
+		this.databaseFactory = databaseFactory;
+	}
 	/**
 	 * It takes rss links and give one by one to travelInNews.
 	 * @param RssLinksAL This arraylist is rss links list.
@@ -27,7 +39,7 @@ public class NewsChecker {
 		if (RssLinksAL == null || RssLinksAL.isEmpty() )
 			return false;
 
-		for (URL rssURLs : RssLinksAL) { // it read all rss urls
+		for (URL rssURLs : RssLinksAL) { 
 			if(!(lastNews.containsKey(rssURLs.toString())))
 				lastNews.put(rssURLs.toString(), "");
 			travelInNews( rssURLs);
@@ -78,11 +90,14 @@ public class NewsChecker {
 	 * @return wordFrequencyPerNew It is a hash table which occurs word-frequency
 	 */
 	public Hashtable<String, Integer> handleMessage(FeedMessage message) {
-		DateUtils dateUtils = new DateUtils();
-		//TODO burada messageları database gönderebilirriz.
-		Database mongoDbNews = new MongoDb("news");
-		mongoDbNews.saveNews(message);
 		WordProcessor processOfWords = new WordProcessor();
+		databaseFactory =  DatabaseFactory.getInstance();
+		DateUtils dateUtils = new DateUtils();
+		if(databaseFactory.getDatabaseType()==null)
+			databaseFactory.setDatabaseType("mongo");//for test
+		Database dbForNews = databaseFactory.getDatabase("news");
+		FeedMessage messageNews = processOfWords.cleanMessageForNews(message);
+		dbForNews.saveNews(message);
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
 		String datePerNew = dateUtils.dateCustomize(message.getpubDate());
 		wordFrequencyPerNew = processOfWords.splitAndHashing(message.getTitle() + " " + message.getDescription());
@@ -116,7 +131,11 @@ public class NewsChecker {
 	 * @return true :Success false :fail
 	 */
 	private boolean travelWordByWord(String datePerNew, Hashtable<String, Integer> wordFrequencyPerNew) {
-		DbHelper dbHelper = DbHelper.getInstance();
+		DbHelper dbHelper;
+		if (db!=null) {
+			dbHelper = new DbHelper(db);
+		}
+		dbHelper = new DbHelper();
 		boolean proccessSuccessful = false;
 		Enumeration<String> e = wordFrequencyPerNew.keys();
 		while (e.hasMoreElements()) {

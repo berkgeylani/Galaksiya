@@ -7,6 +7,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+import com.galaksiya.newsObserver.parser.FeedMessage;
+
 public class WordProcessor {
 
 	/**
@@ -25,5 +27,10 @@ public class WordProcessor {
 			wordFrequency.put(word, frequency);
 		}
 		return wordFrequency;
+	}
+	public FeedMessage cleanMessageForNews(FeedMessage message) {
+		message.setDescription(message.getDescription().replaceAll("\\<[^>]*>", "").replaceAll("\\p{P}", "").toLowerCase());
+		message.setTitle(message.getTitle().replaceAll("\\<[^>]*>", "").replaceAll("\\p{P}", "").toLowerCase());
+		return message;
 	}
 }

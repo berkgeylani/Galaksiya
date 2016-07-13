@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response.Status;
 import org.bson.Document;
 
 import com.galaksiya.newsObserver.database.Database;
-import com.galaksiya.newsObserver.database.MongoDb;
+import com.galaksiya.newsObserver.database.DatabaseFactory;
 
 /**
  * this class fill the context with html from a selected query.
@@ -22,13 +22,15 @@ import com.galaksiya.newsObserver.database.MongoDb;
 @Path("/newsobserver")
 public class WebsiteContentCreator {
 
-	private Database mongoDbHelper ;
+	private Database dbHelper ;
 	private DateUtils dateUtils = new DateUtils();
+	private DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
 	public WebsiteContentCreator(){
-		mongoDbHelper = new MongoDb();
+		
+		dbHelper = databaseFactory.getDatabase();
 	}
-	public WebsiteContentCreator(Database mongoHelper){
-		mongoDbHelper=mongoHelper;
+	public WebsiteContentCreator(Database dbHelperArg){
+		dbHelper=dbHelperArg;
 	}
 	public String createContext(ArrayList<Document> dataAl){
 		DateUtils dateUtils = new DateUtils();
@@ -67,7 +69,7 @@ public class WebsiteContentCreator {
 					+ "Second Parameter : Add a acceptable month 1-12 on here.ıt should be in text  and abbrevitaion from like: May,Jun</br>"
 					+ "Third Parameter : Add a acceptable year on here</br>"
 					+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.").build();
-		ArrayList<Document> dataAl = mongoDbHelper.fetch(day+" "+month+" "+year, limit);
+		ArrayList<Document> dataAl = dbHelper.fetch(day+" "+month+" "+year, limit);
 		if(dataAl==null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("We have a problem in our databases.Please come back later again.").build();
 		else if(dataAl.size()==0)
@@ -92,7 +94,7 @@ public class WebsiteContentCreator {
 					+ "Second Parameter : Add a acceptable month 1-12 on here.ıt should be in text  and abbrevitaion from like: May,Jun</br>"
 					+ "Third Parameter : Add a acceptable year on here</br>"
 					+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.").build();		
-		ArrayList<Document> dataAl = mongoDbHelper.fetch(day+" "+month+" "+year);
+		ArrayList<Document> dataAl = dbHelper.fetch(day+" "+month+" "+year);
 		if(dataAl==null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>"
 					+ "We have a problem in our databases.Please come back later again.").build();
@@ -109,7 +111,7 @@ public class WebsiteContentCreator {
 	@Path("sortedAll")
 	@Produces(MediaType.TEXT_HTML)
 	public Response sortedAll() {
-		ArrayList<Document> dataAl = mongoDbHelper.fetch();
+		ArrayList<Document> dataAl = dbHelper.fetch();
 		if(dataAl==null)
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>We have a problem in our databases."
 					+ "Please come back later again.").build();

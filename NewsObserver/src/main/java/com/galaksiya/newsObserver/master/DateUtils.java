@@ -59,6 +59,10 @@ public class DateUtils {
 		if (pubDate.length() == 29)
 			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
 					+ pubDate.toString().substring(25, 29);
+		else if (pubDate.length() == 10) {
+			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(5, 7) + " "
+					+ pubDate.toString().substring(0, 4);
+		}
 		else
 			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
 					+ pubDate.toString().substring(24, 28);

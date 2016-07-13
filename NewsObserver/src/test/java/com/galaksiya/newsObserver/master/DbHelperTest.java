@@ -22,7 +22,7 @@ public class DbHelperTest {
 	@Before 
 	public void before(){
 		mongo= new  MongoDb(COLLECTION_NAME);
-		dbHelper = new DbHelper(COLLECTION_NAME);
+		dbHelper = new DbHelper(mongo);
 	}
 	
 	@After

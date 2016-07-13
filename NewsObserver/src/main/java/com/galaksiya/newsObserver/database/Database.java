@@ -21,7 +21,12 @@ public interface Database {
 	 * @return true:if process has been successfully done. false: If it fault.
 	 */
 	boolean delete();
-
+	/**
+	 * Delete just today.
+	 * @return true:if process has been successfully done. false: If it fault.
+	 */
+	boolean deleteToday();
+	
 	/**
 	 * Prints all the words sorted in frequency
 	 * @return a size(int) which will be printed

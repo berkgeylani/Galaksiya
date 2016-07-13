@@ -315,4 +315,10 @@ public class MongoDb implements Database {
 		}
 		return null;
 	}
+
+	@Override
+	public boolean deleteToday() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

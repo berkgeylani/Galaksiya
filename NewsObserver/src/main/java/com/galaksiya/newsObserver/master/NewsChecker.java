@@ -93,9 +93,14 @@ public class NewsChecker {
 		WordProcessor processOfWords = new WordProcessor();
 		databaseFactory =  DatabaseFactory.getInstance();
 		DateUtils dateUtils = new DateUtils();
-		if(databaseFactory.getDatabaseType()==null)
+		Database dbForNews;
+		if(databaseFactory.getDatabaseType()==null){
 			databaseFactory.setDatabaseType("mongo");//for test
-		Database dbForNews = databaseFactory.getDatabase("news");
+			dbForNews = databaseFactory.getDatabase("newsTest");
+		}
+		else {
+			dbForNews = databaseFactory.getDatabase("news");
+		}
 		FeedMessage messageNews = processOfWords.cleanMessageForNews(message);
 		dbForNews.saveNews(message);
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();

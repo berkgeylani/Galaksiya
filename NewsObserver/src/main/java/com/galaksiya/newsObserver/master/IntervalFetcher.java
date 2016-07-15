@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 
 public class IntervalFetcher {
 	private static final Logger LOG = Logger.getLogger(IntervalFetcher.class);
-	ScheduledExecutorService executor;
+	private ScheduledExecutorService executor;
 
 	/**
 	 * This function does their tasks repeatly in 5 min and the repeated task is

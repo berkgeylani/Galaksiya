@@ -38,7 +38,7 @@ sleep 15
 if [ "$PSNAMEFROMTERMINAL" == "" ] || [ "$PSNAMEFROMTERMINAL" != "$PSPATH" ]
 then
 	echo "App will be started"
-	nohup java -jar jarar/jarar.jar /home/ubuntu/new.txt derby > /home/ubuntu/mylog.log 2>&1 & 
+	nohup java -DdatabaseType="mongo" -jar jarar.jar --rsspath=/home/ubuntu/new.txt > /home/ubuntu/mylog.log 2>&1 & 
 	echo "Terminal is working in background."
 else 
 	echo "App already working on back side."

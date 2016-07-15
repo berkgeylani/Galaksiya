@@ -20,13 +20,13 @@ public class IntervalFetcher {
 	 *            It is a arraylist which occurs from urls of rss's
 	 */
 	public void start(ArrayList<URL> RssLinksAL) {
-		NewsChecker newsChecker = new NewsChecker();  //argumanda alsın rssLinksAl yi
+		NewsChecker newsChecker = new NewsChecker(RssLinksAL);
 		// lastNewsStatic = lastNews;
 		executor = Executors.newSingleThreadScheduledExecutor();
 
 		Runnable periodicTask = new Runnable() {
 			public void run() {
-				newsChecker.updateActualNews(RssLinksAL);
+				newsChecker.updateActualNews();
 				LOG.info("Checked all the rss links.");
 			}
 		};

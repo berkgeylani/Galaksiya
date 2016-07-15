@@ -19,9 +19,7 @@ public class Main {
 
 	public static String _DatabaseType;
 
-
 	private static final String PROPERTY_NAME = "databaseType";
-
 
 	/**
 	 * It is the main of a program..
@@ -44,20 +42,17 @@ public class Main {
 		if (cmd.hasOption("p")) {
 			filePath = cmd.getOptionValue("p");
 		} else {
-			LOG.debug("Defolut database format.[derby]");
+			LOG.debug("Default database format.[derby]");
 		}
-		if(System.getProperty(PROPERTY_NAME) != null){
-		if (  System.getProperty(PROPERTY_NAME).equalsIgnoreCase("mongo")) {
-			databaseType = "mongo";
-		} }
-		
+		if (System.getProperty(PROPERTY_NAME) != null) {
+			if (System.getProperty(PROPERTY_NAME).equalsIgnoreCase("mongo")) {
+				databaseType = "mongo";
+			}
+		}
 		if (initiate.initiateApp(databaseType, filePath)) {
 			initiate.startWebserver();
 		}
 
 	}
 
-	
-
-	
 }

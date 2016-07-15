@@ -24,6 +24,8 @@ public class NewsChecker {
 	private Database dbForNews;
 
 	private DatabaseFactory databaseFactory;
+	
+	private ArrayList<URL> RssLinksAL ;
 
 	public NewsChecker(String type, Database dbObject) {
 		if (type.equalsIgnoreCase("test")) {
@@ -33,9 +35,11 @@ public class NewsChecker {
 		}
 	}
 
-	public NewsChecker() {
+	public NewsChecker(ArrayList<URL> RssLinksAL) {
 		databaseFactory = DatabaseFactory.getInstance();
 		dbForNews = databaseFactory.getDatabase("news");
+		db = databaseFactory.getDatabase("STATISTICS");
+		this.RssLinksAL=RssLinksAL;
 	}
 
 	public NewsChecker(Database dbObject) {
@@ -49,7 +53,7 @@ public class NewsChecker {
 	 *            This arraylist is rss links list.
 	 * @return true :success false :fail
 	 */
-	public boolean updateActualNews(ArrayList<URL> RssLinksAL) {
+	public boolean updateActualNews() {
 		if (RssLinksAL == null || RssLinksAL.isEmpty())
 			return false;
 

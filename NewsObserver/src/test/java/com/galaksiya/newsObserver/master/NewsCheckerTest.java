@@ -61,7 +61,6 @@ public class NewsCheckerTest {
 		databaseFactory.setDatabaseType("mongo");
 		NewsChecker newsCheckerForNewTable = new NewsChecker("test",databaseFactory.getDatabase("newsTest"));
 		Hashtable<String, Integer> wordFrequencyPerNew = newsCheckerForNewTable.handleMessage(messsage);
-		System.out.println(wordFrequencyPerNew.toString());
 		Enumeration<String> e = wordFrequencyPerNew.keys();
 		while (e.hasMoreElements()) {
 			String key = (String) e.nextElement();
@@ -97,15 +96,11 @@ public class NewsCheckerTest {
 	}
 
 	@Test
-	public void updateActualNewsNullInput() {
-		assertFalse(newsChecker.updateActualNews(null));
-	}
-
-	@Test
 	public void updateActualNewsValidInput() {////
 		Hashtable<String, String> lastNews = new Hashtable<String, String>();
 		lastNews.put("http://localhost:" + 8112 + "/", getSampleTitle());
-		assertTrue(newsChecker.updateActualNews(rssLinksAL));
+		NewsChecker newsChecker = new NewsChecker(rssLinksAL);
+		assertTrue(newsChecker.updateActualNews());
 	}
 
 	private FeedMessage createSampleMessage() {

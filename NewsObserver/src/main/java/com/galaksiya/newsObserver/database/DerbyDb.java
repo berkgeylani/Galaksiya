@@ -15,14 +15,17 @@ import org.bson.Document;
 
 import com.galaksiya.newsObserver.master.DateUtils;
 import com.galaksiya.newsObserver.parser.FeedMessage;
-import com.mongodb.MongoClient;
 
 public class DerbyDb implements Database {
+
 	private static Connection conn = null;
 
-	private static final Logger LOG = Logger.getLogger(MongoDb.class);
+	private static final Logger LOG = Logger.getLogger(DerbyDb.class);
+
 	private final static String DATABASE_NAME = "Db.db";
 
+	private static Object instanceLock = new Object();
+	
 	/**
 	 * Fabric of a MongoClient
 	 * 
@@ -31,7 +34,7 @@ public class DerbyDb implements Database {
 	 */
 	public static Connection getInstance() {
 		if (conn == null) {
-			synchronized (MongoClient.class) {
+			synchronized (instanceLock) {
 				if (conn == null) { // yes double check
 					// setting for conn will be here
 					try {
@@ -48,16 +51,15 @@ public class DerbyDb implements Database {
 	}
 
 	private DateUtils dateUtils = new DateUtils();
-	private String tableName;
+
+	private String tableName = DatabaseConstants.TABLE_NAME_STATISTICS;
 
 	public DerbyDb() {
-		this.tableName = "STATISTICS";
 		try {
 			getCollection();
 		} catch (SQLException e) {
 			LOG.error("Cant create DerbyDb onject.", e);
 		}
-
 	}
 
 	/**
@@ -68,7 +70,9 @@ public class DerbyDb implements Database {
 	 * @throws SQLException
 	 */
 	public DerbyDb(String tableName) {
-		this.tableName = tableName.toUpperCase();
+		if (tableName != null) {
+			this.tableName = tableName.toUpperCase();
+		}
 		try {
 			getCollection();
 		} catch (SQLException e) {
@@ -203,7 +207,6 @@ public class DerbyDb implements Database {
 	 * @throws SQLException
 	 */
 	public void getCollection() throws SQLException {
-
 		DatabaseMetaData dbmd = getInstance().getMetaData();
 		ResultSet rs = dbmd.getTables(null, "APP", tableName, null);
 		if (!(rs.next())) {
@@ -211,8 +214,8 @@ public class DerbyDb implements Database {
 			if (tableName.contains("NEWS")) {
 				String statement = "CREATE TABLE " + tableName + "(" + "ID int NOT NULL GENERATED ALWAYS AS IDENTITY"
 						+ "(START WITH 1,INCREMENT BY 1)," + "PUBLISHDATE DATE NOT NULL,"
-						+ "TITLE varchar(600) NOT NULL," + "DESCRIPTION varchar(1500) NOT NULL," + "PRIMARY KEY(ID)"
-						+ ")";
+						+ "TITLE varchar(600) NOT NULL," + "LINK varchar(200) NOT NULL,"
+						+ "DESCRIPTION varchar(1500) NOT NULL," + "PRIMARY KEY(ID)" + ")";
 				stmt.execute(statement);
 			} else {
 
@@ -252,7 +255,8 @@ public class DerbyDb implements Database {
 				Document document = new Document();
 				document.append("pubDate", (res.getDate("PUBLISHDATE").toString()));
 				document.append("title", (res.getString("TITLE")));
-				document.append("description", res.getString("DESCRIPTION") + "");
+				document.append("description", res.getString("DESCRIPTION"));
+				document.append("link", res.getString("LINK"));
 				newsAl.add(document);
 			}
 			return newsAl;
@@ -267,7 +271,6 @@ public class DerbyDb implements Database {
 		if (word == null || word.equals("")) {
 			return false;
 		}
-
 		try {
 			java.sql.Date sqlDate = new java.sql.Date(dateUtils.dateConvert(dateStr).getTime());
 			PreparedStatement insertemp = conn
@@ -293,11 +296,12 @@ public class DerbyDb implements Database {
 		try {
 			java.sql.Date sqlDate = new java.sql.Date(
 					dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate())).getTime());
-			PreparedStatement insertemp = getInstance()
-					.prepareStatement("insert into " + tableName + "(PUBLISHDATE,TITLE,DESCRIPTION) values(?,?,?)");
+			PreparedStatement insertemp = getInstance().prepareStatement(
+					"insert into " + tableName + "(PUBLISHDATE,TITLE,LINK,DESCRIPTION) values(?,?,?,?)");
 			insertemp.setString(1, sqlDate.toString());
-			insertemp.setString(2, message.getTitle());
-			insertemp.setString(3, message.getDescription());
+			insertemp.setString(2, message.getTitle().toString());
+			insertemp.setString(3, message.getLink().toString());
+			insertemp.setString(4, message.getDescription().toString());
 			insertemp.executeUpdate();
 			return true;
 		} catch (SQLException sqlException) {
@@ -337,7 +341,7 @@ public class DerbyDb implements Database {
 
 			PreparedStatement insertemp = getInstance().prepareStatement("UPDATE " + tableName + " SET FREQUENCY = "
 					+ getFrequency(word, sqlDate) + "+" + frequencyInc + " WHERE word= ?  AND PUBLISHDATE= ? ");
-			insertemp.setString(1 , word);
+			insertemp.setString(1, word);
 			insertemp.setString(2, sqlDate.toString());
 			insertemp.executeUpdate();
 			return true;
@@ -352,34 +356,29 @@ public class DerbyDb implements Database {
 	}
 
 	@Override
-	public boolean findNew(FeedMessage message) {
+	public boolean exists(FeedMessage message) {
 		if (message == null || message.getTitle() == null || message.getTitle().equals("")
 				|| message.getDescription() == null || message.getDescription().equals("")
 				|| message.getpubDate() == null || message.getpubDate().equals("")) {
 			return false;
 		}
-		int count=0;
-		Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
-		java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+		int count = 0;
 		try {
-			PreparedStatement findEmp = getInstance().prepareStatement("SELECT COUNT(*) FROM " + tableName + " WHERE PUBLISHDATE= ? AND TITLE= ? AND DESCRIPTION= ?");
-			findEmp.setString(1, sqlDate.toString());
-			findEmp.setString(2, message.getTitle());
-			findEmp.setString(3, message.getDescription());
+			PreparedStatement findEmp = getInstance()
+					.prepareStatement("SELECT COUNT(*) FROM " + tableName + " WHERE LINK= ? ");
+			findEmp.setString(1, message.getLink());
 			ResultSet rSet = findEmp.executeQuery();
 			while (rSet.next()) {
-				count=rSet.getInt(1);
+				count = rSet.getInt(1);
 			}
-			if (count>0) {
+			if (count > 0) {
 				return true;
 			}
 		} catch (SQLException e) {
-			LOG.error("News find process have a trouble.",e);
+			LOG.error("News find process have a trouble.", e);
 		}
-		
+
 		return false;
 	}
-
-	
 
 }

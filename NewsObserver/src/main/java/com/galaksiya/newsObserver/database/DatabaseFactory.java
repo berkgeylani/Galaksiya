@@ -1,9 +1,12 @@
 package com.galaksiya.newsObserver.database;
 
 public class DatabaseFactory {
+
+	private static final String DEFAULT_DATABASE_TYPE = DatabaseConstants.DATABASE_TYPE_DERBY;
+
 	private static DatabaseFactory databaseFactory;
-	
-	private String databaseType;
+
+	private String databaseType = DEFAULT_DATABASE_TYPE;
 
 	public String getDatabaseType() {
 		return databaseType;
@@ -11,6 +14,10 @@ public class DatabaseFactory {
 
 	public void setDatabaseType(String databaseType) {
 		this.databaseType = databaseType;
+	}
+
+	public void setDefaultDatabaseType() {
+		setDatabaseType(DEFAULT_DATABASE_TYPE);
 	}
 
 	public static DatabaseFactory getInstance() {
@@ -23,21 +30,19 @@ public class DatabaseFactory {
 		}
 		return databaseFactory;
 	}
-	public static void setInstance(DatabaseFactory dFactory){
-		databaseFactory=dFactory;
+
+	public static void setInstance(DatabaseFactory dFactory) {
+		databaseFactory = dFactory;
 	}
-	public Database getDatabase(){
-		if (databaseType.equalsIgnoreCase("mongo")) {
-			return new MongoDb();
-		} else if(databaseType.equalsIgnoreCase("derby")){
-			return new DerbyDb();
-		}
-		return null;
+
+	public Database getDatabase() {
+		return getDatabase(null);
 	}
-	public Database getDatabase(String databaseTypeParameter){
-		if (databaseType.equalsIgnoreCase("mongo")) {
+
+	public Database getDatabase(String databaseTypeParameter) {
+		if (databaseType.equalsIgnoreCase(DatabaseConstants.DATABASE_TYPE_MONGO)) {
 			return new MongoDb(databaseTypeParameter);
-		} else if(databaseType.equalsIgnoreCase("derby")){
+		} else if (databaseType.equalsIgnoreCase(DEFAULT_DATABASE_TYPE)) {
 			return new DerbyDb(databaseTypeParameter);
 		}
 		return null;

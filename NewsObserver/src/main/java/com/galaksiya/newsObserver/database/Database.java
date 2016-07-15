@@ -77,7 +77,7 @@ public interface Database {
 	 * @param message It occurs from publishDate-Title-Description
 	 * @return true: It find false: There is no new in database like in message.
 	 */
-	public boolean findNew(FeedMessage message);
+	public boolean exists(FeedMessage message);
 	
 	/**
 	 * It gives total count of a data in database.

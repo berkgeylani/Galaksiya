@@ -16,14 +16,17 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
 public class MongoDb implements Database {
 
-	static final Logger LOG = Logger.getLogger(MongoDb.class);
+	private static final String LOCALHOST = "localhost";
 
-	private String collectionName;
+	private static final String MONGO_DB_NAME = "mydb";
+
+	private static final Logger LOG = Logger.getLogger(MongoDb.class);
+
+	private String collectionName = DatabaseConstants.TABLE_NAME_STATISTICS;
 
 	private static MongoClient mongoClient;
 
@@ -38,8 +41,8 @@ public class MongoDb implements Database {
 			synchronized (MongoClient.class) {
 				if (mongoClient == null) { // yes double check
 					MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-					builder.connectionsPerHost(100);
-					mongoClient = new MongoClient(new ServerAddress("localhost"), builder.build());
+					builder.connectionsPerHost(100);//TODO 100 u field yap
+					mongoClient = new MongoClient(new ServerAddress(LOCALHOST), builder.build());
 				}
 			}
 		}
@@ -58,7 +61,9 @@ public class MongoDb implements Database {
 	 *            String to set collection name.
 	 */
 	public MongoDb(String collectionName) {
-		this.collectionName = collectionName;
+		if(collectionName!=null){
+			this.collectionName = collectionName;
+		}
 	}
 
 	/*
@@ -153,9 +158,9 @@ public class MongoDb implements Database {
 			date_word_freq.add(search.first().get("date").toString());
 			date_word_freq.add(search.first().get("word").toString());
 			date_word_freq.add(search.first().get("frequency").toString());
-
 			return date_word_freq;
 		} catch (Exception e) {
+			LOG.error("Can't fetch the first document.",e);
 		}
 		return null;
 	}
@@ -170,22 +175,17 @@ public class MongoDb implements Database {
 	 *         set when create MongoDb(//here).
 	 */
 	public MongoCollection<Document> getCollection(MongoClient client) {
-		MongoDatabase mDatabase = client.getDatabase("mydb");
-		MongoCollection<Document> collection = null;
-		if (this.collectionName == null) {
-			collection = mDatabase.getCollection("statistics");
-		} else {
-			collection = mDatabase.getCollection(this.collectionName);
-		}
-		return collection;
+		return client.getDatabase(MONGO_DB_NAME).getCollection(this.collectionName);
 	}
 
 	/**
 	 * It gives count of documents in FindIterable which is param
-	 * @param iterable It is a Mongo query response object.
+	 * 
+	 * @param iterable
+	 *            It is a Mongo query response object.
 	 * @return A int which is count of documents.
 	 */
-	public ArrayList<Document> findIterableToArraylist(FindIterable<Document> iterable) {
+	private ArrayList<Document> findIterableToArraylist(FindIterable<Document> iterable) {
 		ArrayList<Document> dataAL = new ArrayList<Document>();
 		MongoCursor<Document> cursor = iterable.iterator();
 		while (cursor.hasNext()) {
@@ -237,13 +237,14 @@ public class MongoDb implements Database {
 		try {
 			Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
 			getCollection(mongoClient).insertOne(new Document().append("title", message.getTitle())
-					.append("description", message.getDescription()).append("pubDate", date));
+					.append("description", message.getDescription()).append("link", message.getLink()).append("pubDate", date));
 			return true;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 		}
 		return false;
 	}
+
 	@Override
 	public ArrayList<Document> getNews() {
 		MongoClient mongoClient = getInstance();
@@ -317,23 +318,22 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public boolean findNew(FeedMessage message) {
+	public boolean exists(FeedMessage message) {
 		if (message == null || message.getTitle() == null || message.getTitle().equals("")
 				|| message.getDescription() == null || message.getDescription().equals("")
 				|| message.getpubDate() == null || message.getpubDate().equals("")) {
 			return false;
 		}
-		long count=0;
-		Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
+		long count = 0;
 		try {
-			Bson filter = new Document().append("pubDate", date).append("title", message.getTitle()).append("description", message.getDescription());
+			Bson filter = new Document().append("link", message.getLink());
 			MongoClient mongoClient = getInstance();
-			count =  getCollection(mongoClient).count(filter);
+			count = getCollection(mongoClient).count(filter);
 			if (count > 0) {
 				return true;
 			}
 		} catch (Exception e) {
-			LOG.error("News find process have a troble.",e);
+			LOG.error("News find process have a troble.", e);
 		}
 		return false;
 	}

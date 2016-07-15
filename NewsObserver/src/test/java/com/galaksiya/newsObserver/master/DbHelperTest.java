@@ -14,19 +14,19 @@ import com.galaksiya.newsObserver.database.MongoDb;
 public class DbHelperTest {
 
 	private static final String COLLECTION_NAME = "test";
-	
-	private DbHelper dbHelper;
-	
-	private Database mongo ;
-	
-	@Before 
-	public void before(){
-		mongo= new  MongoDb(COLLECTION_NAME);
-		dbHelper = new DbHelper(mongo);
+
+	private FrequencyUpdater dbHelper;
+
+	private Database mongo;
+
+	@Before
+	public void before() {
+		mongo = new MongoDb(COLLECTION_NAME);
+		dbHelper = new FrequencyUpdater(mongo);
 	}
-	
+
 	@After
-	public void after(){
+	public void after() {
 		mongo.delete();
 	}
 
@@ -42,6 +42,6 @@ public class DbHelperTest {
 		dbHelper.addDatabase(date, word, 2);
 		dateWordFreq = mongo.fetchFirstWDocument();
 		int frequencyNew = Integer.parseInt(dateWordFreq.get(2));
-		assertEquals(frequencyNew , frequency + 2 );
+		assertEquals(frequencyNew, frequency + 2);
 	}
 }

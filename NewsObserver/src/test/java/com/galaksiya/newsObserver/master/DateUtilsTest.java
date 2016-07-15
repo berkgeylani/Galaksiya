@@ -25,5 +25,4 @@ public class DateUtilsTest {
 		assertEquals("13 May 2016", dateUtils.dateCustomize("Fri May 13 10:24:56 EEST 2016"));
 		assertEquals("22 Mar 2016", dateUtils.dateCustomize("Tue Mar 22 14:15:00 EET 2016"));
 	}
-
 }

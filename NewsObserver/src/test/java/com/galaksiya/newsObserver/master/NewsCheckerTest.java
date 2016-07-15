@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.database.DatabaseConstants;
 import com.galaksiya.newsObserver.database.DatabaseFactory;
 import com.galaksiya.newsObserver.database.MongoDb;
 import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
@@ -26,11 +27,12 @@ public class NewsCheckerTest {
 	private static Server server;
 
 	private static final int SERVER_PORT = 8111;
-	private	DateUtils dateUtils = new DateUtils();
 
+	private DateUtils dateUtils = new DateUtils();
 
 	@BeforeClass
 	public static void startJetty() throws Exception {
+		DatabaseFactory.getInstance().setDatabaseType(DatabaseConstants.DATABASE_TYPE_MONGO);
 		server = new Server(SERVER_PORT);
 		server.setHandler(new CreateRssJetty());
 		server.setStopAtShutdown(true);
@@ -39,60 +41,50 @@ public class NewsCheckerTest {
 
 	@AfterClass
 	public static void stopJetty() throws Exception {
+		DatabaseFactory.getInstance().setDefaultDatabaseType();
 		server.stop();
 	}
 
-	private NewsChecker newsChecker = new NewsChecker();
+	private NewsChecker newsChecker = new NewsChecker("test",new MongoDb("test"));
 
 	private ArrayList<URL> rssLinksAL = new ArrayList<URL>();
 
 	private RssReader rssReader = new RssReader();
 
 	@Test
-	public void canConvert() {
-		assertTrue(dateUtils.canConvert("02-May-2016"));
-		assertTrue(dateUtils.canConvert("02-May 2016"));
-		assertTrue(dateUtils.canConvert("02 May 2016"));
-	}
-	@Test
-	public void canConvertInvalidInput() {
-		assertFalse(dateUtils.canConvert("02 May3 2016"));
-	}
-	@Test 
-	public void canConvertWithoutBlankInput(){
-		assertFalse(dateUtils.canConvert("21 May!2011"));
-	}
-	
-	@Test
 	public void handleMessage() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		mongoDb.delete();
 		int sumOffreq = 0;
 		FeedMessage messsage = createSampleMessage();
-		Hashtable<String, Integer> wordFrequencyPerNew = newsChecker.handleMessage(messsage);
+		DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
+		databaseFactory.setDatabaseType("mongo");
+		NewsChecker newsCheckerForNewTable = new NewsChecker("test",databaseFactory.getDatabase("newsTest"));
+		Hashtable<String, Integer> wordFrequencyPerNew = newsCheckerForNewTable.handleMessage(messsage);
+		System.out.println(wordFrequencyPerNew.toString());
 		Enumeration<String> e = wordFrequencyPerNew.keys();
 		while (e.hasMoreElements()) {
 			String key = (String) e.nextElement();
 			// key: word - wordFrequencyPerNew.get(key):value
 			sumOffreq += wordFrequencyPerNew.get(key);
 		}
-		assertEquals(62, sumOffreq);
+		assertEquals(58, sumOffreq);
 	}
+
 	@Test
 	public void dateCustomizeValidInput() {
 		assertEquals("13 May 2016", dateUtils.dateCustomize("Fri May 13 10:24:56 EEST 2016"));
 		assertEquals("22 Mar 2016", dateUtils.dateCustomize("Tue Mar 22 14:15:00 EET 2016"));
 	}
 
-
 	@Before
 	public void before() throws Exception {
 		rssLinksAL.add(new URL("http://localhost:" + SERVER_PORT + "/"));
 		DatabaseFactory.setInstance(null);
-		MongoDb mongoDbtest = new MongoDb("Test"); 
+		MongoDb mongoDbtest = new MongoDb("Test");
 		mongoDbtest.delete();
 	}
-	
+
 	@Test
 	public void titleControl() {
 		// process each news...
@@ -110,9 +102,9 @@ public class NewsCheckerTest {
 	}
 
 	@Test
-	public void updateActualNewsValidInput() {
+	public void updateActualNewsValidInput() {////
 		Hashtable<String, String> lastNews = new Hashtable<String, String>();
-		lastNews.put("http://localhost:"+8112+"/", getSampleTitle());
+		lastNews.put("http://localhost:" + 8112 + "/", getSampleTitle());
 		assertTrue(newsChecker.updateActualNews(rssLinksAL));
 	}
 
@@ -121,6 +113,7 @@ public class NewsCheckerTest {
 		messsage.setTitle("Erdoğan: Döviz rezervleri 150-165 milyar dolar olmalı");
 		messsage.setDescription(
 				"Cumhurbaşkanı Tayyip Erdoğan, Kocaeli Üniversitesinde toplu açılış ve fahri doktora töreninde yaptığı açıklamalarda, 27.5 milyar dolar döviz rezervi olan bir Merkez Bankası vardı. Şu anda 113 milyar dolar. Görevi bıraktığımda aslında 136 milyar dolara kadar yükselmişti ancak krizler falan şu anda 113 milyar dolar dedi  ve ekledi: Ama yeniden inanıyorum ki 136 milyar dolar da");
+		messsage.setLink("http://www.birgun.net/haber-detay/kpss-sonuclari-aciklandi-119916.html");
 		messsage.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		return messsage;
 	}

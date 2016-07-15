@@ -1,57 +1,62 @@
 package com.galaksiya.newsObserver.parser;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
+import org.xml.sax.InputSource;
 
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
-import com.sun.syndication.io.XmlReader;
-
-
 
 public class RssReader {
 	
 	private ArrayList<FeedMessage> itemsAL = new ArrayList<FeedMessage>();
+	
 	private static final Logger LOG = Logger.getLogger(RssReader.class);
+	
 /**
  * It parse the rss which is given with param with using ROME library.It converts news to messages.
  * These messages push to an arraylist to return.
  * @param url The url which will be read
  * @return Arraylist occurs from messages and these messages occurs from news.
+ * @throws FeedException 
  */
-	public ArrayList<FeedMessage> parseFeed(URL url) {
+	public ArrayList<FeedMessage> parseFeed(URL url)  {
 		if( url==null )
 			return null;
-		
-		
+		SyndFeed feed = null;
+		InputStream is = null;
 		try {
-			HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
-			// Reading the feed
-			SyndFeedInput input = new SyndFeedInput();
-			SyndFeed feed = null;
-			try {
-				feed = input.build(new XmlReader(httpcon));
-			} catch (FeedException | IOException e) {
-				LOG.error("Cant read this url:"+url,e);
-				return null;
+			URLConnection openConnection = url.openConnection();
+			openConnection.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20100101 Firefox/25.0");
+			is = openConnection.getInputStream();
+			if("gzip".equals(openConnection.getContentEncoding())){
+				is = new GZIPInputStream(is);
 			}
+			InputSource source = new InputSource(is);
+			SyndFeedInput input = new SyndFeedInput();
+			feed = input.build(source);
 			@SuppressWarnings("unchecked")
 			List<SyndEntry> entries = feed.getEntries();
 			Iterator<SyndEntry> itEntries = entries.iterator();
+			
+			
 			while (itEntries.hasNext()) {
 				FeedMessage message = new FeedMessage();
 				SyndEntry entry = itEntries.next();
 				message.setTitle(entry.getTitle());
 				message.setDescription(entry.getDescription().getValue());
 				message.setPubDate(entry.getPublishedDate().toString());
+				message.setLink( entry.getLink().toString());
 				message.toString();
 				itemsAL.add(message);
 			}
@@ -64,9 +69,12 @@ public class RssReader {
 			}
 		} catch (IllegalArgumentException | IOException e) {
 			LOG.error("RSS reader problem.",e);
+		} catch (FeedException e) {
+			LOG.error("Source to feed process is failed.",e);
 		}
 		return null;
 	}
+	
 	/**
 	 * 
 	 * @return It returns count of a news in URL

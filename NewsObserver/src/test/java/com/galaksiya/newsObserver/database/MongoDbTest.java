@@ -6,30 +6,130 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.galaksiya.newsObserver.master.DateUtils;
 import com.galaksiya.newsObserver.parser.FeedMessage;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoWriteException;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 
 public class MongoDbTest {
-	private Database mongoDb;
+	private Database mongoDb = new MongoDb("test");
 	private String date;
 	private String word;
+	private MongoClient mongoClient;
+	private static final String MONGO_DB_NAME = "mydb";
+	private static final String LOCALHOST = "localhost";
+	private DateUtils dateUtils = new DateUtils();
+	private String COLLECTION_NAME = "test";
+	private String COLLECTION_NAME_NEWS = "newsTest";
+	private static final Logger LOG = Logger.getLogger(MongoDbTest.class);
+
+	public MongoClient getInstance() {
+		MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
+		builder.connectionsPerHost(100);// TODO 100 u field yap
+		mongoClient = new MongoClient(new ServerAddress(LOCALHOST), builder.build());
+		return mongoClient;
+	}
+
+	public MongoCollection<Document> getCollection(String collectionName) {
+		return mongoClient.getDatabase(MONGO_DB_NAME).getCollection(collectionName);
+	}
+
+	public long contain(String dateStr, String word) {
+		if (word == null || word.equals("")) {
+			return -1;
+		}
+		Date date = dateUtils.dateConvert(dateStr);
+		Bson filter = new Document().append("date", date).append("word", word);
+		return getCollection(COLLECTION_NAME).count(filter);
+	}
+
+	public boolean save(String dateStr, String word, int frequency) {
+		if (word == null || word.equals("")) {
+			return false;
+		}
+		try {
+			Date date = dateUtils.dateConvert(dateStr);
+			getCollection(COLLECTION_NAME)
+					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
+			return true;
+
+		} catch (MongoWriteException e) {
+			LOG.error("Data couldn't be inserted.", e);
+		}
+		return false;
+	}
+
+	public ArrayList<String> fetchFirstWDocument() {
+		try {
+			ArrayList<String> date_word_freq = new ArrayList<String>();
+			FindIterable<Document> search = getCollection(COLLECTION_NAME).find();
+			if (search.first() == null) {
+				return null;
+			}
+			date_word_freq.add(search.first().get("date").toString());
+			date_word_freq.add(search.first().get("word").toString());
+			date_word_freq.add(search.first().get("frequency").toString());
+			return date_word_freq;
+		} catch (Exception e) {
+			LOG.error("Can't fetch the first document.", e);
+		}
+		return null;
+	}
+
+	public long totalCount(String collectionName) {
+		return getCollection(collectionName).count(new Document());
+	}
+
+	public ArrayList<Document> getNews() {
+		try {
+			FindIterable<Document> iterable = getCollection(COLLECTION_NAME_NEWS).find();
+			ArrayList<Document> newsAl = findIterableToArraylist(iterable);
+			return newsAl;
+		} catch (MongoWriteException e) {
+			LOG.error("Data couldn't be inserted.", e);
+		}
+		return null;
+	}
+
+	public ArrayList<Document> findIterableToArraylist(FindIterable<Document> iterable) {
+		ArrayList<Document> dataAL = new ArrayList<Document>();
+		MongoCursor<Document> cursor = iterable.iterator();
+		while (cursor.hasNext()) {
+			dataAL.add(cursor.next());
+		}
+		return dataAL;
+	}
 
 	@Before
 	public void before() {
 		mongoDb = new MongoDb("test");
+		mongoDb.delete();
 		word = "test";
 		date = "17-May-2016";
+		mongoClient = getInstance();
+		getCollection("test");
 	}
 
 	@After
 	public void After() {
+		MongoDb mongoDb = new MongoDb("test");
 		mongoDb.delete();
+		MongoDb mongoDbNews = new MongoDb("newsTest");
+		mongoDbNews.delete();
 	}
 
 	@Test
@@ -64,18 +164,18 @@ public class MongoDbTest {
 
 	@Test
 	public void save() {
-		assertEquals(0, mongoDb.contain(date, word));
+		assertEquals(0, contain(date, word));
 		assertTrue(mongoDb.save(date, word, 2));
-		assertEquals(1, mongoDb.contain(date, word));
+		assertEquals(1, contain(date, word));
 	}
 
 	@Test
 	public void delete() {
-		mongoDb.save(date, word, 3);
-		mongoDb.save("17 Mar 2015", "test2", 4);
-		assertEquals(2, mongoDb.totalCount());
+		save(date, word, 3);
+		save("17 Mar 2015", "test2", 4);
+		assertEquals(2, totalCount(COLLECTION_NAME));
 		assertTrue(mongoDb.delete());
-		assertEquals(0, mongoDb.totalCount());
+		assertEquals(0, totalCount(COLLECTION_NAME));
 	}
 
 	@Test
@@ -86,36 +186,35 @@ public class MongoDbTest {
 
 	@Test
 	public void updateCanIncrement() {
-		mongoDb.save(date, word, 2);
-		int frequencyLocal = Integer.parseInt(mongoDb.fetchFirstWDocument().get(2));
+		save(date, word, 2);
+		int frequencyLocal = Integer.parseInt(fetchFirstWDocument().get(2));
 		mongoDb.update(date, word, 2);
-		assertEquals(Integer.parseInt(mongoDb.fetchFirstWDocument().get(2)), frequencyLocal + 2);
+		assertEquals(Integer.parseInt(fetchFirstWDocument().get(2)), frequencyLocal + 2);
 	}
-
 
 	@Test
 	public void overrideFetch() {
 		for (int i = 0; i < 12; i++) {
-			mongoDb.save(date, word, 2);
+			save(date, word, 2);
 		}
-		assertEquals(mongoDb.totalCount(), (mongoDb.fetch().size()));
+		assertEquals(totalCount(COLLECTION_NAME), (mongoDb.fetch().size()));
 	}
 
 	@Test
 	public void overrideFetchDate() {
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		assertEquals(mongoDb.contain(date, word), mongoDb.fetch(date).size());
+		save(date, word, 2);
+		save(date, word, 2);
+		save(date, word, 2);
+		save(date, word, 2);
+		assertEquals(contain(date, word), mongoDb.fetch(date).size());
 	}
 
 	@Test
 	public void overrideFetchDateLimit() {
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
-		mongoDb.save(date, word, 2);
+		save(date, word, 2);
+		save(date, word, 2);
+		save(date, word, 2);
+		save(date, word, 2);
 		assertEquals(2, mongoDb.fetch(date, 2).size());
 	}
 
@@ -125,37 +224,40 @@ public class MongoDbTest {
 		if (firstDoc != null)
 			fail("fetchFirstDocument test has broken because of :" + firstDoc.get(0) + "\t" + firstDoc.get(1) + "\t"
 					+ firstDoc.get(2) + "\t in added database");
-		mongoDb.save(date, word, 2);
+		save(date, word, 2);
 		firstDoc = mongoDb.fetchFirstWDocument();
 		assertFalse(firstDoc.isEmpty());
 	}
 
 	@Test
-	public void contain() {
+	public void containTest() {
 		assertEquals(0, mongoDb.contain(date, word));
-		mongoDb.save(date, word, 2);
+		save(date, word, 2);
 		assertEquals(1, mongoDb.contain(date, word));
 	}
 
 	@Test
-	public void totalCount() {
+	public void totalCountTest() {
 		assertEquals(0, mongoDb.totalCount());
 		for (int i = 0; i < 6; i++) {
-			mongoDb.save(date, word, 2);
+			save(date, word, 2);
 		}
 		assertEquals(6, mongoDb.totalCount());
 	}
+
 	@Test
-	public void saveNewsNullTitle(){
+	public void saveNewsNullTitle() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		FeedMessage message = new FeedMessage();
 		message.setTitle(null);
-		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setDescription(
+				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		assertFalse(mongoDb.saveNews(message));
 	}
+
 	@Test
-	public void saveNewsNullDescription(){
+	public void saveNewsNullDescription() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		FeedMessage message = new FeedMessage();
 		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
@@ -163,69 +265,82 @@ public class MongoDbTest {
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		assertFalse(mongoDb.saveNews(message));
 	}
+
 	@Test
-	public void saveNewsNullPubdate(){
+	public void saveNewsNullPubdate() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		FeedMessage message = new FeedMessage();
 		message.setTitle("");
-		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setDescription(
+				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate(null);
 		assertFalse(mongoDb.saveNews(message));
 	}
+
 	@Test
-	public void saveNewsEmptyTitle(){
+	public void saveNewsEmptyTitle() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		FeedMessage message = new FeedMessage();
 		message.setTitle("");
-		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setDescription(
+				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		assertFalse(mongoDb.saveNews(message));
 	}
+
 	@Test
-	public void saveNewsEmptyDescription(){
+	public void saveNewsEmptyDescription() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		FeedMessage message = new FeedMessage();
 		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
 		message.setDescription("");
-		message.setPubDate("Mon May 02 20:03:40 EEST 2016");		
+		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		assertFalse(mongoDb.saveNews(message));
 	}
+
 	@Test
-	public void saveNewsEmptyPubDate(){
+	public void saveNewsEmptyPubDate() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		FeedMessage message = new FeedMessage();
 		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
-		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setDescription(
+				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("");
 		assertFalse(mongoDb.saveNews(message));
 	}
+
 	@Test
-	public void saveNewscanInsert(){
+	public void saveNewscanInsert() {
 		MongoDb mongoDb = new MongoDb("newsTest");
 		mongoDb.delete();
 		FeedMessage message = new FeedMessage();
 		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
-		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setDescription(
+				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		mongoDb.saveNews(message);
-		assertEquals( 1 , mongoDb.totalCount());
+		assertEquals(1, totalCount(COLLECTION_NAME_NEWS));
 	}
+
 	@Test
-	public void saveNewInsertDataControl(){  ////////////////////////////
+	public void saveNewInsertDataControl() { ////////////////////////////
 		DateUtils dateUtils = new DateUtils();
 		MongoDb mongoDb = new MongoDb("newsTest");
 		mongoDb.delete();
 		FeedMessage message = new FeedMessage();
 		message.setTitle("FETÖ lideri saldırıdan sonra DAEŞ’i değil devleti suçladı!");
-		message.setDescription("Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
+		message.setDescription(
+				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
 		mongoDb.saveNews(message);
-		ArrayList<Document> newsAL = mongoDb.getNews();
-		if(newsAL == null)
+		ArrayList<Document> newsAL = getNews();
+		if (newsAL == null)
 			fail("Couldn't insert.");
 		Document document = newsAL.get(0);
-		boolean isTitleDescPubDateEqualsWithDatabase = document.get("title").equals(message.getTitle()) && document.get("description").equals(message.getDescription());
-		assertEquals(dateUtils.dateCustomize(document.get("pubDate").toString()),dateUtils.dateCustomize("Mon May 02 00:00:00 EEST 2016"));
+		boolean isTitleDescPubDateEqualsWithDatabase = document.get("title").equals(message.getTitle())
+				&& document.get("description").equals(message.getDescription());
+		assertEquals(dateUtils.dateCustomize(document.get("pubDate").toString()),
+				dateUtils.dateCustomize("Mon May 02 00:00:00 EEST 2016"));
 		assertTrue(isTitleDescPubDateEqualsWithDatabase);
 	}
 }

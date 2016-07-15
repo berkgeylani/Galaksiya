@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.galaksiya.newsObserver.database.MongoDb;
 import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
 
 public class FileParserTest {
@@ -35,7 +36,13 @@ public class FileParserTest {
 
 	private ArrayList<String> rssLinksAL = new ArrayList<String>();
 	private static Server server = new Server(SERVER_PORT);//static yaptık çünkü classın initialize'dan edilmeden önce çalıştırılması gerekiyor.
-	
+	@AfterClass
+	public static void shutDown(){
+		MongoDb mongoDb = new MongoDb("test");
+		mongoDb.delete();
+		MongoDb mongoDbNews = new MongoDb("newsTest");
+		mongoDbNews.delete();
+	}
 	@BeforeClass
 	public static void startJetty() throws Exception{
         server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class).setHttpCompliance(HttpCompliance.LEGACY);
@@ -62,13 +69,7 @@ public class FileParserTest {
 	@Test
 	public void wrongPathWay() {
 
-		assertFalse(testFileParser.readerOfFile(System.getProperty("user.dir")));// what
-																					// will
-																					// function
-																					// do
-																					// in
-																					// worng
-																					// path?
+		assertFalse(testFileParser.readerOfFile(System.getProperty("user.dir")));
 		assertFalse(!testFileParser.readerOfFile(file)); // givin truepath and
 															// response should
 															// be true

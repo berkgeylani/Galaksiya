@@ -26,7 +26,6 @@ public class WebsiteContentCreator {
 	private DateUtils dateUtils = new DateUtils();
 	private DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
 	public WebsiteContentCreator(){
-		
 		dbHelper = databaseFactory.getDatabase();
 	}
 	public WebsiteContentCreator(Database dbHelperArg){

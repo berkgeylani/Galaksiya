@@ -19,14 +19,13 @@ public class IntervalFetcher {
 	 * @param RssLinksAL
 	 *            It is a arraylist which occurs from urls of rss's
 	 */
-	public void intervaller(ArrayList<URL> RssLinksAL) {
-		NewsChecker newsChecker = new NewsChecker();
+	public void start(ArrayList<URL> RssLinksAL) {
+		NewsChecker newsChecker = new NewsChecker();  //argumanda alsın rssLinksAl yi
 		// lastNewsStatic = lastNews;
 		executor = Executors.newSingleThreadScheduledExecutor();
 
 		Runnable periodicTask = new Runnable() {
 			public void run() {
-				// Every 5 min this which controlling a
 				newsChecker.updateActualNews(RssLinksAL);
 				LOG.info("Checked all the rss links.");
 			}
@@ -37,7 +36,7 @@ public class IntervalFetcher {
 	/**
 	 * It closes the intervaller.
 	 */
-	public void intervalCloser() {
+	public void shutdown() {
 		executor.shutdownNow();
 		LOG.debug("Intervaller closed.");
 	}

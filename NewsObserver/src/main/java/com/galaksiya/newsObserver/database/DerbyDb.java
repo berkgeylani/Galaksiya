@@ -208,7 +208,7 @@ public class DerbyDb implements Database {
 	 */
 	public void getCollection() throws SQLException {
 		DatabaseMetaData dbmd = getInstance().getMetaData();
-		ResultSet rs = dbmd.getTables(null, "APP", tableName, null);
+		ResultSet rs = dbmd.getTables(null, "APP", tableName, null); 
 		if (!(rs.next())) {
 			Statement stmt = conn.createStatement();
 			if (tableName.contains("NEWS")) {

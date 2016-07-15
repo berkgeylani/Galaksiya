@@ -23,7 +23,7 @@ public class Inititate {
 	 * @throws Exception
 	 */
 	public void startWebserver() throws Exception {
-
+		
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
 

@@ -169,7 +169,9 @@ public class NewsChecker {
 			String word = (String) e.nextElement();
 			Integer frequency = wordFrequencyPerNew.get(word);
 			proccessSuccessful = updater.addDatabase(datePerNew, word, frequency);
-			didNotAdded.add(new Document().append("date", datePerNew).append("word", word).append("frequency", frequency));
+			if(!proccessSuccessful){
+				didNotAdded.add(new Document().append("date", datePerNew).append("word", word).append("frequency", frequency));
+			}
 		}
 		LOG.error("These are not added to database."+didNotAdded);
 		return proccessSuccessful;

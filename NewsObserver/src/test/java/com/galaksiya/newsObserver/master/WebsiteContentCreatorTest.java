@@ -19,31 +19,23 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.galaksiya.newsObserver.database.Database;
-import com.galaksiya.newsObserver.database.MongoDb;
+import com.galaksiya.newsobserver.database.Database;
+import com.galaksiya.newsobserver.database.MongoDb;
+import com.galaksiya.newsobserver.master.DateUtils;
+import com.galaksiya.newsobserver.master.WebsiteContentCreator;
 
 public class WebsiteContentCreatorTest {
-	private Database mongoDb = new MongoDb("test");
-
-	private WebsiteContentCreator contentCreator = new WebsiteContentCreator(mongoDb);
-
-	private ArrayList<Document> dataAl;
-
 	@AfterClass
 	public static void shutDown() {
 		MongoDb mongoDb = new MongoDb("test");
 		mongoDb.delete();
 	}
 
-	@Test
-	public void createContextNullInput() {
-		assertEquals(null, contentCreator.createContext(null));
-	}
+	private Database mongoDb = new MongoDb("test");
+	
+	private WebsiteContentCreator contentCreator = new WebsiteContentCreator(mongoDb);
 
-	@Test
-	public void createContextZeroSizeInput() {
-		assertEquals(null, contentCreator.createContext(new ArrayList<Document>()));
-	}
+	private ArrayList<Document> dataAl;
 
 	@Before
 	public void Before() {
@@ -69,13 +61,18 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
+	public void createContextNullInput() {
+		assertEquals(null, contentCreator.createContext(null));
+	}
+
+	@Test
 	public void createContextZeroCanCreate() {
 		DateUtils dateUtils = new DateUtils();
 		Document document = new Document();
 		document.append("date", "Wed Jun 01 00:00:00 EEST 2016").append("word", "Atalay").append("frequency", "6");
 		dataAl.add(document);
 		String content = "<html>"
-				+ "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data</title></head>"
+				+ "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-0</title></head>"
 				+ "<body>" + "<h4>Data</h4>" + "<ul>" + "<li>"
 				+ dateUtils.dateCustomize(document.get("date").toString()) + "</li>" + "<li>"
 				+ document.get("word").toString() + "</li>" + "<li>" + document.get("frequency").toString() + "</li>"
@@ -84,39 +81,14 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
-	public void topLimitForDayBadInputYear() {
-		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
-				contentCreator.topLimitForADay("2016", "Jun", null, 1).getStatus());// bad
+	public void createContextZeroSizeInput() {
+		assertEquals(null, contentCreator.createContext(new ArrayList<Document>()));
 	}
 
 	@Test
-	public void topLimitForDayBadInputMonth() {
+	public void forADayBadInputDay() {
 		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
-				contentCreator.topLimitForADay("2016", null, "01", 1).getStatus());// bad
-	}
-
-	@Test
-	public void topLimitForDayBadInputDay() {
-		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
-				contentCreator.topLimitForADay(null, "Jun", "01", 1).getStatus());// bad
-	}
-
-	@Test
-	public void topLimitForDayBadInputLimit() {
-		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
-				contentCreator.topLimitForADay("2016", "Jun", "01", -1).getStatus());
-	}
-
-	@Test
-	public void topLimitForDayNoContent() {
-		assertEquals(Response.status(Status.NO_CONTENT).build().getStatus(),
-				contentCreator.topLimitForADay("1961", "May", "31", 5).getStatus());// no
-	}
-
-	@Test
-	public void forADayBadInputYear() {
-		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
-				contentCreator.forADay("2016", "Jun", null).getStatus());
+				contentCreator.forADay(null, "Jun", "01").getStatus());
 	}
 
 	@Test
@@ -126,9 +98,32 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
-	public void forADayBadInputDay() {
+	public void forADayBadInputYear() {
 		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
-				contentCreator.forADay(null, "Jun", "01").getStatus());
+				contentCreator.forADay("2016", "Jun", null).getStatus());
+	}
+
+	@Test
+	public void ForADayConnectWithoutMongoDbConnection() {
+		Database mockedMongo = mock(MongoDb.class);
+		when(mockedMongo.fetch(anyString())).thenReturn(null);
+		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
+		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),
+				contentCreatorWMockedMongo.forADay("01", "Jun", "2000").getStatus());
+	}
+
+	@Test
+	public void forADayContentTest() {
+		mongoDb.save("01 Jun 2000", "Galaksiya", 5);
+		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.forADay("2000", "Jun", "01").getEntity().toString());
+		Elements ul = doc.select("ul");
+		Elements li = ul.select("li"); // select all li from ul
+		boolean isAllEquals = false;
+		if (li.get(0).text().equals("01 Jun 2000") && li.get(1).text().equals("Galaksiya")
+				&& li.get(2).text().equals("5")) {
+			isAllEquals = true;
+		}
+		assertTrue(isAllEquals);
 	}
 
 	@Test
@@ -144,7 +139,16 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
-	public void sortedAllContentTest() throws Exception {
+	public void sortedAllConnectWithoutMongoDbConnection()  {
+		Database mockedMongo = mock(MongoDb.class);
+		when(mockedMongo.fetch()).thenReturn(null);
+		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
+		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),
+				contentCreatorWMockedMongo.sortedAll().getStatus());
+	}
+
+	@Test
+	public void sortedAllContentTest(){
 		mongoDb.save("01 Jun 2000", "Galaksiya", 5);
 		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.sortedAll().getEntity().toString());
 		Elements ul = doc.select("ul");
@@ -158,21 +162,12 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
-	public void forADayContentTest() throws Exception {
-		mongoDb.save("01 Jun 2000", "Galaksiya", 5);
-		org.jsoup.nodes.Document doc = Jsoup.parse(contentCreator.forADay("2000", "Jun", "01").getEntity().toString());
-		Elements ul = doc.select("ul");
-		Elements li = ul.select("li"); // select all li from ul
-		boolean isAllEquals = false;
-		if (li.get(0).text().equals("01 Jun 2000") && li.get(1).text().equals("Galaksiya")
-				&& li.get(2).text().equals("5")) {
-			isAllEquals = true;
-		}
-		assertTrue(isAllEquals);
+	public void sortedAllNoContent() {
+		assertEquals(Response.status(Status.NO_CONTENT).build().getStatus(),
+				contentCreator.sortedAll().getStatus());// no
 	}
-
 	@Test
-	public void topLimitForADayContentTest() throws Exception {
+	public void topLimitForADayContentTest() {
 		mongoDb.save("01 Jun 2000", "Galaksiya", 5);
 		org.jsoup.nodes.Document doc = Jsoup
 				.parse(contentCreator.topLimitForADay("2000", "Jun", "01", 1).getEntity().toString());
@@ -187,7 +182,31 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
-	public void TopLimitForDayConnectWithoutMongoDbConnection() throws Exception {
+	public void topLimitForDayBadInputDay() {
+		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
+				contentCreator.topLimitForADay(null, "Jun", "01", 1).getStatus());// bad
+	}
+
+	@Test
+	public void topLimitForDayBadInputLimit() {
+		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
+				contentCreator.topLimitForADay("2016", "Jun", "01", -1).getStatus());
+	}
+
+	@Test
+	public void topLimitForDayBadInputMonth() {
+		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
+				contentCreator.topLimitForADay("2016", null, "01", 1).getStatus());// bad
+	}
+
+	@Test
+	public void topLimitForDayBadInputYear() {
+		assertEquals(Response.status(Status.BAD_REQUEST).build().getStatus(),
+				contentCreator.topLimitForADay("2016", "Jun", null, 1).getStatus());// bad
+	}
+
+	@Test
+	public void TopLimitForDayConnectWithoutMongoDbConnection() {
 		Database mockedMongo = mock(MongoDb.class);
 		when(mockedMongo.fetch(anyString(), anyInt())).thenReturn(null);
 		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
@@ -196,20 +215,8 @@ public class WebsiteContentCreatorTest {
 	}
 
 	@Test
-	public void ForADayConnectWithoutMongoDbConnection() throws Exception {
-		Database mockedMongo = mock(MongoDb.class);
-		when(mockedMongo.fetch(anyString())).thenReturn(null);
-		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
-		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),
-				contentCreatorWMockedMongo.forADay("01", "Jun", "2000").getStatus());
-	}
-
-	@Test
-	public void sortedAllConnectWithoutMongoDbConnection() throws Exception {
-		Database mockedMongo = mock(MongoDb.class);
-		when(mockedMongo.fetch()).thenReturn(null);
-		WebsiteContentCreator contentCreatorWMockedMongo = new WebsiteContentCreator(mockedMongo);
-		assertEquals(Response.status(Status.INTERNAL_SERVER_ERROR).build().getStatus(),
-				contentCreatorWMockedMongo.sortedAll().getStatus());
+	public void topLimitForDayNoContent() {
+		assertEquals(Response.status(Status.NO_CONTENT).build().getStatus(),
+				contentCreator.topLimitForADay("1961", "May", "31", 5).getStatus());// no
 	}
 }

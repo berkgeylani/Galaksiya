@@ -21,42 +21,67 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.galaksiya.newsObserver.database.MongoDb;
 import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
+import com.galaksiya.newsobserver.database.MongoDb;
+import com.galaksiya.newsobserver.master.FileParser;
 
 public class FileParserTest {
+	private static Server server;
+	private static final int SERVER_PORT = 8119;
+	@AfterClass
+	public static void shutDown() {
+		MongoDb mongoDb = new MongoDb("test");
+		mongoDb.delete();
+		MongoDb mongoDbNews = new MongoDb("newsTest");
+		mongoDbNews.delete();
+	}
+
+	@BeforeClass
+	public static void startJetty() {
+		server = new Server(SERVER_PORT);
+		server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class)
+				.setHttpCompliance(HttpCompliance.LEGACY);
+		server.setHandler(new CreateRssJetty());
+		server.setStopAtShutdown(true);
+		try {
+			server.start();
+		} catch (Exception e) {
+			System.err.println(e);
+		}
+	}
+	@AfterClass
+	public static void stopJetty() {
+		try {
+			server.stop();
+		} catch (Exception e) {
+			System.err.println(e);
+		}
+	}
+
 	/*
 	 * emptyPathWay:checks behaviour when inputs are null or empty string
 	 * wrongPathWay: checks pathway is true but is there an any txt file which
 	 * we need
 	 */
 	private String file = "fileParserTest.txt";
-	private FileParser testFileParser = new FileParser(file);
-	private static final int SERVER_PORT = 8119;
 
 	private ArrayList<String> rssLinksAL = new ArrayList<String>();
-	private static Server server = new Server(SERVER_PORT);//static yaptık çünkü classın initialize'dan edilmeden önce çalıştırılması gerekiyor.
-	@AfterClass
-	public static void shutDown(){
-		MongoDb mongoDb = new MongoDb("test");
-		mongoDb.delete();
-		MongoDb mongoDbNews = new MongoDb("newsTest");
-		mongoDbNews.delete();
+
+	private FileParser testFileParser = new FileParser(file);
+
+	@Test
+	public void canReadTxt() { // check reading line size with arraylist size
+		testFileParser.readerOfFile(file);
+		assertEquals(rssLinksAL.size(), testFileParser.getRssLinksAL().size());
 	}
-	@BeforeClass
-	public static void startJetty() throws Exception{
-        server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class).setHttpCompliance(HttpCompliance.LEGACY);
-        server.setHandler(new CreateRssJetty());
-        server.setStopAtShutdown(true);
-        server.start();
-	}
-	@Before
-	public void setup() throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
-			rssLinksAL.add("http://localhost:"+SERVER_PORT+"/");
-			for (String rssLink : rssLinksAL) {
-				writer.write(rssLink);// We wrote a txt file
-			}
+
+	@After
+	public void deleteSetup() {
+		try {
+			Files.deleteIfExists(Paths.get(file));
+		} catch (IOException x) {
+			// File permission problems are caught here.
+			System.err.println(x);
 		}
 	}
 
@@ -64,6 +89,39 @@ public class FileParserTest {
 	public void emptyPathWay() {
 		assertFalse(testFileParser.readerOfFile(""));
 		assertFalse(testFileParser.readerOfFile(null));
+	}
+
+	@Test
+	public void givenArrayListContainsURL() {// can it translate all the lines
+		testFileParser.readerOfFile(file);
+		try {
+			for (URL URLs : testFileParser.getRssLinksAL()) {
+				new URL(URLs.toString());
+			}
+		} catch (MalformedURLException exception) {
+			Assert.fail("FileParrser.readerOFFile can't convert string to URL");
+		}
+	}
+
+	@Test
+	public void invalidRssLink() throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
+			rssLinksAL.add("\n|@~");
+			for (String rssLink : rssLinksAL) {
+				writer.write(rssLink);// We wrote a txt file
+			}
+		}
+		assertFalse(testFileParser.readerOfFile(file));
+	}
+
+	@Before
+	public void setup() throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
+			rssLinksAL.add("http://localhost:" + SERVER_PORT + "/");
+			for (String rssLink : rssLinksAL) {
+				writer.write(rssLink);// We wrote a txt file
+			}
+		}
 	}
 
 	@Test
@@ -79,42 +137,5 @@ public class FileParserTest {
 		 * false path("good.txt"); //returns true path("not|good.txt");
 		 * //returns false path("not:good.txt"); //returns false
 		 */
-	}
-
-	@Test
-	public void canReadTxt() { // check reading line size with arraylist size
-		testFileParser.readerOfFile(file);
-		assertEquals(rssLinksAL.size(), testFileParser.getRssLinksAL().size());
-	}
-
-	@Test
-	public void givenArrayListContainsURL() {// can it translate all the lines
-												// to url
-		testFileParser.readerOfFile(file);
-		try {
-			for (URL URLs : testFileParser.getRssLinksAL()) // This is just
-															// iterate on
-															// rssLinksAL and
-															// check are they
-															// all URL?
-			{
-				new URL(URLs.toString());
-			}
-		} catch (MalformedURLException exception) {
-			Assert.fail("FileParrser.readerOFFile can't convert string to URL");
-		}
-	}
-	@After
-	public void deleteSetup() {
-		try {
-			Files.deleteIfExists(Paths.get(file));
-		} catch (IOException x) {
-			// File permission problems are caught here.
-			System.err.println(x);
-		}
-	}
-	@AfterClass
-	public static void stopJetty() throws Exception{
-		server.stop();
 	}
 }

@@ -7,7 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({
    NewsCheckerTest.class,
    FileParserTest.class,
-   DbHelperTest.class,
+   FrequencyUpdateTest.class,
    WebsiteContentCreatorTest.class,
    DateUtilsTest.class
 })

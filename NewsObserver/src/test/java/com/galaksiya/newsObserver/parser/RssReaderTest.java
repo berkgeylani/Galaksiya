@@ -21,6 +21,8 @@ import org.junit.Test;
 import com.galaksiya.newsObserver.parser.testutil.CreateNoNewRssWebsite;
 import com.galaksiya.newsObserver.parser.testutil.CreateNonRssWebsite;
 import com.galaksiya.newsObserver.parser.testutil.CreateRssWebsite;
+import com.galaksiya.newsobserver.parser.FeedMessage;
+import com.galaksiya.newsobserver.parser.RssReader;
 
 public class RssReaderTest {
 
@@ -29,7 +31,7 @@ public class RssReaderTest {
 	private static final int SERVER_PORT = 4000;
 
 	@BeforeClass
-	public static void startJetty() throws Exception {
+	public static void startJetty()  {
 		server = new Server(SERVER_PORT);
 
 		ContextHandler context = new ContextHandler("/nonew");
@@ -48,14 +50,41 @@ public class RssReaderTest {
 		server.setHandler(contexts);
 
 		server.setStopAtShutdown(true);
-		server.start();
+		try {
+			server.start();
+		} catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 
 	@AfterClass
-	public static void stopJetty() throws Exception {
-		server.stop();
+	public static void stopJetty() {
+		try {
+			server.stop();
+		} catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 	private RssReader rssRead= new RssReader();
+	@Test
+	public void canReadrssReader() throws MalformedURLException, ParseException{ // true rss,link,new 4
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rss"));
+		FeedMessage message = new FeedMessage();
+		message.setTitle("New York Times Ortadoğu’nun sınırlarını yeniden çizdi; Türkiye’yi böldü");
+		message.setDescription(
+				"New York Times gazetesi, Osmanlı topraklarının paylaşılmasını öngören ve tüm taraflarla imzalanan Sykes-Picot Anlaşmasının 100. yıldönümünde arşivinden yeni bir harita çıkardı. Haritalar ise İngiltere ve Fransanın hazırladığı Sykes-Picotun alternatifleri. ORTADOĞU HARİTASI BU ŞEKİLDE ÇİZİLSEYDİ Haberde dönemin ABD Başkanı Woodrow Wilson tarafından hazırlatılan haritayla birlikte,1920lerde sınırlar bu şekilde çizilseydi Ortadoğu kurtarılabilir miydi? sorusu da yer alıyor. []");
+		message.setPubDate("Tue Jun 21 13:16:16 EEST 2016"
+				+ "");
+		assertTrue(areEqual(message, itemsAL.get(0)));
+	}
+	@Test
+	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
+		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew")).isEmpty()) ; 
+	}
+	@Test
+	public void rssReaderNonRssInput() throws MalformedURLException{ //true link,false rss 2
+		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonrss"))); 
+	}
 	//empty URL - not neccessary
 	//wrong URL - done 1
 	//true url but not rss -done 2
@@ -82,24 +111,5 @@ public class RssReaderTest {
 		}
 		boolean isPubDateEqual =date1.equals(date2);//Tue, 21 Jun 2016 13:16:16----Tue Jun 21 13:16:16 EEST 2016
 		return isDescriptionEqual && isTitleEqual && isPubDateEqual;
-	}
-	@Test
-	public void canReadrssReader() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rss"));
-		FeedMessage message = new FeedMessage();
-		message.setTitle("New York Times Ortadoğu’nun sınırlarını yeniden çizdi; Türkiye’yi böldü");
-		message.setDescription(
-				"New York Times gazetesi, Osmanlı topraklarının paylaşılmasını öngören ve tüm taraflarla imzalanan Sykes-Picot Anlaşmasının 100. yıldönümünde arşivinden yeni bir harita çıkardı. Haritalar ise İngiltere ve Fransanın hazırladığı Sykes-Picotun alternatifleri. ORTADOĞU HARİTASI BU ŞEKİLDE ÇİZİLSEYDİ Haberde dönemin ABD Başkanı Woodrow Wilson tarafından hazırlatılan haritayla birlikte,1920lerde sınırlar bu şekilde çizilseydi Ortadoğu kurtarılabilir miydi? sorusu da yer alıyor. []");
-		message.setPubDate("Tue Jun 21 13:16:16 EEST 2016"
-				+ "");
-		assertTrue(areEqual(message, itemsAL.get(0)));
-	}
-	@Test
-	public void rssReaderNonRssInput() throws MalformedURLException{ //true link,false rss 2
-		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonrss"))); 
-	}
-	@Test
-	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
-		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew")).isEmpty()) ; 
 	}
 }

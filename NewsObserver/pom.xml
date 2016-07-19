@@ -76,7 +76,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>com.galaksiya.newsObserver.master.Main</mainClass>
+							<mainClass>com.galaksiya.newsobserver.master.Main</mainClass>
 						</manifest>
 						<manifestEntries>
 							<Class-Path>.</Class-Path>

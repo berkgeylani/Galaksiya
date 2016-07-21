@@ -22,6 +22,12 @@ import com.galaksiya.newsobserver.database.DatabaseFactory;
 @Path("/newsobserver")
 public class WebsiteContentCreator {
 
+	private static final String BAD_REQUEST_ANSWER = "BAD REQUEST </br>"
+			+ "topLimitforday/{First Parameter}/{Second Parameter}/{Third Parameter}/{Fourth Parameter} </br>"
+			+ "First Parameter : Add a acceptable day 1-(30 | 31) on here</br>"
+			+ "Second Parameter : Add a acceptable month 1-12 on here.ıt should be in text  and abbrevitaion from like: May,Jun</br>"
+			+ "Third Parameter : Add a acceptable year on here</br>"
+			+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.";
 	private DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
 	private DateUtils dateUtils = new DateUtils();
 	private Database dbHelper ;
@@ -32,8 +38,7 @@ public class WebsiteContentCreator {
 		dbHelper=dbHelperArg;
 	}
 	public String createContext(List<Document> dataAl){
-		DateUtils dateUtils = new DateUtils();
-		if(dataAl==null || dataAl.size()==0) return null;
+		if(dataAl==null || dataAl.isEmpty()) return null;
 		String content="<html>"
 				+"<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-"+ dbHelper.totalCount() +"</title></head>"
 				+"<body>"
@@ -61,17 +66,13 @@ public class WebsiteContentCreator {
 	@Produces(MediaType.TEXT_HTML)
 	public Response forADay(@PathParam("year") String year,@PathParam("month") String month,@PathParam("day") String day) {
 		if(day==null || month==null ||year==null || !dateUtils.canConvert(day+" "+month+" "+year))
-			return Response.status(Status.BAD_REQUEST).entity("BAD REQUEST </br>"
-					+ "topLimitforday/{First Parameter}/{Second Parameter}/{Third Parameter}/{Fourth Parameter} </br>"
-					+ "First Parameter : Add a acceptable day 1-(30 | 31) on here</br>"
-					+ "Second Parameter : Add a acceptable month 1-12 on here.ıt should be in text  and abbrevitaion from like: May,Jun</br>"
-					+ "Third Parameter : Add a acceptable year on here</br>"
-					+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.").build();		
+			return Response.status(Status.BAD_REQUEST).entity(BAD_REQUEST_ANSWER).build();		
 		List<Document> dataAl = dbHelper.fetch(day+" "+month+" "+year);
-		if(dataAl==null)
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>"
-					+ "We have a problem in our databases.Please come back later again.").build();
-		else if(dataAl.size()==0)
+//		if(dataAl==null)
+//			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>"
+//					+ "We have a problem in our databases.Please come back later again.").build();
+//		else 
+		if(dataAl.isEmpty())
 			return Response.status(Response.Status.NO_CONTENT).entity("We haven't got any data to show you."
 					+ "Please try any other parameter.").build();
 		return Response.ok(createContext(dataAl)).build(); 
@@ -85,10 +86,11 @@ public class WebsiteContentCreator {
 	@Produces(MediaType.TEXT_HTML)
 	public Response sortedAll() {
 		List<Document> dataAl = dbHelper.fetch();
-		if(dataAl==null)
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>We have a problem in our databases."
-					+ "Please come back later again.").build();
-		else if(dataAl.size()==0)
+//		if(dataAl==null)
+//			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("INTERNAL_SERVER_ERROR </br>We have a problem in our databases."
+//					+ "Please come back later again.").build();
+//		else 
+		if(dataAl.isEmpty())
 			return Response.status(Response.Status.NO_CONTENT).entity("NO CONTENT </br>We haven't got any data to show you."
 					+ "Please try any other parameter.").build();
 		return Response.ok(createContext(dataAl)).build(); 
@@ -106,16 +108,12 @@ public class WebsiteContentCreator {
 	@Produces(MediaType.TEXT_HTML)
 	public Response topLimitForADay(@PathParam("year") String year,@PathParam("month") String month,@PathParam("day") String day,@PathParam("limit") int limit) {
 		if(day==null || month==null ||year==null || !dateUtils.canConvert(day+" "+month+" "+year) || limit < 1 )
-			return Response.status(Status.BAD_REQUEST).entity("BAD REQUEST </br>"
-					+ "topLimitforday/{First Parameter}/{Second Parameter}/{Third Parameter}/{Fourth Parameter} </br>"
-					+ "First Parameter : Add a acceptable day 1-(30 | 31) on here</br>"
-					+ "Second Parameter : Add a acceptable month 1-12 on here.ıt should be in text  and abbrevitaion from like: May,Jun</br>"
-					+ "Third Parameter : Add a acceptable year on here</br>"
-					+ "Fourth Parameter : The limit  which you want see data.Limit Should be greater that 0.").build();
+			return Response.status(Status.BAD_REQUEST).entity(BAD_REQUEST_ANSWER).build();
 		List<Document> dataAl = dbHelper.fetch(day+" "+month+" "+year, limit);
-		if(dataAl==null)
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("We have a problem in our databases.Please come back later again.").build();
-		else if(dataAl.size()==0)
+//		if(dataAl==null)
+//			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("We have a problem in our databases.Please come back later again.").build();
+//		else 
+		if(dataAl.isEmpty())
 			return Response.status(Response.Status.NO_CONTENT).entity("We haven't got any data to show you.Please try any other parameter.").build();
 		return Response.ok(createContext(dataAl )).build();
 	}

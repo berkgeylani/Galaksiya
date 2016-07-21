@@ -2,6 +2,7 @@ package com.galaksiya.newsobserver.database;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -20,13 +21,15 @@ import com.mongodb.client.result.UpdateResult;
 
 public class MongoDb implements Database {
 
+	private static final int CONNECTION_POOL_SIZE = 100;
+
 	private static final String LOCALHOST = "localhost";
 
 	private static final Logger LOG = Logger.getLogger(MongoDb.class);
 
 	private static final String MONGO_DB_NAME = "mydb";
 
-	private static MongoClient mongoClient;
+	private static MongoClient mongoClient_INSTANCE;
 
 	/**
 	 * Fabric of a MongoClient
@@ -35,16 +38,15 @@ public class MongoDb implements Database {
 	 *         (dbAdress,port).
 	 */
 	public static MongoClient getInstance() {
-		if (mongoClient == null) {
+		if (mongoClient_INSTANCE == null) {
 			synchronized (MongoClient.class) {
-				if (mongoClient == null) { // yes double check
-					MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-					builder.connectionsPerHost(100);// TODO 100 u field yap
-					mongoClient = new MongoClient(new ServerAddress(LOCALHOST), builder.build());
+				if (mongoClient_INSTANCE == null) { // yes double check
+					MongoClientOptions.Builder builder = new MongoClientOptions.Builder().connectionsPerHost(CONNECTION_POOL_SIZE);
+					mongoClient_INSTANCE = new MongoClient(new ServerAddress(LOCALHOST), builder.build());
 				}
 			}
 		}
-		return mongoClient;
+		return mongoClient_INSTANCE;
 	}
 
 	private String collectionName = DatabaseConstants.TABLE_NAME_STATISTICS;
@@ -107,9 +109,7 @@ public class MongoDb implements Database {
 
 	@Override
 	public boolean exists(FeedMessage message) {
-		if (message == null || message.getTitle() == null || message.getTitle().equals("")
-				|| message.getDescription() == null || message.getDescription().equals("")
-				|| message.getpubDate() == null || message.getpubDate().equals("")) {
+		if (!isMessageCorrect(message)) {
 			return false;
 		}
 		long count = 0;
@@ -132,7 +132,7 @@ public class MongoDb implements Database {
 	 * @see com.galaksiya.newsObserver.database.Database#fetch()
 	 */
 	@Override
-	public ArrayList<Document> fetch() { // frequency sorted for all the words
+	public List<Document> fetch() { // frequency sorted for all the words
 		return fetch(new Document(), new Document().append("frequency", 1), -1);
 	}
 
@@ -143,7 +143,7 @@ public class MongoDb implements Database {
 	 * find,Document sort,int limit)
 	 */
 	@Override
-	public ArrayList<Document> fetch(Document find, Document sort, int limit) {
+	public List<Document> fetch(Document find, Document sort, int limit) {
 		MongoClient mongoClient = getInstance();
 		try {
 			FindIterable<Document> iterable = getCollection(mongoClient).find(find).sort(sort);
@@ -162,7 +162,7 @@ public class MongoDb implements Database {
 	 * @see com.galaksiya.newsObserver.database.Database#fetch(java.lang.String)
 	 */
 	@Override
-	public ArrayList<Document> fetch(String date) {
+	public List<Document> fetch(String date) {
 		Date dateConverted = dateUtils.dateConvert(date);
 		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", 1), -1);
 
@@ -175,7 +175,7 @@ public class MongoDb implements Database {
 	 * int)
 	 */
 	@Override
-	public ArrayList<Document> fetch(String date, int limit) {
+	public List<Document> fetch(String date, int limit) {
 		Date dateConverted = dateUtils.dateConvert(date);
 		return fetch(new Document().append("date", dateConverted), new Document().append("frequency", -1), limit);
 	}
@@ -186,10 +186,10 @@ public class MongoDb implements Database {
 	 * @see com.galaksiya.newsObserver.database.Database#fetchFirstWDocument()
 	 */
 	@Override
-	public ArrayList<String> fetchFirstWDocument() {
+	public List<String> fetchFirstWDocument() {
 		MongoClient mongoClient = getInstance();
 		try {
-			ArrayList<String> date_word_freq = new ArrayList<String>();
+			ArrayList<String> date_word_freq = new ArrayList<>();
 			FindIterable<Document> search = getCollection(mongoClient).find();
 			if (search.first() == null) {
 				return null;
@@ -218,11 +218,11 @@ public class MongoDb implements Database {
 	}
 
 	@Override
-	public ArrayList<Document> getNews() {
+	public List<Document> getNews() {
 		MongoClient mongoClient = getInstance();
 		try {
 			FindIterable<Document> iterable = getCollection(mongoClient).find();
-			ArrayList<Document> newsAl = findIterableToArraylist(iterable);
+			List<Document> newsAl = findIterableToArraylist(iterable);
 			return newsAl;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
@@ -264,9 +264,7 @@ public class MongoDb implements Database {
 	@Override
 	public boolean saveNews(FeedMessage message) {
 		MongoClient mongoClient = getInstance();
-		if (message == null || message.getTitle() == null || message.getTitle().equals("")
-				|| message.getDescription() == null || message.getDescription().equals("")
-				|| message.getpubDate() == null || message.getpubDate().equals("")) {
+		if (!isMessageCorrect(message)) {
 			return false;
 		}
 		try {
@@ -284,6 +282,24 @@ public class MongoDb implements Database {
 	public void setCollectionName(String collectionName) {
 		this.collectionName = collectionName;
 	}
+	/**
+	 * It controls the message like is it null or is its content contain anything or null.
+	 * @param message message(title description pubdate)
+	 * @return	true : Correct Message false: Incorrect message
+	 */
+	public boolean isMessageCorrect(FeedMessage message) {
+		if (message == null ) {
+			return false;
+		}
+		boolean isMessagetitleInvalid = message.getTitle() == null || "".equals(message.getTitle());
+		boolean isMessageDescInvalid  = message.getDescription() == null || "".equals(message.getDescription());
+		boolean isMessagePubDInvalid  = message.getpubDate() == null || "".equals(message.getpubDate());
+		if ( isMessagetitleInvalid || isMessageDescInvalid || isMessagePubDInvalid) {
+			return false;
+		}
+		return true;
+	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -327,8 +343,8 @@ public class MongoDb implements Database {
 	 *            It is a Mongo query response object.
 	 * @return A int which is count of documents.
 	 */
-	private ArrayList<Document> findIterableToArraylist(FindIterable<Document> iterable) {
-		ArrayList<Document> dataAL = new ArrayList<Document>();
+	private List<Document> findIterableToArraylist(FindIterable<Document> iterable) {
+		ArrayList<Document> dataAL = new ArrayList<>();
 		MongoCursor<Document> cursor = iterable.iterator();
 		while (cursor.hasNext()) {
 			dataAL.add(cursor.next());

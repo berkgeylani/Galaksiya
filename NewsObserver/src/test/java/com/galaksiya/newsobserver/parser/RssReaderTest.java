@@ -1,4 +1,4 @@
-package com.galaksiya.newsObserver.parser;
+package com.galaksiya.newsobserver.parser;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -18,11 +18,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.galaksiya.newsObserver.parser.testutil.CreateNoNewRssWebsite;
-import com.galaksiya.newsObserver.parser.testutil.CreateNonRssWebsite;
-import com.galaksiya.newsObserver.parser.testutil.CreateRssWebsite;
 import com.galaksiya.newsobserver.parser.FeedMessage;
 import com.galaksiya.newsobserver.parser.RssReader;
+import com.galaksiya.newsobserver.parser.testutil.CreateNoNewRssWebsite;
+import com.galaksiya.newsobserver.parser.testutil.CreateNonRssWebsite;
+import com.galaksiya.newsobserver.parser.testutil.CreateRssWebsite;
 
 public class RssReaderTest {
 
@@ -83,7 +83,7 @@ public class RssReaderTest {
 	}
 	@Test
 	public void rssReaderNonRssInput() throws MalformedURLException{ //true link,false rss 2
-		assertEquals(null,rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonrss"))); 
+		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonrss")).isEmpty()); 
 	}
 	//empty URL - not neccessary
 	//wrong URL - done 1
@@ -96,7 +96,7 @@ public class RssReaderTest {
 	}
 	@Test
 	public void rssReaderWrongURL() throws MalformedURLException{ //wrong url
-		assertEquals(null,rssRead.parseFeed(new URL("http:/localhost:"+SERVER_PORT+"/rss"))); 
+		assertTrue(rssRead.parseFeed(new URL("http:/localhost:"+SERVER_PORT+"/rss")).isEmpty()); 
 	}
 	private boolean areEqual(FeedMessage message,FeedMessage message2) throws ParseException{
 		boolean isDescriptionEqual = message.getDescription().equals(message2.getDescription());

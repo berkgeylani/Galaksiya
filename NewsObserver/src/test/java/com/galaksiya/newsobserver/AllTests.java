@@ -1,12 +1,12 @@
-package com.galaksiya.newsObserver;
+package com.galaksiya.newsobserver;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.galaksiya.newsObserver.database.DatabaseTestSuite;
-import com.galaksiya.newsObserver.master.MasterTestSuite;
-import com.galaksiya.newsObserver.parser.RssReaderTest;
+import com.galaksiya.newsobserver.database.DatabaseTestSuite;
+import com.galaksiya.newsobserver.master.MasterTestSuite;
+import com.galaksiya.newsobserver.parser.RssReaderTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({

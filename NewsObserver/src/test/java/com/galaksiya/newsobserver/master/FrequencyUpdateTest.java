@@ -1,4 +1,4 @@
-package com.galaksiya.newsObserver.master;
+package com.galaksiya.newsobserver.master;
 
 import static org.junit.Assert.*;
 

@@ -23,7 +23,7 @@ public class NewsChecker {
 
 	private Database dbForNews;
 
-	private Hashtable<String, String> lastNews = new Hashtable<String, String>();
+	private Hashtable<String, String> lastNews = new Hashtable<>();
 	
 	private ArrayList<URL> RssLinksAl ;
 
@@ -82,8 +82,7 @@ public class NewsChecker {
 			return null;
 		}
 		dbForNews.saveNews(message);
-		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<String, Integer>();
-		wordFrequencyPerNew = processOfWords.splitWords(message.getTitle() + " ", message.getDescription()); 
+		Hashtable<String, Integer> wordFrequencyPerNew = processOfWords.splitWords(message.getTitle() + " ", message.getDescription()); 
 		// wordFrequency test edecez
 		if (!traverseWordByWord(datePerNew, wordFrequencyPerNew))
 			return null;
@@ -115,15 +114,12 @@ public class NewsChecker {
 					lastNewsArray[0] = rssURLs.toString();
 					lastNewsArray[1] = message.getTitle();
 					updateNew = false;
-					updated = true;
 				}
-				if (handleMessage(message) == null)
-					continue;
 			} else {
-				break;
+				break;  //itemsAl yi size 0 yapılabilir.
 			}
 		}
-		if ( !updateNew && updated) {
+		if ( !updateNew ) {
 			lastNews.put(lastNewsArray[0], lastNewsArray[1]);
 		}
 		return true;
@@ -143,7 +139,7 @@ public class NewsChecker {
 		boolean proccessSuccessful = false,generalProcess=true;
 		FrequencyUpdater updater = new FrequencyUpdater(db);
 		Enumeration<String> e = wordFrequencyPerNew.keys();
-		ArrayList<Document> didNotAdded = new ArrayList<Document>();
+		ArrayList<Document> didNotAdded = new ArrayList<>();
 		while (e.hasMoreElements()) {
 			String word = (String) e.nextElement();
 			Integer frequency = wordFrequencyPerNew.get(word);

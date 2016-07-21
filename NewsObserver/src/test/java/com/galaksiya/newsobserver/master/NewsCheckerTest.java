@@ -1,4 +1,4 @@
-package com.galaksiya.newsObserver.master;
+package com.galaksiya.newsobserver.master;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,12 +19,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
 import com.galaksiya.newsobserver.database.DatabaseConstants;
 import com.galaksiya.newsobserver.database.DatabaseFactory;
 import com.galaksiya.newsobserver.database.MongoDb;
 import com.galaksiya.newsobserver.master.DateUtils;
 import com.galaksiya.newsobserver.master.NewsChecker;
+import com.galaksiya.newsobserver.master.testutil.CreateRssJetty;
 import com.galaksiya.newsobserver.parser.FeedMessage;
 import com.galaksiya.newsobserver.parser.RssReader;
 
@@ -35,43 +35,31 @@ public class NewsCheckerTest {
 	private static final int SERVER_PORT = 8111;
 
 	@BeforeClass
-	public static void startJetty() {
+	public static void startJetty() throws Exception {
 		DatabaseFactory.getInstance().setDatabaseType(DatabaseConstants.DATABASE_TYPE_MONGO);
 		server = new Server(SERVER_PORT);
 		server.setHandler(new CreateRssJetty());
 		server.setStopAtShutdown(true);
-		try {
-			server.start();
-		} catch (Exception e) {
-			System.err.println(e);
-		}
+		server.start();
 	}
 
 	@AfterClass
-	public static void stopJetty() {
+	public static void stopJetty() throws Exception {
 		DatabaseFactory.getInstance().setDefaultDatabaseType();
-		try {
-			server.stop();
-		} catch (Exception e) {
-			System.err.println(e);
-		}
+		server.stop();
 	}
 
 	private DateUtils dateUtils = new DateUtils();
 
 	private NewsChecker newsChecker = new NewsChecker("test", new MongoDb("test"));
 
-	private ArrayList<URL> rssLinksAL = new ArrayList<URL>();
+	private ArrayList<URL> rssLinksAL = new ArrayList<>();
 
 	private RssReader rssReader = new RssReader();
 
 	@Before
-	public void before() {
-		try {
-			rssLinksAL.add(new URL("http://localhost:" + SERVER_PORT + "/"));
-		} catch (MalformedURLException e) {
-			System.err.println(e);
-		}
+	public void before() throws MalformedURLException {
+		rssLinksAL.add(new URL("http://localhost:" + SERVER_PORT + "/"));
 		DatabaseFactory.setInstance(null);
 		MongoDb mongoDbtest = new MongoDb("Test");
 		mongoDbtest.delete();
@@ -154,10 +142,10 @@ public class NewsCheckerTest {
 
 	@Test
 	public void updateActualNewsValidInput() {////
-		Hashtable<String, String> lastNews = new Hashtable<String, String>();
+		Hashtable<String, String> lastNews = new Hashtable<>();
 		lastNews.put("http://localhost:" + 8112 + "/", getSampleTitle());
-		NewsChecker newsChecker = new NewsChecker(rssLinksAL);
-		assertTrue(newsChecker.updateActualNews());
+		NewsChecker newsCheckerLocal = new NewsChecker(rssLinksAL);
+		assertTrue(newsCheckerLocal.updateActualNews());
 	}
 
 	@Test

@@ -9,8 +9,6 @@ import org.apache.log4j.Logger;
 public class DateUtils {
 	static final Logger LOG = Logger.getLogger(DateUtils.class);
 	
-	public DateUtils() {
-	}
 	/**
 	 * It controls is given String can convertable to date.
 	 * @param datePerNew String occurs date
@@ -37,8 +35,6 @@ public class DateUtils {
 		Date date = null;
 			try {
 				date = format1.parse(dateStr.replaceAll("\\s+", "-"));
-				//LOG.debug("Input(String) converted date successfully.");
-	
 			} catch (ParseException e) {
 				LOG.error("Input(String) couldn't convert to date.It will be requested again. ", e);
 				return null;
@@ -53,15 +49,15 @@ public class DateUtils {
 	public String dateCustomize(String pubDate) {
 		String datePerNew;
 		if (pubDate.length() == 29)
-			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
-					+ pubDate.toString().substring(25, 29);
+			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(4, 7) + " "
+					+ pubDate.substring(25, 29);
 		else if (pubDate.length() == 10) {
-			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(5, 7) + " "
-					+ pubDate.toString().substring(0, 4);
+			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(5, 7) + " "
+					+ pubDate.substring(0, 4);
 		}
 		else
-			datePerNew = pubDate.substring(8, 10) + " " + pubDate.toString().substring(4, 7) + " "
-					+ pubDate.toString().substring(24, 28);
+			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(4, 7) + " "
+					+ pubDate.substring(24, 28);
 		return datePerNew;
 	}
 

@@ -13,6 +13,9 @@ public class Main {
 
 	private static final String PROPERTY_NAME = "databaseType";
 
+
+	private static final String DB_PROPERTY = System.getProperty(PROPERTY_NAME);
+
 	/**
 	 * It is the main of a program..
 	 * 
@@ -36,10 +39,8 @@ public class Main {
 		} else {
 			LOG.debug("Default database format.[derby]");
 		}
-		if (System.getProperty(PROPERTY_NAME) != null) {
-			if (System.getProperty(PROPERTY_NAME).equalsIgnoreCase("mongo")) {
+		if (DB_PROPERTY != null && DB_PROPERTY.equalsIgnoreCase("mongo")) {
 				databaseType = "mongo";
-			}
 		}
 		if (initiate.initiateApp(databaseType, filePath)) {
 			LOG.info("Program started.");

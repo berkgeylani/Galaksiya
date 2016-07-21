@@ -18,7 +18,7 @@ public class FileParser {
 	private ArrayList<URL> rssLinksAL;
 
 	public FileParser(String filePath) {
-		rssLinksAL = new ArrayList<URL>();
+		rssLinksAL = new ArrayList<>();
 		readerOfFile(filePath);
 	}
 	/**
@@ -54,19 +54,18 @@ public class FileParser {
 					 url= new URL(rssLink);
 				}
 				catch (MalformedURLException e) {
-					LOG.error("In file(.txt),One of links isn't a Url",e);
+					LOG.error("In file(.txt),One of links isn't a Url --> "+url,e);
 					return false;
 				} 
-				if(url!=null )
-					rssLinksAL.add(url);
+				rssLinksAL.add(url);
 			}
-			return true; // herşey okeyse return 1
+			return true; // herşey okeyse return true
 		} catch (FileNotFoundException e) {
 			LOG.error("File Not Found In Given Path",e);
 		} catch (IOException e) {
 			LOG.error("Input or output problem",e);
 		}
-		return false; //catch girdiyse return 2;
+		return false; 
 	}
 
 }

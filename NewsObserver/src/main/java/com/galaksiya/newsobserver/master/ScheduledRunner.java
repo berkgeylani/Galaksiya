@@ -29,15 +29,14 @@ public class ScheduledRunner {
 	 */
 	public void start(ArrayList<URL> RssLinksAL) {
 		NewsChecker newsChecker = new NewsChecker(RssLinksAL);
-		// lastNewsStatic = lastNews;
 		executor = Executors.newSingleThreadScheduledExecutor();
 
 		Runnable periodicTask = new Runnable() {
 			public void run() {
 				newsChecker.updateActualNews();
-				LOG.info("Checked all the rss links.");
+				LOG.info("Checked all the rss links."); 
 			}
 		};
-		executor.scheduleAtFixedRate(periodicTask, 0, 5, TimeUnit.MINUTES);
+		executor.scheduleAtFixedRate(periodicTask, 0, 15, TimeUnit.MINUTES);
 	}
 }

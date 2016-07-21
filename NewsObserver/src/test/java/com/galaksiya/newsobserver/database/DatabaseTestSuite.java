@@ -1,4 +1,4 @@
-package com.galaksiya.newsObserver.database;
+package com.galaksiya.newsobserver.database;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

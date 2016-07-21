@@ -1,33 +1,34 @@
-package com.galaksiya.newsObserver.master;
+package com.galaksiya.newsobserver.master;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpCompliance;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.galaksiya.newsObserver.master.testutil.CreateRssJetty;
 import com.galaksiya.newsobserver.database.MongoDb;
+import com.galaksiya.newsobserver.database.MongoDbTest;
 import com.galaksiya.newsobserver.master.FileParser;
+import com.galaksiya.newsobserver.master.testutil.CreateRssJetty;
 
 public class FileParserTest {
 	private static Server server;
 	private static final int SERVER_PORT = 8119;
+	private static final Logger LOG = Logger.getLogger(FileParserTest.class);
+
 	@AfterClass
 	public static void shutDown() {
 		MongoDb mongoDb = new MongoDb("test");
@@ -37,25 +38,17 @@ public class FileParserTest {
 	}
 
 	@BeforeClass
-	public static void startJetty() {
+	public static void startJetty() throws Exception {
 		server = new Server(SERVER_PORT);
 		server.getConnectors()[0].getConnectionFactory(HttpConnectionFactory.class)
 				.setHttpCompliance(HttpCompliance.LEGACY);
 		server.setHandler(new CreateRssJetty());
 		server.setStopAtShutdown(true);
-		try {
-			server.start();
-		} catch (Exception e) {
-			System.err.println(e);
-		}
+		server.start();
 	}
 	@AfterClass
-	public static void stopJetty() {
-		try {
-			server.stop();
-		} catch (Exception e) {
-			System.err.println(e);
-		}
+	public static void stopJetty() throws Exception {
+		server.stop();
 	}
 
 	/*
@@ -65,7 +58,7 @@ public class FileParserTest {
 	 */
 	private String file = "fileParserTest.txt";
 
-	private ArrayList<String> rssLinksAL = new ArrayList<String>();
+	private ArrayList<String> rssLinksAL = new ArrayList<>();
 
 	private FileParser testFileParser = new FileParser(file);
 
@@ -80,8 +73,7 @@ public class FileParserTest {
 		try {
 			Files.deleteIfExists(Paths.get(file));
 		} catch (IOException x) {
-			// File permission problems are caught here.
-			System.err.println(x);
+			LOG.error("Couldn't delete the file. -->",x);
 		}
 	}
 
@@ -89,18 +81,6 @@ public class FileParserTest {
 	public void emptyPathWay() {
 		assertFalse(testFileParser.readerOfFile(""));
 		assertFalse(testFileParser.readerOfFile(null));
-	}
-
-	@Test
-	public void givenArrayListContainsURL() {// can it translate all the lines
-		testFileParser.readerOfFile(file);
-		try {
-			for (URL URLs : testFileParser.getRssLinksAL()) {
-				new URL(URLs.toString());
-			}
-		} catch (MalformedURLException exception) {
-			Assert.fail("FileParrser.readerOFFile can't convert string to URL");
-		}
 	}
 
 	@Test
@@ -131,11 +111,5 @@ public class FileParserTest {
 		assertFalse(!testFileParser.readerOfFile(file)); // givin truepath and
 															// response should
 															// be true
-		/*
-		 * examples path("c:/test"); //returns true path("c:/te:t"); //returns
-		 * false path("c:/te?t"); //returns false path("c/te*t"); //returns
-		 * false path("good.txt"); //returns true path("not|good.txt");
-		 * //returns false path("not:good.txt"); //returns false
-		 */
 	}
 }

@@ -150,7 +150,7 @@ public class NewsChecker {
 				generalProcess=false;
 			}
 		}
-		if(generalProcess){
+		if(!generalProcess){
 			LOG.error("These are not added to database."+didNotAdded);
 		}
 		return generalProcess;

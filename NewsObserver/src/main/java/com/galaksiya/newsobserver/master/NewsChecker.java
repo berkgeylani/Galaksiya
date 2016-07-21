@@ -100,7 +100,7 @@ public class NewsChecker {
 	 */
 	public boolean traverseNews(URL rssURLs) {
 		String[] lastNewsArray = new String[2];
-		boolean updateNew = true, updated = false;
+		boolean updateNew = true;
 		RssReader parserOfRss = new RssReader();
 		ArrayList<FeedMessage> itemsAL = parserOfRss.parseFeed(rssURLs);
 		if (itemsAL == null || itemsAL.isEmpty()) {
@@ -115,9 +115,10 @@ public class NewsChecker {
 					lastNewsArray[1] = message.getTitle();
 					updateNew = false;
 				}
+				handleMessage(message);
 			} else {
 				break;  //itemsAl yi size 0 yapılabilir.
-			}
+			} 	
 		}
 		if ( !updateNew ) {
 			lastNews.put(lastNewsArray[0], lastNewsArray[1]);
@@ -149,7 +150,9 @@ public class NewsChecker {
 				generalProcess=false;
 			}
 		}
-		LOG.error("These are not added to database."+didNotAdded);
+		if(generalProcess){
+			LOG.error("These are not added to database."+didNotAdded);
+		}
 		return generalProcess;
 	}
 

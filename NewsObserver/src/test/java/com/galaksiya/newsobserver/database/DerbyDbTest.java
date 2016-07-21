@@ -157,20 +157,23 @@ public class DerbyDbTest {
 	}
 
 	public void getCollection(String tableName) throws SQLException {
+		tableName=tableName.toUpperCase();
 		DatabaseMetaData dbmd = getInstance().getMetaData();
-		ResultSet rs = dbmd.getTables(null, "APP", tableName, null);
+		ResultSet rs = dbmd.getTables(null, "APP", tableName, null); 
 		if (!(rs.next())) {
-			try (Statement stmt = conn.createStatement()) {
-				if (tableName.contains("NEWS")) {
-					String statement = "CREATE TABLE " + tableName + "("
-							+ "ID int NOT NULL GENERATED ALWAYS AS IDENTITY" + "(START WITH 1,INCREMENT BY 1),"
-							+ "PUBLISHDATE DATE NOT NULL," + "TITLE varchar(600) NOT NULL,"
-							+ "LINK varchar(200) NOT NULL," + "DESCRIPTION varchar(1500) NOT NULL," + "PRIMARY KEY(ID)"
-							+ ")";
-					stmt.execute(statement);
-				}
-			} catch (SQLException e) {
-				LOG.error("CAnt create table.", e);
+			Statement stmt = conn.createStatement();
+			if (tableName.contains("NEWS")) {
+				String statement = "CREATE TABLE " + tableName + "(" + "ID int NOT NULL GENERATED ALWAYS AS IDENTITY"
+						+ "(START WITH 1,INCREMENT BY 1)," + "PUBLISHDATE DATE NOT NULL,"
+						+ "TITLE varchar(600) NOT NULL," + "LINK varchar(200) NOT NULL,"
+						+ "DESCRIPTION varchar(1500) NOT NULL," + "PRIMARY KEY(ID)" + ")";
+				stmt.execute(statement);
+			} else {
+
+				String statement = "CREATE TABLE " + tableName + "(" + "ID int NOT NULL GENERATED ALWAYS AS IDENTITY"
+						+ "(START WITH 1,INCREMENT BY 1)," + "PUBLISHDATE DATE NOT NULL,"
+						+ "WORD varchar(255) NOT NULL," + "FREQUENCY INT NOT NULL," + "PRIMARY KEY(ID)" + ")";
+				stmt.execute(statement);
 			}
 		}
 	}

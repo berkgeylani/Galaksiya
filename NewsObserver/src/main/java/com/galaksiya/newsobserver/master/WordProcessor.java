@@ -24,6 +24,9 @@ public class WordProcessor {
 			List<String> processedStr = Arrays
 					.asList(text.replaceAll("\\<[^>]*>", "").replaceAll("\\p{P}", " ").toLowerCase().split("\\s+"));
 			Set<String> uniqueWords = new HashSet<>(processedStr);
+			if(uniqueWords.contains("")){
+				uniqueWords.remove("");
+			}
 			for (String word : uniqueWords) {
 				int frequency = Collections.frequency(processedStr, word);
 				wordFrequency.put(word, frequency);

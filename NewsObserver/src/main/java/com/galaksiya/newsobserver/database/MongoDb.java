@@ -247,10 +247,8 @@ public class MongoDb implements Database {
 			getCollection(mongoClient)
 					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
 			return true;
-
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
-
 		}
 		return false;
 	}

@@ -1,5 +1,7 @@
 package com.galaksiya.newsobserver.master;
 
+import org.apache.log4j.Logger;
+
 import com.galaksiya.newsobserver.database.Database;
 
 public class FrequencyUpdater {

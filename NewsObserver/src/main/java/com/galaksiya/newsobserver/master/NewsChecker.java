@@ -151,7 +151,7 @@ public class NewsChecker {
 			}
 		}
 		if(!generalProcess){
-			LOG.error("These are not added to database."+didNotAdded);
+			LOG.error("These are not added to database."+didNotAdded.toString());
 		}
 		return generalProcess;
 	}

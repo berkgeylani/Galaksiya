@@ -57,19 +57,23 @@ public class RssReader {
 				FeedMessage message = new FeedMessage();
 				SyndEntry entry = itEntries.next();
 				message.setTitle(entry.getTitle());
-				message.setDescription(entry.getDescription().getValue());
-				message.setPubDate(entry.getPublishedDate().toString());
-				message.setLink(entry.getLink().toString());
-				message.toString();
-				itemsAL.add(message);
+				if (message.getTitle() != "") {
+					message.setDescription(entry.getDescription().getValue());
+					message.setPubDate(entry.getPublishedDate().toString());
+					message.setLink(entry.getLink().toString());
+					message.toString();
+					itemsAL.add(message);
+				}else {
+					System.out.println("Problem while reading.");
+				}
 			}
 			if (itemsAL.isEmpty()) {
-				LOG.error("There is no news.From this rss : -> "+url);
+				LOG.error("There is no news.From this rss : -> " + url);
 			}
 		} catch (IllegalArgumentException | IOException e) {
-			LOG.error("RSS reader problem.  ->"+url, e);
+			LOG.error("RSS reader problem.  ->" + url, e);
 		} catch (FeedException e) {
-			LOG.error("Source to feed process is failed.->   "+url, e);
+			LOG.error("Source to feed process is failed.->   " + url, e);
 		}
 		return itemsAL;
 	}

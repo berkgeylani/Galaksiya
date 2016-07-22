@@ -43,9 +43,12 @@ public class RssReaderTest {
 
 		ContextHandler context2 = new ContextHandler("/rss");
 		context2.setHandler(new CreateRssWebsite());
+		
+		ContextHandler context3 = new ContextHandler("/rssMalformedItem");
+		context2.setHandler(new CreateRssWebsite());
 
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
-		contexts.setHandlers(new Handler[] { context, context1, context2 });
+		contexts.setHandlers(new Handler[] { context, context1, context2 , context3});
 
 		server.setHandler(contexts);
 
@@ -76,6 +79,12 @@ public class RssReaderTest {
 		message.setPubDate("Tue Jun 21 13:16:16 EEST 2016"
 				+ "");
 		assertTrue(areEqual(message, itemsAL.get(0)));
+	}
+	@Test
+	public void canReadMalformedItem() throws MalformedURLException, ParseException{ // true rss,link,new 4
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItem"));
+		FeedMessage message = new FeedMessage();
+		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3

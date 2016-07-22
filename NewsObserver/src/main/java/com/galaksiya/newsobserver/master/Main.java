@@ -24,7 +24,7 @@ public class Main {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		String databaseType = "derby";// default
+		String databaseType = "mongo";// default
 		CommandLineParser parser = new DefaultParser();
 		Inititator initiate = new Inititator();
 		// create Options object
@@ -37,7 +37,7 @@ public class Main {
 		if (cmd.hasOption("p")) {
 			filePath = cmd.getOptionValue("p");
 		} else {
-			LOG.debug("Default database format.[derby]");
+			LOG.debug("Default database format.["+databaseType+"]");
 		}
 		if (DB_PROPERTY != null && DB_PROPERTY.equalsIgnoreCase("mongo")) {
 				databaseType = "mongo";

@@ -37,6 +37,6 @@ public class ScheduledRunner {
 				LOG.info("Checked all the rss links."); 
 			}
 		};
-		executor.scheduleAtFixedRate(periodicTask, 0, 15, TimeUnit.MINUTES);
+		executor.scheduleAtFixedRate(periodicTask, 0, 5, TimeUnit.MINUTES);
 	}
 }

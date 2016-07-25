@@ -56,15 +56,19 @@ public class RssReader {
 			while (itEntries.hasNext()) {
 				FeedMessage message = new FeedMessage();
 				SyndEntry entry = itEntries.next();
-				message.setTitle(entry.getTitle());
-				if (message.getTitle() != "") {
+				boolean titleCorrect = entry.getTitle()!=null && entry.getTitle() != "";
+				boolean descriptionCorrect = entry.getDescription()!=null && entry.getDescription().getValue() != "";
+				boolean pubDateCorrect = entry.getPublishedDate()!=null && entry.getPublishedDate().toString() != "";
+				boolean linkCorrect = entry.getLink()!=null && entry.getLink() != "";
+				if (titleCorrect && descriptionCorrect && pubDateCorrect && linkCorrect) {
+					message.setTitle(entry.getTitle());
 					message.setDescription(entry.getDescription().getValue());
 					message.setPubDate(entry.getPublishedDate().toString());
-					message.setLink(entry.getLink().toString());
+					message.setLink(entry.getLink());
 					message.toString();
 					itemsAL.add(message);
-				}else {
-					System.out.println("Problem while reading.");
+				} else {
+					LOG.error("Problem while reading item because of malformed rss item. -->\t"+url);
 				}
 			}
 			if (itemsAL.isEmpty()) {

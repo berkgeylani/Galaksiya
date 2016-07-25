@@ -44,11 +44,21 @@ public class RssReaderTest {
 		ContextHandler context2 = new ContextHandler("/rss");
 		context2.setHandler(new CreateRssWebsite());
 		
-		ContextHandler context3 = new ContextHandler("/rssMalformedItem");
+		ContextHandler context3 = new ContextHandler("/rssMalformedItemTitle");
 		context2.setHandler(new CreateRssWebsite());
+		
+		ContextHandler context4 = new ContextHandler("/rssMalformedItemDescription");
+		context2.setHandler(new CreateRssWebsite());
+		
+		ContextHandler context5 = new ContextHandler("/rssMalformedItemPubDate");
+		context2.setHandler(new CreateRssWebsite());
+		
+		ContextHandler context6 = new ContextHandler("/rssMalformedItemLink");
+		context2.setHandler(new CreateRssWebsite());
+		
 
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
-		contexts.setHandlers(new Handler[] { context, context1, context2 , context3});
+		contexts.setHandlers(new Handler[] { context, context1, context2 , context3, context4, context5 , context6});
 
 		server.setHandler(contexts);
 
@@ -81,11 +91,26 @@ public class RssReaderTest {
 		assertTrue(areEqual(message, itemsAL.get(0)));
 	}
 	@Test
-	public void canReadMalformedItem() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItem"));
-		FeedMessage message = new FeedMessage();
+	public void canReadMalformedItemTitle() throws MalformedURLException, ParseException{ // true rss,link,new 4
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemTitle"));
 		assertTrue(itemsAL.isEmpty());
 	}
+	@Test
+	public void canReadMalformedItemDescription() throws MalformedURLException, ParseException{ // true rss,link,new 4
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemDescription"));
+		assertTrue(itemsAL.isEmpty());
+	}
+	@Test
+	public void canReadMalformedItemPubDate() throws MalformedURLException, ParseException{ // true rss,link,new 4
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemPubDate"));
+		assertTrue(itemsAL.isEmpty());
+	}
+	@Test
+	public void canReadMalformedItemLink() throws MalformedURLException, ParseException{ // true rss,link,new 4
+		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemLink"));
+		assertTrue(itemsAL.isEmpty());
+	}
+	
 	@Test
 	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
 		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew")).isEmpty()) ; 

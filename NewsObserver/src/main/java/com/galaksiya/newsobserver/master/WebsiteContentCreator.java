@@ -40,7 +40,7 @@ public class WebsiteContentCreator {
 	public String createContext(List<Document> dataAl){
 		if(dataAl==null || dataAl.isEmpty()) return null;
 		String content="<html>"
-				+"<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-"+ dbHelper.totalCount() +"</title></head>"
+				+"<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-"+ dbHelper.getNews().size() +"</title></head>"
 				+"<body>"
 				+"<h4>Data</h4>";
 		for (Document document : dataAl) {

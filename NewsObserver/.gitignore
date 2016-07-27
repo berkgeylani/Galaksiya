@@ -4,4 +4,5 @@ target/*
 !target/jarar/
 .settings/
 *.log/
+*.db/
 ~*

@@ -215,9 +215,9 @@ public class MongoDbTest {
 	@Test
 	public void overrideFetchDateLimit() {
 		save(date, word, 2);
-		save(date, word, 2);
-		save(date, word, 2);
-		save(date, word, 2);
+		save(date, word+"a", 2);
+		save(date, word+"b", 2);
+		save(date, word+"c", 2);
 		assertEquals(2, mongoDb.fetch(date, 2).size());
 	}
 
@@ -284,7 +284,8 @@ public class MongoDbTest {
 			return false;
 		}
 		try {
-			getCollection(COLLECTION_NAME).insertOne(new Document().append("date", dateUtils.dateConvert(dateStr))
+			String customId = dateUtils.dateStrToHashForm(dateStr) +"_" + word;
+			getCollection(COLLECTION_NAME).insertOne(new Document("_id",customId).append("date", dateUtils.dateConvert(dateStr))
 					.append("word", word).append("frequency", frequency));
 			return true;
 
@@ -467,7 +468,7 @@ public class MongoDbTest {
 	public void totalCountTest() {
 		assertEquals(0, mongoDb.totalCount());
 		for (int i = 0; i < 6; i++) {
-			save(date, word, 2);
+			save(date, word+i, 2);
 		}
 		assertEquals(6, mongoDb.totalCount());
 	}

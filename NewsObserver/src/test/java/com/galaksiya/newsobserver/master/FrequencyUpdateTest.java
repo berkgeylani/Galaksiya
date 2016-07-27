@@ -47,7 +47,10 @@ public class FrequencyUpdateTest {
 	@Test
 	public void updateDatabaseControl() {
 		DateUtils dateUtils = new DateUtils();
-		Document document = new Document().append("date",dateUtils.dateConvert("17 May 2016")).append("word", "test").append("frequency", 2);
+		String dateStr = "17 May 2016";
+		String wordStr = "test";
+		String customId = dateUtils.dateStrToHashForm(dateStr) +"_" + wordStr;
+		Document document = new Document("_id",customId).append("date",dateUtils.dateConvert(dateStr)).append("word", wordStr).append("frequency", 2);
 		List<Document> docList = new ArrayList<>();
 		docList.add(document);
 		dbHelper.addDatabase(docList);

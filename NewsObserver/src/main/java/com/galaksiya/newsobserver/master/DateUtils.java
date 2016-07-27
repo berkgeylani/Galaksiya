@@ -42,6 +42,16 @@ public class DateUtils {
 		return date;
 	}
 	/**
+	 * It converts string(date) to hash form string.
+	 * @param dateStr It gets a date string which is like 09 May 2016
+	 * @return and return 2016_May_09
+	 */
+	public String dateStrToHashForm(String dateStr){
+		return dateStr.substring(7, 11) + "_" + dateStr.substring(3, 6) + "_"
+				+ dateStr.substring(0, 2);
+	}
+	
+	/**
 	 * It convert a String which occurs date like 'Fri May 13 10:24:56 EEST 2016' to 13 May 2016.
 	 * @param pubDate A date string like 'Fri May 13 10:24:56 EEST 2016'
 	 * @return ıt returns a String like '13 May 2016'.(date-month-year)

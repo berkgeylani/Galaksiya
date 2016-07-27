@@ -17,7 +17,6 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.UpdateResult;
 
 public class MongoDb implements Database {
@@ -82,8 +81,9 @@ public class MongoDb implements Database {
 		if (word == null || word.equals("")) {
 			return -1;
 		}
+		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(date.toString())) +"_" + word;
 
-		Bson filter = new Document().append("date", date).append("word", word);
+		Bson filter = new Document().append("_id",customId);
 
 		MongoClient mongoClient = getInstance();
 		return getCollection(mongoClient).count(filter);
@@ -348,10 +348,11 @@ public class MongoDb implements Database {
 		if (word == null || word.equals("")) {
 			return false;
 		}
-		Date dateConverted = dateUtils.dateConvert(dateUtils.dateCustomize(dateStr));
+		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(dateStr)) +"_" + word;
+		
 		try {
 			UpdateResult result = getCollection(mongoClient).updateOne(
-					new Document("date", dateConverted).append("word", word),
+					new Document("_id", customId),
 					new Document("$inc", new Document("frequency", frequency)));
 			return result.wasAcknowledged();
 		} catch (MongoWriteException e) {

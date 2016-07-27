@@ -149,7 +149,8 @@ public class NewsChecker {
 		while (e.hasMoreElements()) {
 			String word = (String) e.nextElement();
 			Integer frequency = wordFrequencyPerNew.get(word);
-			documentList.add(new Document().append("date", dateUtils.dateConvert(datePerNew)).append("word", word)
+			String customId = dateUtils.dateStrToHashForm(datePerNew) +"_" + word;
+			documentList.add(new Document("_id",customId).append("date", dateUtils.dateConvert(datePerNew)).append("word", word)
 					.append("frequency", frequency));
 		}
 		return updater.addDatabase(documentList);

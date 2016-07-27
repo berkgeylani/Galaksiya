@@ -42,7 +42,7 @@ public class FrequencyUpdater {
 			if (database.contain(document.getDate("date"),document.getString("word")) == 1) {
 				isSuccessfulPerProcess = database.update(document.getDate("date").toString(),  //2
 						document.getString("word"), document.getInteger("frequency"));
-				isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess;// TODO boolean&=boolean oluyormu bak
+				isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess; // TODO boolean&=boolean oluyormu bak
 			} else {
 				insertList.add(document);
 			}
@@ -53,5 +53,4 @@ public class FrequencyUpdater {
 		}
 		return isSuccessfulAll;
 	}
-
 }

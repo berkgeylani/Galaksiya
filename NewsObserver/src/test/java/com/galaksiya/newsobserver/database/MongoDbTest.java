@@ -265,7 +265,7 @@ public class MongoDbTest {
 
 		// then
 		System.out.println(firstDocument.get(0)+"\t"+firstDocument.get(1)+"\t"+firstDocument.get(2));
-		boolean isDateEqual = "Tue May 17 00:00:00 EEST 2016".equals(firstDocument.get(0));
+		boolean isDateEqual = dateUtils.dateCustomize("Tue May 17 00:00:00 EEST 2016").equals(dateUtils.dateCustomize(firstDocument.get(0)));
 		boolean isWordEqual = "test".equals(firstDocument.get(1));
 		boolean isFrequencyEqual = "2".equals(firstDocument.get(2));
 		assertTrue(isDateEqual && isFrequencyEqual && isWordEqual);

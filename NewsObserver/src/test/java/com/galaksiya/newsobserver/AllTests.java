@@ -10,7 +10,7 @@ import com.galaksiya.newsobserver.parser.RssReaderTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	DatabaseTestSuite.class,
+	DatabaseTestSuite.class, 
 	MasterTestSuite.class,
 	RssReaderTest.class
 })

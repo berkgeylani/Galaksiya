@@ -12,7 +12,7 @@ public class Main {
 
 
 	private static final String PROPERTY_NAME = "databaseType";
-
+	public static final long START_TIME= System.nanoTime();
 
 	private static final String DB_PROPERTY = System.getProperty(PROPERTY_NAME);
 
@@ -24,6 +24,7 @@ public class Main {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
+		LOG.info("Program başlangıcı\t"+(System.nanoTime()-START_TIME)/ 1000000000.0);
 		String databaseType = "mongo";// default
 		CommandLineParser parser = new DefaultParser();
 		Inititator initiate = new Inititator();
@@ -48,7 +49,7 @@ public class Main {
 			LOG.error("Program was closed.");
 			System.exit(0);
 		}
-
+		
 	}
 
 }

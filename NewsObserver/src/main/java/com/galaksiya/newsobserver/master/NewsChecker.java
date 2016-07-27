@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -24,14 +25,14 @@ public class NewsChecker {
 	private Database dbForNews;
 
 	private Hashtable<String, String> lastNews = new Hashtable<>();
-	
-	private ArrayList<URL> RssLinksAl ;
+
+	private ArrayList<URL> RssLinksAl;
 
 	public NewsChecker(ArrayList<URL> RssLinksAl) {
 		databaseFactory = DatabaseFactory.getInstance();
 		dbForNews = databaseFactory.getDatabase("news");
 		db = databaseFactory.getDatabase("STATISTICS");
-		this.RssLinksAl=RssLinksAl;
+		this.RssLinksAl = RssLinksAl;
 	}
 
 	public NewsChecker(Database dbObject) {
@@ -41,8 +42,8 @@ public class NewsChecker {
 	public NewsChecker(String type, Database dbObject) {
 		if (type.equalsIgnoreCase("test")) {
 			this.dbForNews = dbObject;
-			databaseFactory=DatabaseFactory.getInstance();
-			this.db=databaseFactory.getDatabase("test");
+			databaseFactory = DatabaseFactory.getInstance();
+			this.db = databaseFactory.getDatabase("test");
 		}
 	}
 
@@ -82,7 +83,8 @@ public class NewsChecker {
 			return null;
 		}
 		dbForNews.saveNews(message);
-		Hashtable<String, Integer> wordFrequencyPerNew = processOfWords.splitWords(message.getTitle() + " ", message.getDescription()); 
+		Hashtable<String, Integer> wordFrequencyPerNew = processOfWords.splitWords(message.getTitle() + " ",
+				message.getDescription());
 		// wordFrequency test edecez
 		if (!traverseWordByWord(datePerNew, wordFrequencyPerNew))
 			return null;
@@ -108,6 +110,7 @@ public class NewsChecker {
 			return false;
 		}
 		for (FeedMessage message : itemsAL) {
+			LOG.info("Haber Giriş\t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
 			boolean isThereAnyNewNews = !message.getTitle().equals(lastNews.get(rssURLs.toString()));
 			if (isThereAnyNewNews) { // if there is a new news we should insert
 				if (updateNew) {
@@ -116,11 +119,13 @@ public class NewsChecker {
 					updateNew = false;
 				}
 				handleMessage(message);
+
 			} else {
-				break;  //itemsAl yi size 0 yapılabilir.
-			} 	
+				break; // itemsAl yi size 0 yapılabilir.
+			}
+			LOG.info("haber Çıkış \t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
 		}
-		if ( !updateNew ) {
+		if (!updateNew) {
 			lastNews.put(lastNewsArray[0], lastNewsArray[1]);
 		}
 		return true;
@@ -137,23 +142,17 @@ public class NewsChecker {
 	 * @return true :Success false :fail
 	 */
 	public boolean traverseWordByWord(String datePerNew, Hashtable<String, Integer> wordFrequencyPerNew) {
-		boolean proccessSuccessful = false,generalProcess=true;
+		List<Document> documentList = new ArrayList<>();
 		FrequencyUpdater updater = new FrequencyUpdater(db);
+		DateUtils dateUtils = new DateUtils();
 		Enumeration<String> e = wordFrequencyPerNew.keys();
-		ArrayList<Document> didNotAdded = new ArrayList<>();
 		while (e.hasMoreElements()) {
 			String word = (String) e.nextElement();
 			Integer frequency = wordFrequencyPerNew.get(word);
-			proccessSuccessful = updater.addDatabase(datePerNew, word, frequency);
-			if(!proccessSuccessful){
-				didNotAdded.add(new Document().append("date", datePerNew).append("word", word).append("frequency", frequency));
-				generalProcess=false;
-			}
+			documentList.add(new Document().append("date", dateUtils.dateConvert(datePerNew)).append("word", word)
+					.append("frequency", frequency));
 		}
-		if(!generalProcess){
-			LOG.error("These are not added to database."+didNotAdded.toString());
-		}
-		return generalProcess;
+		return updater.addDatabase(documentList);
 	}
 
 	/**
@@ -166,12 +165,14 @@ public class NewsChecker {
 	public boolean updateActualNews() {
 		if (RssLinksAl == null || RssLinksAl.isEmpty())
 			return false;
-
 		for (URL rssURL : RssLinksAl) {
+			LOG.info("link Giriş\t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
+
 			if (!lastNews.containsKey(rssURL.toString())) {
 				lastNews.put(rssURL.toString(), "");
 			}
 			traverseNews(rssURL);
+			LOG.info("link Çıkış \t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
 			LOG.debug(rssURL + " checked.");
 		}
 		return true;

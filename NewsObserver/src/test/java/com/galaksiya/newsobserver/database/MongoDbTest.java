@@ -2,8 +2,8 @@ package com.galaksiya.newsobserver.database;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -20,8 +20,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.galaksiya.newsobserver.database.Database;
-import com.galaksiya.newsobserver.database.MongoDb;
 import com.galaksiya.newsobserver.master.DateUtils;
 import com.galaksiya.newsobserver.parser.FeedMessage;
 import com.mongodb.MongoClient;
@@ -78,19 +76,19 @@ public class MongoDbTest {
 
 	@Test
 	public void containInvalidInput() {
-		assertEquals(-1, mongoDb.contain(date, ""));
+		assertEquals(-1, mongoDb.contain(dateUtils.dateConvert(date), ""));
 	}
 
 	@Test
 	public void containNullInput() {
-		assertEquals(-1, mongoDb.contain(date, null));
+		assertEquals(-1, mongoDb.contain(dateUtils.dateConvert(date), null));
 	}
 
 	@Test
 	public void containTest() {
-		assertEquals(0, mongoDb.contain(date, word));
+		assertEquals(0, mongoDb.contain(dateUtils.dateConvert(date), word));
 		save(date, word, 2);
-		assertEquals(1, mongoDb.contain(date, word));
+		assertEquals(1, mongoDb.contain(dateUtils.dateConvert(date), word));
 	}
 
 	@Test
@@ -224,7 +222,58 @@ public class MongoDbTest {
 	}
 
 	@Test
+	public void saveManyArgDocWInvalidInput() {
+		assertFalse(mongoDb.saveMany(new ArrayList<>()));
+	}
+
+	
+	
+	@Test
+	public void saveManyArgDocWNullInput() {
+		//then
+		assertFalse(mongoDb.saveMany(null));
+	}
+	
+	@Test
+	public void saveManyCanInsert() {
+		// Given
+		Document document = new Document().append("date", dateUtils.dateConvert("17 May 2016")).append("word", "test")
+				.append("frequency", 2);
+		List<Document> docList = new ArrayList<>();
+		docList.add(document);
+
+		// When
+		assertEquals(0, mongoDb.totalCount());
+		mongoDb.saveMany(docList);
+
+		// then
+		assertEquals(1, mongoDb.totalCount());
+	}
+
+	@Test
+	public void saveManyContentControl() {
+		// Given
+		Document document = new Document().append("date", dateUtils.dateConvert("17 May 2016")).append("word", "test")
+				.append("frequency", 2);
+		List<Document> docList = new ArrayList<>();
+		docList.add(document);
+
+		// When
+		assertEquals(0, mongoDb.totalCount());
+		mongoDb.saveMany(docList);
+		List<String> firstDocument = mongoDb.fetchFirstWDocument();
+
+		// then
+		System.out.println(firstDocument.get(0)+"\t"+firstDocument.get(1)+"\t"+firstDocument.get(2));
+		boolean isDateEqual = "Tue May 17 00:00:00 EEST 2016".equals(firstDocument.get(0));
+		boolean isWordEqual = "test".equals(firstDocument.get(1));
+		boolean isFrequencyEqual = "2".equals(firstDocument.get(2));
+		assertTrue(isDateEqual && isFrequencyEqual && isWordEqual);
+	}
+	
+	@Test
 	public void save() {
+
 		assertEquals(0, contain(date, word));
 		assertTrue(mongoDb.save(date, word, 2));
 		assertEquals(1, contain(date, word));
@@ -235,8 +284,8 @@ public class MongoDbTest {
 			return false;
 		}
 		try {
-			getCollection(COLLECTION_NAME)
-					.insertOne(new Document().append("date", dateUtils.dateConvert(dateStr)).append("word", word).append("frequency", frequency));
+			getCollection(COLLECTION_NAME).insertOne(new Document().append("date", dateUtils.dateConvert(dateStr))
+					.append("word", word).append("frequency", frequency));
 			return true;
 
 		} catch (MongoWriteException e) {

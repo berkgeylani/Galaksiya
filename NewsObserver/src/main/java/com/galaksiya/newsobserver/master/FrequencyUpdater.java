@@ -1,11 +1,17 @@
 package com.galaksiya.newsobserver.master;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
+import org.bson.Document;
 
 import com.galaksiya.newsobserver.database.Database;
 
 public class FrequencyUpdater {
 
+	private final static Logger LOG = Logger.getLogger(FrequencyUpdater.class);
+	
 	private Database database;
 
 	public FrequencyUpdater(Database dbObject) {
@@ -24,18 +30,28 @@ public class FrequencyUpdater {
 	 *            Frequency of a word.
 	 * @return flagSuccessful Successful Flag(True: Okay False : Fault)
 	 */
-	public boolean addDatabase(String datePerNew, String word, int frequency) {
-		boolean flagSuccessful;
-		DateUtils dateUtils = new DateUtils();
-		if (!dateUtils.canConvert(datePerNew))
+	public boolean addDatabase(List<Document> docList) {
+		if (docList == null || docList.isEmpty())
 			return false;
-		boolean alreadyInsertedToDatabase = database.contain(datePerNew, word) >= 1;
-		if (alreadyInsertedToDatabase) {
-			flagSuccessful = database.update(datePerNew, word, frequency);
-		} else {
-			flagSuccessful = database.save(datePerNew, word, frequency);
+		boolean isSuccessfulAll = true;
+		boolean isSuccessfulPerProcess = true;
+		boolean alreadyInsertedToDatabase = false;
+		List<Document> insertList = new ArrayList<>();
+
+		for (Document document : docList) {
+			if (database.contain(document.getDate("date"),document.getString("word")) == 1) {
+				isSuccessfulPerProcess = database.update(document.getDate("date").toString(),  //2
+						document.getString("word"), document.getInteger("frequency"));
+				isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess;// TODO boolean&=boolean oluyormu bak
+			} else {
+				insertList.add(document);
+			}
 		}
-		return flagSuccessful;
+		if (!alreadyInsertedToDatabase) {
+			isSuccessfulPerProcess = database.saveMany(insertList);//1
+			isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess;
+		}
+		return isSuccessfulAll;
 	}
 
 }

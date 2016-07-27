@@ -1,5 +1,6 @@
 package com.galaksiya.newsobserver.database;
 
+import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
@@ -14,7 +15,7 @@ public interface Database {
 	 * @param word	Word which will be search.
 	 * @return -1: Fault Others: Success
 	 */
-	long contain(String dateStr, String word);
+	long contain(Date date, String word);
 
 	/**
 	 * Delete all the data from database
@@ -59,6 +60,14 @@ public interface Database {
 	 */
 	boolean save(String dateStr, String word, int frequency);
 
+	/**
+	 * It insert a list to database
+	 * @param insertList A document list which is many (date-word frequency).
+	 * @return true:if process has been successfully done. false: If it fault.
+	 */
+	boolean saveMany(List<Document> insertList);
+	
+	
 	/**
 	 * It insert news to Db one by one.
 	 * 

@@ -51,13 +51,19 @@ public class DateUtils {
 		if (pubDate.length() == 29)
 			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(4, 7) + " "
 					+ pubDate.substring(25, 29);
+		else if(pubDate.length() == 28)
+			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(4, 7) + " "
+					+ pubDate.substring(24, 28);
+		else if (pubDate.length() == 11) {
+			datePerNew = pubDate.substring(0, 2) + " " + pubDate.substring(3, 6) + " "
+					+ pubDate.substring(7, 11);
+		}
 		else if (pubDate.length() == 10) {
 			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(5, 7) + " "
 					+ pubDate.substring(0, 4);
+		}else {
+			 datePerNew=null;
 		}
-		else
-			datePerNew = pubDate.substring(8, 10) + " " + pubDate.substring(4, 7) + " "
-					+ pubDate.substring(24, 28);
 		return datePerNew;
 	}
 

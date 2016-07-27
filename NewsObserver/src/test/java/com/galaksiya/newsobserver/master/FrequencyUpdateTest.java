@@ -3,7 +3,9 @@ package com.galaksiya.newsobserver.master;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +24,15 @@ public class FrequencyUpdateTest {
 	private Database mongo;
 
 	@Test
-	public void addDatabaseInvalidDate(){
-		assertFalse(dbHelper.addDatabase("qwerqwer", "test", 2));
+	public void addDatabaseInvalidEmptyList(){
+		List<Document> docList = new ArrayList<>();
+		assertFalse(dbHelper.addDatabase(docList));
 	}
-
+	@Test
+	public void addDatabaseInvalidNullList(){
+		assertFalse(dbHelper.addDatabase(null));
+	}
+	
 	@After
 	public void after() {
 		mongo.delete();
@@ -40,13 +47,16 @@ public class FrequencyUpdateTest {
 	@Test
 	public void updateDatabaseControl() {
 		DateUtils dateUtils = new DateUtils();
-		dbHelper.addDatabase("17 May 2016", "test", 2);
+		Document document = new Document().append("date",dateUtils.dateConvert("17 May 2016")).append("word", "test").append("frequency", 2);
+		List<Document> docList = new ArrayList<>();
+		docList.add(document);
+		dbHelper.addDatabase(docList);
 		ArrayList<String> dateWordFreq = (ArrayList<String>) mongo.fetchFirstWDocument();
 		String date = dateWordFreq.get(0);
 		String word = dateWordFreq.get(1);
 		int frequency = Integer.parseInt(dateWordFreq.get(2));
 		date = dateUtils.dateCustomize(date);
-		dbHelper.addDatabase(date, word, 2);
+		dbHelper.addDatabase(docList);
 		dateWordFreq = (ArrayList<String>) mongo.fetchFirstWDocument();
 		int frequencyNew = Integer.parseInt(dateWordFreq.get(2));
 		assertEquals(frequencyNew, frequency + 2);

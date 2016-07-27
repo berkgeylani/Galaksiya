@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -77,6 +78,7 @@ public class DerbyDbTest {
 	private DerbyDb derbyDb = new DerbyDb(TABLE_NAME);
 	private String dateStr = "09-May-2016";;
 	private String word = "testWord";
+
 	@After
 	public void after() {
 		delete(TABLE_NAME);
@@ -88,6 +90,7 @@ public class DerbyDbTest {
 		getCollection(TABLE_NAME);
 		getCollection(TABLE_NAME_NEWS);
 	}
+
 	public long contain(String dateStr, String word) {
 		if (word == null || word.equals("")) {
 			return -1;
@@ -112,12 +115,12 @@ public class DerbyDbTest {
 
 	@Test
 	public void containInvalidInput() {
-		assertEquals(-1, derbyDb.contain(dateStr, ""));
+		assertEquals(-1, derbyDb.contain(dateUtils.dateConvert(dateStr), ""));
 	}
 
 	@Test
 	public void containNullInput() {
-		assertEquals(-1, derbyDb.contain(dateStr, null));
+		assertEquals(-1, derbyDb.contain(dateUtils.dateConvert(dateStr), null));
 	}
 
 	public boolean delete(String tableName) {
@@ -157,9 +160,9 @@ public class DerbyDbTest {
 	}
 
 	public void getCollection(String tableName) throws SQLException {
-		tableName=tableName.toUpperCase();
+		tableName = tableName.toUpperCase();
 		DatabaseMetaData dbmd = getInstance().getMetaData();
-		ResultSet rs = dbmd.getTables(null, "APP", tableName, null); 
+		ResultSet rs = dbmd.getTables(null, "APP", tableName, null);
 		if (!(rs.next())) {
 			Statement stmt = conn.createStatement();
 			if (tableName.contains("NEWS")) {
@@ -233,8 +236,64 @@ public class DerbyDbTest {
 	}
 
 	@Test
-	public void saveInvalidInput() {
+	public void saveArgWordWEmptyInput() {
 		assertFalse(derbyDb.save(dateStr, "", 2));
+	}
+
+	@Test
+	public void saveArgDateWEmptyInput() {
+		assertFalse(derbyDb.save("", word, 2));
+
+	}
+
+	@Test
+	public void saveManyArgDocWInvalidInput() {
+		assertFalse(derbyDb.saveMany(new ArrayList<>()));
+	}
+
+	
+	
+	@Test
+	public void saveManyArgDocWNullInput() {
+		//then
+		assertFalse(derbyDb.saveMany(null));
+	}
+
+	
+	@Test
+	public void saveManyCanInsert() {
+		// Given
+		Document document = new Document().append("date", dateUtils.dateConvert("17 May 2016")).append("word", "test")
+				.append("frequency", 2);
+		List<Document> docList = new ArrayList<>();
+		docList.add(document);
+
+		// When
+		assertEquals(0, derbyDb.totalCount());
+		derbyDb.saveMany(docList);
+
+		// then
+		assertEquals(1, derbyDb.totalCount());
+	}
+
+	@Test
+	public void saveManyContentControl() {
+		// Given
+		Document document = new Document().append("date", dateUtils.dateConvert("17 May 2016")).append("word", "test")
+				.append("frequency", 2);
+		List<Document> docList = new ArrayList<>();
+		docList.add(document);
+
+		// When
+		assertEquals(0, derbyDb.totalCount());
+		derbyDb.saveMany(docList);
+		List<String> firstDocument = derbyDb.fetchFirstWDocument();
+
+		// then
+		boolean isDateEqual = "2016-05-17".equals(firstDocument.get(0));
+		boolean isWordEqual = "test".equals(firstDocument.get(1));
+		boolean isFrequencyEqual = "2".equals(firstDocument.get(2));
+		assertTrue(isDateEqual && isFrequencyEqual && isWordEqual);
 	}
 
 	@Test
@@ -481,14 +540,14 @@ public class DerbyDbTest {
 		save(dateStr, word, 9);
 
 		// then
-		assertEquals(1, derbyDb.contain(dateStr, word));
+		assertEquals(1, derbyDb.contain(dateUtils.dateConvert(dateStr), word));
 	}
 
 	@Test
 	public void testContainWInvalidTableName() {
 		DerbyDb derbyDbInvalidTableName = new DerbyDb(TABLE_NAME);
 		derbyDbInvalidTableName.setTableName(null);
-		assertEquals(-1, derbyDbInvalidTableName.contain("21 May 2016", "qwer"));
+		assertEquals(-1, derbyDbInvalidTableName.contain(dateUtils.dateConvert("21 May 2016"), "qwer"));
 	}
 
 	@Test
@@ -612,7 +671,7 @@ public class DerbyDbTest {
 	public void testfetchStringStringIntWInvalidTableName() {
 		DerbyDb derbyDbInvalidTableName = new DerbyDb(TABLE_NAME);
 		derbyDbInvalidTableName.setTableName(null);
-		assertTrue( derbyDbInvalidTableName.fetch(new Document(), new Document().append("frequency", 1), -1).isEmpty());
+		assertTrue(derbyDbInvalidTableName.fetch(new Document(), new Document().append("frequency", 1), -1).isEmpty());
 	}
 
 	@Test
@@ -646,7 +705,7 @@ public class DerbyDbTest {
 	public void testGetNewsWInvalidTableName() {
 		DerbyDb derbyDbInvalidTableName = new DerbyDb(TABLE_NAME);
 		derbyDbInvalidTableName.setTableName(null);
-		assertTrue( derbyDbInvalidTableName.getNews().isEmpty());
+		assertTrue(derbyDbInvalidTableName.getNews().isEmpty());
 	}
 
 	@Test

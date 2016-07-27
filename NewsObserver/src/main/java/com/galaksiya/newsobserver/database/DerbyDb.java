@@ -27,7 +27,6 @@ public class DerbyDb implements Database {
 
 	private static Object instanceLock = new Object();
 
-
 	/**
 	 * Fabric of a DerbyDb
 	 * 
@@ -87,12 +86,12 @@ public class DerbyDb implements Database {
 	}
 
 	@Override
-	public long contain(String dateStr, String word) {
+	public long contain(Date date, String word) {
 		if (word == null || "".equals(word)) {
 			return -1;
 		}
 		int count = -1;
-		java.sql.Date sqlDate = new java.sql.Date(dateUtils.dateConvert(dateStr).getTime());
+		java.sql.Date sqlDate = new java.sql.Date(date.getTime());
 		try (PreparedStatement selectCountemp = conn
 				.prepareStatement("SELECT COUNT(*) FROM " + tableName + " WHERE word= ?  AND PUBLISHDATE= ? ")) {
 
@@ -122,7 +121,7 @@ public class DerbyDb implements Database {
 
 	@Override
 	public boolean exists(FeedMessage message) {
-		if(!isMessageCorrect(message))
+		if (!isMessageCorrect(message))
 			return false;
 		int count = 0;
 		try (PreparedStatement findEmp = conn
@@ -190,7 +189,7 @@ public class DerbyDb implements Database {
 	@Override
 	public List<String> fetchFirstWDocument() {
 		ArrayList<String> dateWordFreq = new ArrayList<>();
-		boolean oneTime = true ;
+		boolean oneTime = true;
 		try (PreparedStatement selectCountemp = conn.prepareStatement("SELECT * FROM " + tableName)) {
 			ResultSet res = selectCountemp.executeQuery();
 			while (res.next() && oneTime) {
@@ -216,7 +215,7 @@ public class DerbyDb implements Database {
 	 */
 	public void getCollection() throws SQLException {
 		DatabaseMetaData dbmd = conn.getMetaData();
-		ResultSet rs = dbmd.getTables(null, "APP", tableName, null); 
+		ResultSet rs = dbmd.getTables(null, "APP", tableName, null);
 		if (!(rs.next())) {
 			Statement stmt = conn.createStatement();
 			if (tableName.contains("NEWS")) {
@@ -256,7 +255,7 @@ public class DerbyDb implements Database {
 
 	@Override
 	public boolean save(String dateStr, String word, int frequency) {
-		if (word == null || "".equals(word)) {
+		if (dateStr == null || word == null || "".equals(dateStr) || "".equals(word)) {
 			return false;
 		}
 		try (PreparedStatement insertemp = conn
@@ -293,19 +292,23 @@ public class DerbyDb implements Database {
 		}
 		return false;
 	}
+
 	/**
-	 * It controls the message like is it null or is its content contain anything or null.
-	 * @param message message(title description pubdate)
-	 * @return	true : Correct Message false: Incorrect message
+	 * It controls the message like is it null or is its content contain
+	 * anything or null.
+	 * 
+	 * @param message
+	 *            message(title description pubdate)
+	 * @return true : Correct Message false: Incorrect message
 	 */
 	public boolean isMessageCorrect(FeedMessage message) {
-		if (message == null ) {
+		if (message == null) {
 			return false;
 		}
 		boolean isMessagetitleInvalid = message.getTitle() == null || "".equals(message.getTitle());
-		boolean isMessageDescInvalid  = message.getDescription() == null || "".equals(message.getDescription());
-		boolean isMessagePubDInvalid  = message.getpubDate() == null || "".equals(message.getpubDate());
-		if ( isMessagetitleInvalid || isMessageDescInvalid || isMessagePubDInvalid) {
+		boolean isMessageDescInvalid = message.getDescription() == null || "".equals(message.getDescription());
+		boolean isMessagePubDInvalid = message.getpubDate() == null || "".equals(message.getpubDate());
+		if (isMessagetitleInvalid || isMessageDescInvalid || isMessagePubDInvalid) {
 			return false;
 		}
 		return true;
@@ -380,6 +383,33 @@ public class DerbyDb implements Database {
 
 	private String sortCase(int sortKey) {
 		return (sortKey > 0) ? "  ORDER BY FREQUENCY" : "";
+	}
+
+	@Override
+	public boolean saveMany(List<Document> insertList) {
+		boolean isSuccessful = false;
+		if (insertList == null || insertList.isEmpty()) {
+			return isSuccessful;
+		}
+		int i = 0;
+		String sqlQuery = "insert into " + tableName + "(PUBLISHDATE,WORD,FREQUENCY) values(?,?,?)";
+		sqlQuery = sqlQuery + new String(new char[insertList.size() - 1]).replace("\0", ",(?,?,?)");
+		PreparedStatement insertemp;
+		try {
+			insertemp = conn.prepareStatement(sqlQuery);
+			for (Document doc : insertList) {
+				java.sql.Date sqlDate = new java.sql.Date(doc.getDate("date").getTime());
+				insertemp.setString(i + 1, sqlDate.toString());
+				insertemp.setString(i + 2, doc.getString("word"));
+				insertemp.setInt(i + 3, doc.getInteger("frequency"));
+				i += 3;
+			}
+			insertemp.executeUpdate();
+			isSuccessful = true;
+		} catch (SQLException e) {
+			LOG.error("Data couldn't be inserted(Many).", e);
+		}
+		return isSuccessful;
 	}
 
 }

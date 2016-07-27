@@ -17,6 +17,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.result.UpdateResult;
 
 public class MongoDb implements Database {
@@ -41,7 +42,8 @@ public class MongoDb implements Database {
 		if (mongoClient_INSTANCE == null) {
 			synchronized (MongoClient.class) {
 				if (mongoClient_INSTANCE == null) { // yes double check
-					MongoClientOptions.Builder builder = new MongoClientOptions.Builder().connectionsPerHost(CONNECTION_POOL_SIZE);
+					MongoClientOptions.Builder builder = new MongoClientOptions.Builder()
+							.connectionsPerHost(CONNECTION_POOL_SIZE);
 					mongoClient_INSTANCE = new MongoClient(new ServerAddress(LOCALHOST), builder.build());
 				}
 			}
@@ -76,11 +78,10 @@ public class MongoDb implements Database {
 	 * java.lang.String)
 	 */
 	@Override
-	public long contain(String dateStr, String word) {
+	public long contain(Date date, String word) {
 		if (word == null || word.equals("")) {
 			return -1;
 		}
-		Date date = dateUtils.dateConvert(dateStr);
 
 		Bson filter = new Document().append("date", date).append("word", word);
 
@@ -214,7 +215,8 @@ public class MongoDb implements Database {
 	 *         set when create MongoDb(//here).
 	 */
 	public MongoCollection<Document> getCollection(MongoClient client) {
-		return client.getDatabase(MONGO_DB_NAME).getCollection(this.collectionName);
+		MongoCollection<Document> collection = client.getDatabase(MONGO_DB_NAME).getCollection(this.collectionName);
+		return collection;
 	}
 
 	@Override
@@ -244,13 +246,34 @@ public class MongoDb implements Database {
 		}
 		try {
 			Date date = dateUtils.dateConvert(dateStr);
+			String customId = dateStr+"_"+word;
 			getCollection(mongoClient)
-					.insertOne(new Document().append("date", date).append("word", word).append("frequency", frequency));
+					.insertOne(new Document().append("_id", customId).append("date", date).append("word", word).append("frequency", frequency));
 			return true;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 		}
 		return false;
+	}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.galaksiya.newsObserver.database.Database#saveMany(List<Document>)
+	 */
+	@Override
+	public boolean saveMany(List<Document> insertList) {
+		if (insertList == null || insertList.isEmpty()) {
+			return false;
+		}
+		MongoClient mongoClient = getInstance();
+		boolean isSuccessful = false;
+		try {
+			getCollection(mongoClient).insertMany(insertList);
+			isSuccessful = true;
+		} catch (MongoWriteException e) {
+			LOG.error("Datas couldn't be inserted.", e);
+		}
+		return isSuccessful;
 	}
 
 	/*
@@ -280,24 +303,27 @@ public class MongoDb implements Database {
 	public void setCollectionName(String collectionName) {
 		this.collectionName = collectionName;
 	}
+
 	/**
-	 * It controls the message like is it null or is its content contain anything or null.
-	 * @param message message(title description pubdate)
-	 * @return	true : Correct Message false: Incorrect message
+	 * It controls the message like is it null or is its content contain
+	 * anything or null.
+	 * 
+	 * @param message
+	 *            message(title description pubdate)
+	 * @return true : Correct Message false: Incorrect message
 	 */
 	public boolean isMessageCorrect(FeedMessage message) {
-		if (message == null ) {
+		if (message == null) {
 			return false;
 		}
 		boolean isMessagetitleInvalid = message.getTitle() == null || "".equals(message.getTitle());
-		boolean isMessageDescInvalid  = message.getDescription() == null || "".equals(message.getDescription());
-		boolean isMessagePubDInvalid  = message.getpubDate() == null || "".equals(message.getpubDate());
-		if ( isMessagetitleInvalid || isMessageDescInvalid || isMessagePubDInvalid) {
+		boolean isMessageDescInvalid = message.getDescription() == null || "".equals(message.getDescription());
+		boolean isMessagePubDInvalid = message.getpubDate() == null || "".equals(message.getpubDate());
+		if (isMessagetitleInvalid || isMessageDescInvalid || isMessagePubDInvalid) {
 			return false;
 		}
 		return true;
 	}
-
 
 	/*
 	 * (non-Javadoc)
@@ -321,16 +347,16 @@ public class MongoDb implements Database {
 		MongoClient mongoClient = getInstance();
 		if (word == null || word.equals("")) {
 			return false;
-			}
-			Date dateConverted = dateUtils.dateConvert(dateStr);
-			try {
-				UpdateResult result = getCollection(mongoClient).updateOne(
-						new Document("date", dateConverted).append("word", word),
-						new Document("$inc", new Document("frequency", frequency)));
-				return result.wasAcknowledged();
-			} catch (MongoWriteException e) {
-				LOG.error("Data couldn't be updated.", e);
-			}
+		}
+		Date dateConverted = dateUtils.dateConvert(dateUtils.dateCustomize(dateStr));
+		try {
+			UpdateResult result = getCollection(mongoClient).updateOne(
+					new Document("date", dateConverted).append("word", word),
+					new Document("$inc", new Document("frequency", frequency)));
+			return result.wasAcknowledged();
+		} catch (MongoWriteException e) {
+			LOG.error("Data couldn't be updated.", e);
+		}
 		return false;
 	}
 

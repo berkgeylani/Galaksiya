@@ -13,6 +13,7 @@ import org.bson.Document;
 
 import com.galaksiya.newsobserver.database.Database;
 import com.galaksiya.newsobserver.database.DatabaseFactory;
+import com.galaksiya.newsobserver.database.MongoDb;
 
 /**
  * this class fill the context with html from a selected query.

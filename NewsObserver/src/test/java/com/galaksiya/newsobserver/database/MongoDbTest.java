@@ -33,7 +33,7 @@ import com.mongodb.client.MongoCursor;
 public class MongoDbTest {
 	private static final int CONNECTİON_POOL_SIZE = 100;
 	private static final String LOCALHOST = "localhost";
-	private static final Logger LOG = Logger.getLogger(MongoDbTest.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 	private static final String MONGO_DB_NAME = "mydb";
 	private String COLLECTION_NAME = "test";
 	private String COLLECTION_NAME_NEWS = "newsTest";
@@ -143,7 +143,7 @@ public class MongoDbTest {
 
 	public MongoClient getInstance() {
 		MongoClientOptions.Builder builder = new MongoClientOptions.Builder();
-		builder.connectionsPerHost(CONNECTİON_POOL_SIZE);// TODO 100 u field yap
+		builder.connectionsPerHost(CONNECTİON_POOL_SIZE);
 		mongoClient = new MongoClient(new ServerAddress(LOCALHOST), builder.build());
 		return mongoClient;
 	}
@@ -308,6 +308,7 @@ public class MongoDbTest {
 		message.setDescription(
 				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		message.setLink("http://www.boston.com/news/politics/2016/07/27/state-official-charge-elections-says-3rd-party-vote-waste");
 		mongoDbNewsTest.saveNews(message);
 		ArrayList<Document> newsAL = (ArrayList<Document>) getNews();
 		assertNotNull(newsAL);
@@ -360,6 +361,7 @@ public class MongoDbTest {
 		message.setDescription(
 				"Fetullahçı Terör Örgütü lideri Fetullah Gülen ihanet için hiçbir fırsatı kaçırmıyor. İstanbul Atatürk Hava Limanı’ndaki terör saldırısından sonra bir taziye yayınlayan Fetullahçı çetenin lideri, teröristleri...");
 		message.setPubDate("Mon May 02 20:03:40 EEST 2016");
+		message.setLink("http://www.boston.com/news/politics/2016/07/27/state-official-charge-elections-says-3rd-party-vote-waste");
 		mongoDbNewsTest.saveNews(message);
 		assertEquals(1, totalCount(COLLECTION_NAME_NEWS));
 	}

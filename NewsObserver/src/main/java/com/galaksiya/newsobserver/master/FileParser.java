@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 
 public class FileParser {
 
-	private static final Logger LOG = Logger.getLogger(FileParser.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 	private ArrayList<URL> rssLinksAL;
 
 	public FileParser(String filePath) {

@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 public class ScheduledRunner {
-	private static final Logger LOG = Logger.getLogger(ScheduledRunner.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 	private ScheduledExecutorService executor;
 
 	/**
@@ -30,6 +30,11 @@ public class ScheduledRunner {
 	public void start(ArrayList<URL> RssLinksAL) {
 		NewsChecker newsChecker = new NewsChecker(RssLinksAL);
 		executor = Executors.newSingleThreadScheduledExecutor();
+		
+//		Runnable periodicTask = () -> {  TODO java 8 için bunu dene.
+//			newsChecker.updateActualNews();
+//			LOG.info("Checked all the rss links.\n\n\n"); 
+//		};
 		
 		Runnable periodicTask = new Runnable() {
 			public void run() {

@@ -8,8 +8,7 @@ import org.apache.log4j.Logger;
 
 public class Main {
 
-	private static final Logger LOG = Logger.getLogger(Main.class);
-
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
 	private static final String PROPERTY_NAME = "databaseType";
 	public static final long START_TIME= System.nanoTime();

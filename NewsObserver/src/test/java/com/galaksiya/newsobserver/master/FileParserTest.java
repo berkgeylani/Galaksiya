@@ -27,7 +27,7 @@ import com.galaksiya.newsobserver.master.testutil.CreateRssJetty;
 public class FileParserTest {
 	private static Server server;
 	private static final int SERVER_PORT = 8119;
-	private static final Logger LOG = Logger.getLogger(FileParserTest.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
 	@AfterClass
 	public static void shutDown() {

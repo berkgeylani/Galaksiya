@@ -56,7 +56,7 @@ public class WebsiteContentCreatorTest {
 
 	@Test
 	public void createContextNullInput() {
-		assertEquals(null, contentCreator.createContext(null));
+		assertEquals(null, contentCreator.createContext(null,"newsTest"));
 	}
 
 	@Test
@@ -66,17 +66,17 @@ public class WebsiteContentCreatorTest {
 		document.append("date", "Wed Jun 01 00:00:00 EEST 2016").append("word", "Atalay").append("frequency", "6");
 		dataAl.add(document);
 		String content = "<html>"
-				+ "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-1</title></head>"
+				+ "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-0</title></head>"
 				+ "<body>" + "<h4>Data</h4>" + "<ul>" + "<li>"
 				+ dateUtils.dateCustomize(document.get("date").toString()) + "</li>" + "<li>"
 				+ document.get("word").toString() + "</li>" + "<li>" + document.get("frequency").toString() + "</li>"
 				+ "</ul>" + "</body>" + "</html>";
-		assertEquals(content, contentCreator.createContext(dataAl));
+		assertEquals(content, contentCreator.createContext(dataAl,"newsTest"));
 	}
 
 	@Test
 	public void createContextZeroSizeInput() {
-		assertEquals(null, contentCreator.createContext(new ArrayList<Document>()));
+		assertEquals(null, contentCreator.createContext(new ArrayList<Document>(),"newsTest"));
 	}
 
 	@Test

@@ -15,7 +15,7 @@ public class Inititator {
 	private Scanner sc;
 	private Server jettyServer;
 
-	private static final Logger LOG = Logger.getLogger(Inititator.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
 	/**
 	 * It starts a web server(port 8112).

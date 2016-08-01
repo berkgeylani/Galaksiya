@@ -1,6 +1,8 @@
 package com.galaksiya.newsobserver.master;
 
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -16,15 +18,27 @@ import com.galaksiya.newsobserver.parser.RssReader;
 
 public class NewsChecker {
 
-	private final static Logger LOG = Logger.getLogger(NewsChecker.class);
+	private final static Logger LOG = Logger.getLogger("com.newsobserver.admin");
+
+	private static final Logger LOG_PERFORMANCE = Logger.getLogger("com.newsobserver.performance");
 
 	private DatabaseFactory databaseFactory;
+
+	private int countOfMessage = 0;
+
+	private double controlOfRssFeeds = 0;
+
+	private double processNewsTime = 0;
+
+	private double processNonNewsTime = 0;
+
+	private double UrlProcessTime = 0;
+
+	private Double[] performanceLog = new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 	private Database db;
 
 	private Database dbForNews;
-
-	private Hashtable<String, String> lastNews = new Hashtable<>();
 
 	private ArrayList<URL> RssLinksAl;
 
@@ -79,9 +93,6 @@ public class NewsChecker {
 		WordProcessor processOfWords = new WordProcessor();
 		DateUtils dateUtils = new DateUtils();
 		String datePerNew = dateUtils.dateCustomize(message.getpubDate());
-		if (dbForNews.exists(message)) {
-			return null;
-		}
 		dbForNews.saveNews(message);
 		Hashtable<String, Integer> wordFrequencyPerNew = processOfWords.splitWords(message.getTitle() + " ",
 				message.getDescription());
@@ -95,38 +106,40 @@ public class NewsChecker {
 	 * It travel news in url which is given with param. It gives news one by one
 	 * to handleMessage. Also this function save the last news.
 	 * 
-	 * @param lastNews
-	 *            It is hashtable which occurs rssLink-lastNew for this link.
 	 * @param rssURLs
 	 *            This is the url which will be read.
 	 */
 	public boolean traverseNews(URL rssURLs) {
-		String[] lastNewsArray = new String[2];
-		boolean updateNew = true;
+		countOfMessage = 1;
 		RssReader parserOfRss = new RssReader();
 		ArrayList<FeedMessage> itemsAL = parserOfRss.parseFeed(rssURLs);
+		performanceLog[1] = System.currentTimeMillis() - UrlProcessTime;
 		if (itemsAL == null || itemsAL.isEmpty()) {
-			LOG.error("There no news to handle.");
+			LOG.error("There is no news to handle.");
 			return false;
 		}
+		// burada da diğeri belirlenecek
 		for (FeedMessage message : itemsAL) {
-			LOG.info("Haber Giriş\t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
-			boolean isThereAnyNewNews = !message.getTitle().equals(lastNews.get(rssURLs.toString()));
-			if (isThereAnyNewNews) { // if there is a new news we should insert
-				if (updateNew) {
-					lastNewsArray[0] = rssURLs.toString();
-					lastNewsArray[1] = message.getTitle();
-					updateNew = false;
+			controlOfRssFeeds = System.currentTimeMillis();
+			if (!dbForNews.exists(message)) {
+				performanceLog[2] += System.currentTimeMillis() - controlOfRssFeeds;
+				if (countOfMessage == 1) {
+					processNewsTime = System.currentTimeMillis();
 				}
 				handleMessage(message);
-
-			} else {
-				break; // itemsAl yi size 0 yapılabilir.
+				countOfMessage++;
+			} else if(countOfMessage==1){
+				processNewsTime = 0;
 			}
-			LOG.info("haber Çıkış \t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
 		}
-		if (!updateNew) {
-			lastNews.put(lastNewsArray[0], lastNewsArray[1]);
+		if (performanceLog[2] == 0) {
+			performanceLog[2] = System.currentTimeMillis() - controlOfRssFeeds;
+		}
+		if (processNewsTime != 0) {
+			performanceLog[3] = System.currentTimeMillis() - processNewsTime;
+		} else {
+			performanceLog[3] = 0.0;
+			processNonNewsTime = System.currentTimeMillis();
 		}
 		return true;
 	}
@@ -147,11 +160,11 @@ public class NewsChecker {
 		DateUtils dateUtils = new DateUtils();
 		Enumeration<String> e = wordFrequencyPerNew.keys();
 		while (e.hasMoreElements()) {
-			String word = (String) e.nextElement();
+			String word = e.nextElement();
 			Integer frequency = wordFrequencyPerNew.get(word);
-			String customId = dateUtils.dateStrToHashForm(datePerNew) +"_" + word;
-			documentList.add(new Document("_id",customId).append("date", dateUtils.dateConvert(datePerNew)).append("word", word)
-					.append("frequency", frequency));
+			String customId = dateUtils.dateStrToHashForm(datePerNew) + "_" + word;
+			documentList.add(new Document("_id", customId).append("date", dateUtils.dateConvert(datePerNew))
+					.append("word", word).append("frequency", frequency));
 		}
 		return updater.addDatabase(documentList);
 	}
@@ -164,18 +177,32 @@ public class NewsChecker {
 	 * @return true :success false :fail
 	 */
 	public boolean updateActualNews() {
-		if (RssLinksAl == null || RssLinksAl.isEmpty())
+		if (RssLinksAl == null || RssLinksAl.isEmpty()) {
 			return false;
-		for (URL rssURL : RssLinksAl) {
-			LOG.info("link Giriş\t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
-
-			if (!lastNews.containsKey(rssURL.toString())) {
-				lastNews.put(rssURL.toString(), "");
-			}
-			traverseNews(rssURL);
-			LOG.info("link Çıkış \t" + (System.nanoTime() - Main.START_TIME) / 1000000000.0);
-			LOG.debug(rssURL + " checked.");
 		}
+		LOG_PERFORMANCE.debug(
+				"RSS LINK TOPLAM SÜRE, RSS FEEDIN ÇEKILMESI, VAR MI YOK MU, HABERLERIN IŞLENMESI, VAR MI YOK MU / RSS HABER SAYISI, HABERLERIN IŞLENMESI / IŞLENEN HABER SAYISI");
+		for (URL rssURL : RssLinksAl) {
+			UrlProcessTime = System.currentTimeMillis();
+			traverseNews(rssURL);
+			performanceLog[0] = System.currentTimeMillis() - UrlProcessTime;
+			performanceLog[4] = performanceLog[2] / countOfMessage;
+			if (performanceLog[3] == 0) {
+				performanceLog[3] = System.currentTimeMillis() - processNonNewsTime;
+			}
+			if(performanceLog[2] == 0)
+				performanceLog[3]=0.0;
+			performanceLog[5] = performanceLog[3] / countOfMessage;
+			NumberFormat formatter = new DecimalFormat("#0.00");
+			performanceLog[4] = Double.parseDouble(formatter.format(performanceLog[4]));
+			performanceLog[5] = Double.parseDouble(formatter.format(performanceLog[5]));
+
+			LOG_PERFORMANCE.debug(performanceLog[0] + "," + performanceLog[1] + "," + performanceLog[2] + ","
+					+ performanceLog[3] + "," + performanceLog[4] + "," + performanceLog[5]);
+			LOG.debug(rssURL + " checked.");
+			performanceLog = new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+		}
+		LOG_PERFORMANCE.debug("bitttiii");
 		return true;
 	}
 }

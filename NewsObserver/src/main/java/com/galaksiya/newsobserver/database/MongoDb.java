@@ -1,8 +1,13 @@
 package com.galaksiya.newsobserver.database;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -10,6 +15,7 @@ import org.bson.conversions.Bson;
 
 import com.galaksiya.newsobserver.master.DateUtils;
 import com.galaksiya.newsobserver.parser.FeedMessage;
+import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoWriteException;
@@ -21,11 +27,11 @@ import com.mongodb.client.result.UpdateResult;
 
 public class MongoDb implements Database {
 
-	private static final int CONNECTION_POOL_SIZE = 100;
+	private static final int CONNECTION_POOL_SIZE = 10;
 
 	private static final String LOCALHOST = "localhost";
 
-	private static final Logger LOG = Logger.getLogger(MongoDb.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
 	private static final String MONGO_DB_NAME = "mydb";
 
@@ -81,9 +87,9 @@ public class MongoDb implements Database {
 		if (word == null || word.equals("")) {
 			return -1;
 		}
-		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(date.toString())) +"_" + word;
+		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(date.toString())) + "_" + word;
 
-		Bson filter = new Document().append("_id",customId);
+		Bson filter = new Document().append("_id", customId);
 
 		MongoClient mongoClient = getInstance();
 		return getCollection(mongoClient).count(filter);
@@ -115,7 +121,7 @@ public class MongoDb implements Database {
 		}
 		long count = 0;
 		try {
-			Bson filter = new Document().append("link", message.getLink());
+			Bson filter = new Document().append("_id", hashString(message.getLink()));
 			MongoClient mongoClient = getInstance();
 			count = getCollection(mongoClient).count(filter);
 			if (count > 0) {
@@ -125,6 +131,29 @@ public class MongoDb implements Database {
 			LOG.error("News find process have a troble.", e);
 		}
 		return false;
+	}
+
+	/**
+	 * It encodes a string to md5 string.
+	 * 
+	 * @param messageLink
+	 *            In coming String to hash to md5 format
+	 * @return Hashed
+	 */
+	private String hashString(String messageLink) {
+		String hashedString = null;
+		try {
+			java.security.MessageDigest mDigest = java.security.MessageDigest.getInstance("MD5");
+			byte[] array = mDigest.digest(messageLink.getBytes("UTF-8"));
+			StringBuffer sBuffer = new StringBuffer();
+			for (int i = 0; i < array.length; i++) {
+				sBuffer.append(String.format("%02x", array[i]));
+			}
+			hashedString = sBuffer.toString();
+		} catch (UnsupportedEncodingException | NoSuchAlgorithmException e1) {
+			System.err.println("Can't hash to md5 please control your hasher function.");
+		}
+		return hashedString;
 	}
 
 	/*
@@ -226,7 +255,10 @@ public class MongoDb implements Database {
 			FindIterable<Document> iterable = getCollection(mongoClient).find();
 			List<Document> newsAl = findIterableToArraylist(iterable);
 			return newsAl;
-		} catch (MongoWriteException e) {
+		}catch (DuplicateKeyException e) {
+			LOG.error("This new has already inserted.");
+		}
+		catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 		}
 		return null;
@@ -246,19 +278,21 @@ public class MongoDb implements Database {
 		}
 		try {
 			Date date = dateUtils.dateConvert(dateStr);
-			String customId = dateStr+"_"+word;
-			getCollection(mongoClient)
-					.insertOne(new Document().append("_id", customId).append("date", date).append("word", word).append("frequency", frequency));
+			String customId = dateStr + "_" + word;
+			getCollection(mongoClient).insertOne(new Document().append("_id", customId).append("date", date)
+					.append("word", word).append("frequency", frequency));
 			return true;
 		} catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 		}
 		return false;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.galaksiya.newsObserver.database.Database#saveMany(List<Document>)
+	 * @see
+	 * com.galaksiya.newsObserver.database.Database#saveMany(List<Document>)
 	 */
 	@Override
 	public boolean saveMany(List<Document> insertList) {
@@ -290,11 +324,16 @@ public class MongoDb implements Database {
 		}
 		try {
 			Date date = dateUtils.dateConvert(dateUtils.dateCustomize(message.getpubDate()));
-			getCollection(mongoClient).insertOne(
-					new Document().append("title", message.getTitle()).append("description", message.getDescription())
-							.append("link", message.getLink()).append("pubDate", date));
+			getCollection(mongoClient).insertOne(new Document("_id", hashString(message.getLink()))
+					.append("title", message.getTitle()).append("description", message.getDescription())
+					.append("link", message.getLink()).append("pubDate", date));
 			return true;
-		} catch (MongoWriteException e) {
+			
+		}
+		catch (DuplicateKeyException e) {
+			LOG.error("This new has already inserted.");
+		} 
+		catch (MongoWriteException e) {
 			LOG.error("Data couldn't be inserted.", e);
 		}
 		return false;
@@ -348,11 +387,10 @@ public class MongoDb implements Database {
 		if (word == null || word.equals("")) {
 			return false;
 		}
-		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(dateStr)) +"_" + word;
-		
+		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(dateStr)) + "_" + word;
+
 		try {
-			UpdateResult result = getCollection(mongoClient).updateOne(
-					new Document("_id", customId),
+			UpdateResult result = getCollection(mongoClient).updateOne(new Document("_id", customId),
 					new Document("$inc", new Document("frequency", frequency)));
 			return result.wasAcknowledged();
 		} catch (MongoWriteException e) {

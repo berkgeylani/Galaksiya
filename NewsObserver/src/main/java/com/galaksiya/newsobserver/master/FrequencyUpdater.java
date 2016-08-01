@@ -10,7 +10,7 @@ import com.galaksiya.newsobserver.database.Database;
 
 public class FrequencyUpdater {
 
-	private final static Logger LOG = Logger.getLogger(FrequencyUpdater.class);
+	private final static Logger LOG = Logger.getLogger("com.newsobserver.admin");
 	
 	private Database database;
 
@@ -39,7 +39,7 @@ public class FrequencyUpdater {
 		List<Document> insertList = new ArrayList<>();
 
 		for (Document document : docList) {
-			if (database.contain(document.getDate("date"),document.getString("word")) == 1) {
+			if (database.contain(document.getDate("date"),document.getString("word")) >= 1) {
 				isSuccessfulPerProcess = database.update(document.getDate("date").toString(),  //2
 						document.getString("word"), document.getInteger("frequency"));
 				isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess; // TODO boolean&=boolean oluyormu bak

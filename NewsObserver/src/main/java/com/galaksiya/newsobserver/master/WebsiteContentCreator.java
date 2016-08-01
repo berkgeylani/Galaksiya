@@ -38,8 +38,8 @@ public class WebsiteContentCreator {
 	public WebsiteContentCreator(Database dbHelperArg){
 		dbHelper=dbHelperArg;
 	}
-	public String createContext(List<Document> dataAl){
-		Database dbForNews = databaseFactory.getDatabase("news");
+	public String createContext(List<Document> dataAl,String collectionToShowInTitle){
+		Database dbForNews = databaseFactory.getDatabase(collectionToShowInTitle);
 		if(dataAl==null || dataAl.isEmpty()) return null;
 		String content="<html>"
 				+"<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-"+ dbForNews.getNews().size() +"</title></head>"
@@ -77,7 +77,7 @@ public class WebsiteContentCreator {
 		if(dataAl.isEmpty())
 			return Response.status(Response.Status.NO_CONTENT).entity("We haven't got any data to show you."
 					+ "Please try any other parameter.").build();
-		return Response.ok(createContext(dataAl)).build(); 
+		return Response.ok(createContext(dataAl ,"news")).build(); 
 	}
 	/**
 	 * This is fill a website content with all the data sorted by frequency.
@@ -95,7 +95,7 @@ public class WebsiteContentCreator {
 		if(dataAl.isEmpty())
 			return Response.status(Response.Status.NO_CONTENT).entity("NO CONTENT </br>We haven't got any data to show you."
 					+ "Please try any other parameter.").build();
-		return Response.ok(createContext(dataAl)).build(); 
+		return Response.ok(createContext(dataAl ,"news")).build(); 
 	} 
 	/**
 	 * This fill a website content with a selected date-month-year with limited data.
@@ -117,6 +117,6 @@ public class WebsiteContentCreator {
 //		else 
 		if(dataAl.isEmpty())
 			return Response.status(Response.Status.NO_CONTENT).entity("We haven't got any data to show you.Please try any other parameter.").build();
-		return Response.ok(createContext(dataAl )).build();
+		return Response.ok(createContext(dataAl ,"news")).build();
 	}
 }

@@ -19,7 +19,7 @@ import com.sun.syndication.io.SyndFeedInput;
 
 public class RssReader {
 
-	private static final Logger LOG = Logger.getLogger(RssReader.class);
+	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
 	private ArrayList<FeedMessage> itemsAL = new ArrayList<>();
 

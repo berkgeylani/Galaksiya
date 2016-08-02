@@ -79,7 +79,7 @@ public class RssReaderTest {
 	private RssReader rssRead= new RssReader();
 	@Test
 	public void canReadrssReader() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rss"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/rss"));
 		FeedMessage message = new FeedMessage();
 		message.setTitle("New York Times Ortadoğu’nun sınırlarını yeniden çizdi; Türkiye’yi böldü");
 		message.setDescription(
@@ -90,32 +90,32 @@ public class RssReaderTest {
 	}
 	@Test
 	public void canReadMalformedItemTitle() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemTitle"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemTitle"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void canReadMalformedItemDescription() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemDescription"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemDescription"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void canReadMalformedItemPubDate() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemPubDate"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemPubDate"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void canReadMalformedItemLink() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemLink"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemLink"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	
 	@Test
 	public void rssReaderNoNew() throws MalformedURLException{ //true link,rss no new 3
-		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonew")).isEmpty()) ; 
+		assertTrue(rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/nonew")).isEmpty()) ; 
 	}
 	@Test
 	public void rssReaderNonRssInput() throws MalformedURLException{ //true link,false rss 2
-		assertTrue(rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/nonrss")).isEmpty()); 
+		assertTrue(rssRead.read(new URL("http://localhost:"+SERVER_PORT+"/nonrss")).isEmpty()); 
 	}
 	//empty URL - not neccessary
 	//wrong URL - done 1
@@ -124,11 +124,11 @@ public class RssReaderTest {
 	//can create messages -done 4
 	@Test
 	public void rssReadernullInput(){ //nullInput 1 
-		assertEquals(null,rssRead.parseFeed(null)); 
+		assertEquals(null,rssRead.read(null)); 
 	}
 	@Test
 	public void rssReaderWrongURL() throws MalformedURLException{ //wrong url
-		assertTrue(rssRead.parseFeed(new URL("http:/localhost:"+SERVER_PORT+"/rss")).isEmpty()); 
+		assertTrue(rssRead.read(new URL("http:/localhost:"+SERVER_PORT+"/rss")).isEmpty()); 
 	}
 	private boolean areEqual(FeedMessage message,FeedMessage message2) throws ParseException{
 		boolean isDescriptionEqual = message.getDescription().equals(message2.getDescription());

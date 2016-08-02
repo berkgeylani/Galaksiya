@@ -120,9 +120,8 @@ public class NewsCheckerTest {
 
 	@Test
 	public void traverseNewsWValidURL() throws MalformedURLException, InterruptedException {
-		Feed feed = new Feed();
-		feed.setUrl(new URL("http://localhost:" + SERVER_PORT + "/"));
-		feed.setFeedMessages(rssReader.parseFeed(feed.getUrl()));
+		URL url = new URL("http://localhost:" + SERVER_PORT + "/");
+		Feed feed = new Feed(url,rssReader.read(url));
 		System.out.println(feed.getFeedMessages());
 		System.out.println(feed.getUrl());
 		assertTrue(newsChecker.traverseNews(feed));
@@ -167,6 +166,6 @@ public class NewsCheckerTest {
 	}
 
 	private String getSampleTitle() {
-		return rssReader.parseFeed(rssLinksAL.get(0)).peek().getTitle();
+		return rssReader.read(rssLinksAL.get(0)).peek().getTitle();
 	}
 }

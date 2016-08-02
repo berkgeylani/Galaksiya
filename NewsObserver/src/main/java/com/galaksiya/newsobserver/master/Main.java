@@ -8,7 +8,8 @@ import org.apache.log4j.Logger;
 
 public class Main {
 
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(Main.class);
+	private static final Logger LOG_PERFORMANCE = Logger.getLogger("com.newsobserver.performance");
 
 	private static final String PROPERTY_NAME = "databaseType";
 	public static final long START_TIME= System.nanoTime();
@@ -25,6 +26,7 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		LOG.info("Program başlangıcı\t"+(System.nanoTime()-START_TIME)/ 1000000000.0);
 		String databaseType = "mongo";// default
+		LOG_PERFORMANCE.error("qwewqerrwe");
 		CommandLineParser parser = new DefaultParser();
 		Inititator initiate = new Inititator();
 		// create Options object

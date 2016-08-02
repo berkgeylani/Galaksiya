@@ -19,6 +19,7 @@ public class ScheduledRunner {
 	public ScheduledRunner() {
 		sharedFeedQueue = new LinkedBlockingQueue<>();
 		sharedURLQueue = new LinkedBlockingQueue<>();
+		executor = Executors.newScheduledThreadPool(3);
 	}
 
 	/**
@@ -38,7 +39,6 @@ public class ScheduledRunner {
 	 */
 	public void start(String filePath) {
 		FileParser fileParser = new FileParser(filePath);
-		executor = Executors.newScheduledThreadPool(3);
 		
 		
 		// Runnable periodicTask = () -> { TODO java 8 için bunu dene.
@@ -50,7 +50,7 @@ public class ScheduledRunner {
 			public void run() {
 				sharedURLQueue.addAll(fileParser.getRssLinks());
 				LOG.info("Thread başlatıldı.");
-				new Thread(new ProducerOfRssFeed(sharedURLQueue, sharedFeedQueue), "ProduceFeedThread").start();
+				new Thread(new RssFetcher(sharedURLQueue, sharedFeedQueue), "ProduceFeedThread").start();
 				new Thread(new NewsChecker(sharedURLQueue, sharedFeedQueue), "ProcessFeedThread").start();
 			}
 		};

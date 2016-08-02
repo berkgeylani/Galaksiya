@@ -60,7 +60,7 @@ public class NewsChecker implements Runnable {
 	 */
 	public boolean containNewsTitle(String title, URL rssURLs) {
 		RssReader parserOfRss = new RssReader();
-		for (FeedMessage message : parserOfRss.parseFeed(rssURLs)) {
+		for (FeedMessage message : parserOfRss.read(rssURLs)) {
 			if (message.getTitle().equals(title)) {
 				return true;
 			}
@@ -113,7 +113,6 @@ public class NewsChecker implements Runnable {
 		}
 		// burada da diğeri belirlenecek
 		long handleMessageSure =System.currentTimeMillis();
-		System.out.println(itemsAL.size());
 		
 		while(itemsAL.size()!=0){
 			FeedMessage message = itemsAL.take();

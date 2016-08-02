@@ -34,7 +34,7 @@ public class RssReader {
 	 *         news.
 	 * @throws FeedException
 	 */
-	public BlockingQueue<FeedMessage> parseFeed(URL url) {
+	public BlockingQueue<FeedMessage> read(URL url) {
 		if (url == null)
 			return null;
 		SyndFeed feed = null;

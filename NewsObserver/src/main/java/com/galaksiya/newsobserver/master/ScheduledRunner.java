@@ -55,6 +55,6 @@ public class ScheduledRunner {
 			}
 		};
 
-		executor.scheduleAtFixedRate(periodicTask, 0, 12, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(periodicTask, 0, 5, TimeUnit.MINUTES);
 	}
 }

@@ -7,8 +7,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -18,8 +18,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.galaksiya.newsobserver.parser.FeedMessage;
-import com.galaksiya.newsobserver.parser.RssReader;
 import com.galaksiya.newsobserver.parser.testutil.CreateNoNewRssWebsite;
 import com.galaksiya.newsobserver.parser.testutil.CreateNonRssWebsite;
 import com.galaksiya.newsobserver.parser.testutil.CreateRssWebsite;
@@ -81,33 +79,33 @@ public class RssReaderTest {
 	private RssReader rssRead= new RssReader();
 	@Test
 	public void canReadrssReader() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rss"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rss"));
 		FeedMessage message = new FeedMessage();
 		message.setTitle("New York Times Ortadoğu’nun sınırlarını yeniden çizdi; Türkiye’yi böldü");
 		message.setDescription(
 				"New York Times gazetesi, Osmanlı topraklarının paylaşılmasını öngören ve tüm taraflarla imzalanan Sykes-Picot Anlaşmasının 100. yıldönümünde arşivinden yeni bir harita çıkardı. Haritalar ise İngiltere ve Fransanın hazırladığı Sykes-Picotun alternatifleri. ORTADOĞU HARİTASI BU ŞEKİLDE ÇİZİLSEYDİ Haberde dönemin ABD Başkanı Woodrow Wilson tarafından hazırlatılan haritayla birlikte,1920lerde sınırlar bu şekilde çizilseydi Ortadoğu kurtarılabilir miydi? sorusu da yer alıyor. []");
 		message.setPubDate("Tue Jun 21 13:16:16 EEST 2016"
 				+ "");
-		assertTrue(areEqual(message, itemsAL.get(0)));
+		assertTrue(areEqual(message, itemsAL.peek()));
 	}
 	@Test
 	public void canReadMalformedItemTitle() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemTitle"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemTitle"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void canReadMalformedItemDescription() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemDescription"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemDescription"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void canReadMalformedItemPubDate() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemPubDate"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemPubDate"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	@Test
 	public void canReadMalformedItemLink() throws MalformedURLException, ParseException{ // true rss,link,new 4
-		ArrayList<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemLink"));
+		BlockingQueue<FeedMessage> itemsAL = rssRead.parseFeed(new URL("http://localhost:"+SERVER_PORT+"/rssMalformedItemLink"));
 		assertTrue(itemsAL.isEmpty());
 	}
 	

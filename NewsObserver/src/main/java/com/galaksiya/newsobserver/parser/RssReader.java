@@ -4,9 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
@@ -19,9 +20,9 @@ import com.sun.syndication.io.SyndFeedInput;
 
 public class RssReader {
 
+	private BlockingQueue<FeedMessage> itemsAL = new LinkedBlockingQueue<>();//TODO copyOnWriteArrayList
 	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
-	private ArrayList<FeedMessage> itemsAL = new ArrayList<>();
 
 	/**
 	 * It parse the rss which is given with param with using ROME library.It
@@ -33,7 +34,7 @@ public class RssReader {
 	 *         news.
 	 * @throws FeedException
 	 */
-	public ArrayList<FeedMessage> parseFeed(URL url) {
+	public BlockingQueue<FeedMessage> parseFeed(URL url) {
 		if (url == null)
 			return null;
 		SyndFeed feed = null;

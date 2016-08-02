@@ -84,11 +84,13 @@ public class MongoDb implements Database {
 	 */
 	@Override
 	public long contain(Date date, String word) {
-		if (word == null || word.equals("")) {
+		if (date==null ||word == null || word.equals("")) {
 			return -1;
 		}
 		String customId = dateUtils.dateStrToHashForm(dateUtils.dateCustomize(date.toString())) + "_" + word;
-
+		if (customId== null) {
+			return 0;
+		}
 		Bson filter = new Document().append("_id", customId);
 
 		MongoClient mongoClient = getInstance();

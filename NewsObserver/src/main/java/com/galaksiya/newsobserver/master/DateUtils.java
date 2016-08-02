@@ -55,6 +55,8 @@ public class DateUtils {
 	 * @return and return 2016_May_09
 	 */
 	public String dateStrToHashForm(String dateStr) {
+		if(dateStr == null || dateStr.isEmpty())
+			return null;
 		return dateStr.substring(7, 11) + "_" + dateStr.substring(3, 6) + "_" + dateStr.substring(0, 2);
 	}
 

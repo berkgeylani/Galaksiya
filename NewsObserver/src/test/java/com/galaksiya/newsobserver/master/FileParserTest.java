@@ -65,7 +65,7 @@ public class FileParserTest {
 	@Test
 	public void canReadTxt() { // check reading line size with arraylist size
 		testFileParser.readerOfFile(file);
-		assertEquals(rssLinksAL.size(), testFileParser.getRssLinksAL().size());
+		assertEquals(rssLinksAL.size(), testFileParser.getRssLinks().size());
 	}
 
 	@After

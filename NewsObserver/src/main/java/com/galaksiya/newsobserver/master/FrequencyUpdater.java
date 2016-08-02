@@ -31,26 +31,35 @@ public class FrequencyUpdater {
 	 * @return flagSuccessful Successful Flag(True: Okay False : Fault)
 	 */
 	public boolean addDatabase(List<Document> docList) {
+		long messagetime = System.currentTimeMillis();
+
 		if (docList == null || docList.isEmpty())
 			return false;
 		boolean isSuccessfulAll = true;
 		boolean isSuccessfulPerProcess = true;
-		boolean alreadyInsertedToDatabase = false;
+		boolean isThereAnyDataToInsert = false; 
 		List<Document> insertList = new ArrayList<>();
 
 		for (Document document : docList) {
-			if (database.contain(document.getDate("date"),document.getString("word")) >= 1) {
+			long contain= database.contain(document.getDate("date"),document.getString("word"));
+			if ( contain >= 1) {
 				isSuccessfulPerProcess = database.update(document.getDate("date").toString(),  //2
 						document.getString("word"), document.getInteger("frequency"));
 				isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess; // TODO boolean&=boolean oluyormu bak
-			} else {
+			}else if (contain==-1) {
+				isSuccessfulAll=false;
+				continue;
+			}
+			else {
+				isThereAnyDataToInsert=true;
 				insertList.add(document);
 			}
 		}
-		if (!alreadyInsertedToDatabase) {
+		if (isThereAnyDataToInsert) {
 			isSuccessfulPerProcess = database.saveMany(insertList);//1
 			isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess;
 		}
+		LOG.fatal("bir mesajı database suresi"+(System.currentTimeMillis()-messagetime));
 		return isSuccessfulAll;
 	}
 }

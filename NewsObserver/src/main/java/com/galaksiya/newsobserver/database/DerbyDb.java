@@ -339,10 +339,10 @@ public class DerbyDb implements Database {
 
 	@Override
 	public boolean update(String dateStr, String word, int frequencyInc) {
-		if (word == null || word.isEmpty() || dateStr == null || !dateUtils.canConvert(dateStr) || frequencyInc < 0) {
-			return false;
-		}
-		java.sql.Date sqlDate = new java.sql.Date(dateUtils.dateConvert(dateStr).getTime());
+		if (word == null || word.isEmpty() || dateStr == null || !dateUtils.canConvert(dateUtils.dateCustomize(dateStr)) || frequencyInc < 0) { 
+			return false; 
+		} 
+		java.sql.Date sqlDate = new java.sql.Date(dateUtils.dateConvert(dateUtils.dateCustomize(dateStr)).getTime());
 		try (PreparedStatement insertemp = conn.prepareStatement("UPDATE " + tableName + " SET FREQUENCY = "
 				+ getFrequency(word, sqlDate) + "+" + frequencyInc + " WHERE word= ?  AND PUBLISHDATE= ? ");) {
 			insertemp.setString(1, word);

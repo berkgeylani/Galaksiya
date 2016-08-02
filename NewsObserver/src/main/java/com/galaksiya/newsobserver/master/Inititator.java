@@ -58,9 +58,8 @@ public class Inititator {
 		}
 		DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
 		databaseFactory.setDatabaseType(databaseType);
-		FileParser fileParser = new FileParser(filePath);
 		ScheduledRunner intervalFetcher = new ScheduledRunner();
-		intervalFetcher.start(fileParser.getRssLinksAL());
+		intervalFetcher.start(filePath);
 		return startWebserver();
 	}
 }

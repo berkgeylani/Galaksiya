@@ -114,19 +114,24 @@ public class NewsCheckerTest {
 	}
 
 	@Test
-	public void traverseNewsWInvalidURL() {
+	public void traverseNewsWInvalidURL() throws InterruptedException {
 		assertFalse(newsChecker.traverseNews(null));
 	}
 
 	@Test
-	public void traverseNewsWValidURL() throws MalformedURLException {
-		assertTrue(newsChecker.traverseNews(new URL("http://localhost:" + SERVER_PORT + "/")));
+	public void traverseNewsWValidURL() throws MalformedURLException, InterruptedException {
+		Feed feed = new Feed();
+		feed.setUrl(new URL("http://localhost:" + SERVER_PORT + "/"));
+		feed.setFeedMessages(rssReader.parseFeed(feed.getUrl()));
+		System.out.println(feed.getFeedMessages());
+		System.out.println(feed.getUrl());
+		assertTrue(newsChecker.traverseNews(feed));
 	}
 
 	@Test
 	public void traverseWordByWordWDatabaseProblemBODate() { // W:With
 																// BO:BecauseOf
-		assertFalse(newsChecker.traverseWordByWord("11 May 20161", createHashTableFortraverse(true)));
+		assertFalse(newsChecker.traverseWordByWord("11 Mayqw 2016", createHashTableFortraverse(true)));
 	}
 
 	@Test
@@ -140,20 +145,6 @@ public class NewsCheckerTest {
 		assertTrue(newsChecker.traverseWordByWord("11 May 2016", createHashTableFortraverse(true)));
 	}
 
-	@Test
-	public void updateActualNewsValidInput() {////
-		Hashtable<String, String> lastNews = new Hashtable<>();
-		lastNews.put("http://localhost:" + 8112 + "/", getSampleTitle());
-		NewsChecker newsCheckerLocal = new NewsChecker(rssLinksAL);
-		assertTrue(newsCheckerLocal.updateActualNews());
-	}
-
-	@Test
-	public void updateActualNewsWNullList() {
-		ArrayList<URL> RssLinksAl = null;
-		NewsChecker newsCheckerWNullArrayList = new NewsChecker(RssLinksAl);
-		assertFalse(newsCheckerWNullArrayList.updateActualNews());
-	}
 
 	private Hashtable<String, Integer> createHashTableFortraverse(boolean correct) {
 		Hashtable<String, Integer> wordFrequencyPerNew = new Hashtable<>();
@@ -176,6 +167,6 @@ public class NewsCheckerTest {
 	}
 
 	private String getSampleTitle() {
-		return rssReader.parseFeed(rssLinksAL.get(0)).get(0).getTitle();
+		return rssReader.parseFeed(rssLinksAL.get(0)).peek().getTitle();
 	}
 }

@@ -8,25 +8,26 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
 public class FileParser {
 
 	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
-	private ArrayList<URL> rssLinksAL;
+	private BlockingQueue<URL> rssLinksBlockingQueue;
 
 	public FileParser(String filePath) {
-		rssLinksAL = new ArrayList<>();
+		rssLinksBlockingQueue = new LinkedBlockingQueue<>();
 		readerOfFile(filePath);
 	}
 	/**
 	 * If you call after readerOfFile function,it returns arraylist which occurs urls.
 	 * @return  It returns an arraylist which occurs url's(rss links).
 	 */
-	public ArrayList<URL> getRssLinksAL() {// Return URLs of rss links
-		return rssLinksAL;
+	public BlockingQueue<URL> getRssLinks() {// Return URLs of rss links
+		return rssLinksBlockingQueue;
 	}
 	
 	
@@ -57,13 +58,15 @@ public class FileParser {
 					LOG.error("In file(.txt),One of links isn't a Url --> "+url,e);
 					return false;
 				} 
-				rssLinksAL.add(url);
+				rssLinksBlockingQueue.put(url);
 			}
 			return true; // herşey okeyse return true
 		} catch (FileNotFoundException e) {
 			LOG.error("File Not Found In Given Path",e);
 		} catch (IOException e) {
 			LOG.error("Input or output problem",e);
+		} catch (InterruptedException e) {
+			LOG.error("Problem while adding url to blocking queue.",e);
 		}
 		return false; 
 	}

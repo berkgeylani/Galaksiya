@@ -1,12 +1,11 @@
 package com.galaksiya.newsobserver.master;
 
 import java.net.URL;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -16,37 +15,26 @@ import com.galaksiya.newsobserver.database.DatabaseFactory;
 import com.galaksiya.newsobserver.parser.FeedMessage;
 import com.galaksiya.newsobserver.parser.RssReader;
 
-public class NewsChecker {
+public class NewsChecker implements Runnable {
 
 	private final static Logger LOG = Logger.getLogger("com.newsobserver.admin");
 
-	private static final Logger LOG_PERFORMANCE = Logger.getLogger("com.newsobserver.performance");
 
 	private DatabaseFactory databaseFactory;
 
-	private int countOfMessage = 0;
-
-	private double controlOfRssFeeds = 0;
-
-	private double processNewsTime = 0;
-
-	private double processNonNewsTime = 0;
-
-	private double UrlProcessTime = 0;
-
-	private Double[] performanceLog = new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	private BlockingQueue<Feed> sharedFeed;
+	private BlockingQueue<URL> sharedURL;
 
 	private Database db;
 
 	private Database dbForNews;
 
-	private ArrayList<URL> RssLinksAl;
-
-	public NewsChecker(ArrayList<URL> RssLinksAl) {
+	public NewsChecker(BlockingQueue<URL> sharedURLQueue,BlockingQueue<Feed> sharedFeedQueue) {
 		databaseFactory = DatabaseFactory.getInstance();
 		dbForNews = databaseFactory.getDatabase("news");
 		db = databaseFactory.getDatabase("STATISTICS");
-		this.RssLinksAl = RssLinksAl;
+		this.sharedFeed = sharedFeedQueue;
+		this.sharedURL = sharedURLQueue;
 	}
 
 	public NewsChecker(Database dbObject) {
@@ -108,39 +96,35 @@ public class NewsChecker {
 	 * 
 	 * @param rssURLs
 	 *            This is the url which will be read.
+	 * @throws InterruptedException 
 	 */
-	public boolean traverseNews(URL rssURLs) {
-		countOfMessage = 1;
-		RssReader parserOfRss = new RssReader();
-		ArrayList<FeedMessage> itemsAL = parserOfRss.parseFeed(rssURLs);
-		performanceLog[1] = System.currentTimeMillis() - UrlProcessTime;
+	public boolean traverseNews(Feed feed) throws InterruptedException {
+		if (feed == null || feed.isEmpty()) {
+			return false;
+		}
+		long time = System.currentTimeMillis();
+		LOG.debug(": process started for this url :" + feed.getUrl());
+		// buraya pojo classı gelicek
+		BlockingQueue<FeedMessage> itemsAL = feed.getFeedMessages();
+	
 		if (itemsAL == null || itemsAL.isEmpty()) {
 			LOG.error("There is no news to handle.");
 			return false;
 		}
 		// burada da diğeri belirlenecek
-		for (FeedMessage message : itemsAL) {
-			controlOfRssFeeds = System.currentTimeMillis();
+		long handleMessageSure =System.currentTimeMillis();
+		System.out.println(itemsAL.size());
+		
+		while(itemsAL.size()!=0){
+			FeedMessage message = itemsAL.take();
+			handleMessageSure= System.currentTimeMillis();
 			if (!dbForNews.exists(message)) {
-				performanceLog[2] += System.currentTimeMillis() - controlOfRssFeeds;
-				if (countOfMessage == 1) {
-					processNewsTime = System.currentTimeMillis();
-				}
 				handleMessage(message);
-				countOfMessage++;
-			} else if(countOfMessage==1){
-				processNewsTime = 0;
 			}
+			LOG.debug("handle message suresi \t"+(handleMessageSure-System.currentTimeMillis()));
 		}
-		if (performanceLog[2] == 0) {
-			performanceLog[2] = System.currentTimeMillis() - controlOfRssFeeds;
-		}
-		if (processNewsTime != 0) {
-			performanceLog[3] = System.currentTimeMillis() - processNewsTime;
-		} else {
-			performanceLog[3] = 0.0;
-			processNonNewsTime = System.currentTimeMillis();
-		}
+		LOG.debug("link başına\t"+(System.currentTimeMillis() - time));
+
 		return true;
 	}
 
@@ -169,40 +153,16 @@ public class NewsChecker {
 		return updater.addDatabase(documentList);
 	}
 
-	/**
-	 * It takes rss links and give one by one to travelInNews.
-	 * 
-	 * @param RssLinksAl
-	 *            This arraylist is rss links list.
-	 * @return true :success false :fail
-	 */
-	public boolean updateActualNews() {
-		if (RssLinksAl == null || RssLinksAl.isEmpty()) {
-			return false;
-		}
-		LOG_PERFORMANCE.debug(
-				"RSS LINK TOPLAM SÜRE, RSS FEEDIN ÇEKILMESI, VAR MI YOK MU, HABERLERIN IŞLENMESI, VAR MI YOK MU / RSS HABER SAYISI, HABERLERIN IŞLENMESI / IŞLENEN HABER SAYISI");
-		for (URL rssURL : RssLinksAl) {
-			UrlProcessTime = System.currentTimeMillis();
-			traverseNews(rssURL);
-			performanceLog[0] = System.currentTimeMillis() - UrlProcessTime;
-			performanceLog[4] = performanceLog[2] / countOfMessage;
-			if (performanceLog[3] == 0) {
-				performanceLog[3] = System.currentTimeMillis() - processNonNewsTime;
+	@Override
+	public void run() {
+		while (!sharedFeed.isEmpty() || !sharedURL.isEmpty()) {
+			try {
+				traverseNews(sharedFeed.take());
+			} catch (InterruptedException e) {
+				LOG.error("A Problem while taking from sharedFeed(BlockingQueue<Feed>)", e);
 			}
-			if(performanceLog[2] == 0)
-				performanceLog[3]=0.0;
-			performanceLog[5] = performanceLog[3] / countOfMessage;
-			NumberFormat formatter = new DecimalFormat("#0.00");
-			performanceLog[4] = Double.parseDouble(formatter.format(performanceLog[4]));
-			performanceLog[5] = Double.parseDouble(formatter.format(performanceLog[5]));
-
-			LOG_PERFORMANCE.debug(performanceLog[0] + "," + performanceLog[1] + "," + performanceLog[2] + ","
-					+ performanceLog[3] + "," + performanceLog[4] + "," + performanceLog[5]);
-			LOG.debug(rssURL + " checked.");
-			performanceLog = new Double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		}
-		LOG_PERFORMANCE.debug("bitttiii");
-		return true;
+		return;
 	}
+
 }

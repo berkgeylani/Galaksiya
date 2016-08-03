@@ -15,12 +15,12 @@ import org.apache.log4j.Logger;
 
 public class FileParser {
 
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(FileParser.class);
 	private BlockingQueue<URL> rssLinksBlockingQueue;
 
 	public FileParser(String filePath) {
 		rssLinksBlockingQueue = new LinkedBlockingQueue<>();
-		readerOfFile(filePath);
+		readFile(filePath);
 	}
 	/**
 	 * If you call after readerOfFile function,it returns arraylist which occurs urls.
@@ -38,7 +38,7 @@ public class FileParser {
 	 * @param filePath will be read file's path
 	 * @return 0:fault 1:success
 	 */
-	public boolean readerOfFile(String filePath) {
+	public boolean readFile(String filePath) {
 		try {
 			Paths.get(filePath);
 		}catch(InvalidPathException | NullPointerException exception){

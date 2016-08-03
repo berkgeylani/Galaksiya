@@ -7,7 +7,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 public class DateUtils {
-	static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	static final Logger LOG = Logger.getLogger(DateUtils.class);
 
 	/**
 	 * It controls is given String can convertable to date.

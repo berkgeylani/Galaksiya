@@ -20,9 +20,7 @@ import com.sun.syndication.io.SyndFeedInput;
 
 public class RssReader {
 
-	private BlockingQueue<FeedMessage> itemsAL = new LinkedBlockingQueue<>();//TODO copyOnWriteArrayList
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
-
+	private static final Logger LOG = Logger.getLogger(RssReader.class);
 
 	/**
 	 * It parse the rss which is given with param with using ROME library.It
@@ -35,6 +33,7 @@ public class RssReader {
 	 * @throws FeedException
 	 */
 	public BlockingQueue<FeedMessage> read(URL url) {
+		BlockingQueue<FeedMessage> itemsAL = new LinkedBlockingQueue<>();
 		if (url == null)
 			return null;
 		SyndFeed feed = null;
@@ -57,10 +56,10 @@ public class RssReader {
 			while (itEntries.hasNext()) {
 				FeedMessage message = new FeedMessage();
 				SyndEntry entry = itEntries.next();
-				boolean titleCorrect = entry.getTitle()!=null && entry.getTitle() != "";
-				boolean descriptionCorrect = entry.getDescription()!=null && entry.getDescription().getValue() != "";
-				boolean pubDateCorrect = entry.getPublishedDate()!=null && entry.getPublishedDate().toString() != "";
-				boolean linkCorrect = entry.getLink()!=null && entry.getLink() != "";
+				boolean titleCorrect = entry.getTitle() != null && entry.getTitle() != "";
+				boolean descriptionCorrect = entry.getDescription() != null && entry.getDescription().getValue() != "";
+				boolean pubDateCorrect = entry.getPublishedDate() != null && entry.getPublishedDate().toString() != "";
+				boolean linkCorrect = entry.getLink() != null && entry.getLink() != "";
 				if (titleCorrect && descriptionCorrect && pubDateCorrect && linkCorrect) {
 					message.setTitle(entry.getTitle());
 					message.setDescription(entry.getDescription().getValue());
@@ -69,7 +68,7 @@ public class RssReader {
 					message.toString();
 					itemsAL.add(message);
 				} else {
-					LOG.error("Problem while reading item because of malformed rss item. -->\t"+url);
+					LOG.error("Problem while reading item because of malformed rss item. -->\t" + url);
 				}
 			}
 			if (itemsAL.isEmpty()) {

@@ -33,7 +33,7 @@ import com.mongodb.client.MongoCursor;
 public class MongoDbTest {
 	private static final int CONNECTİON_POOL_SIZE = 100;
 	private static final String LOCALHOST = "localhost";
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(MongoDbTest.class);
 	private static final String MONGO_DB_NAME = "mydb";
 	private String COLLECTION_NAME = "test";
 	private String COLLECTION_NAME_NEWS = "newsTest";

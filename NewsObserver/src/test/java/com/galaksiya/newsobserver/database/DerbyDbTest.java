@@ -28,7 +28,7 @@ import com.galaksiya.newsobserver.parser.FeedMessage;
 
 public class DerbyDbTest {
 	private final static String DATABASE_NAME = "Db.db";
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(DerbyDbTest.class);
 	private static final String TABLE_NAME = "TEST";
 	private static final String TABLE_NAME_NEWS = "newsTest";
 

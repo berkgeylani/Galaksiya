@@ -1,13 +1,10 @@
 package com.galaksiya.newsobserver.database;
 
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.log4j.Logger;
 import org.bson.Document;
@@ -31,7 +28,7 @@ public class MongoDb implements Database {
 
 	private static final String LOCALHOST = "localhost";
 
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(MongoDb.class);
 
 	private static final String MONGO_DB_NAME = "mydb";
 

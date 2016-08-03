@@ -27,7 +27,7 @@ import com.galaksiya.newsobserver.master.testutil.CreateRssJetty;
 public class FileParserTest {
 	private static Server server;
 	private static final int SERVER_PORT = 8119;
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(FileParserTest.class);
 
 	@AfterClass
 	public static void shutDown() {
@@ -64,7 +64,7 @@ public class FileParserTest {
 
 	@Test
 	public void canReadTxt() { // check reading line size with arraylist size
-		testFileParser.readerOfFile(file);
+		testFileParser.readFile(file);
 		assertEquals(rssLinksAL.size(), testFileParser.getRssLinks().size());
 	}
 
@@ -79,8 +79,8 @@ public class FileParserTest {
 
 	@Test
 	public void emptyPathWay() {
-		assertFalse(testFileParser.readerOfFile(""));
-		assertFalse(testFileParser.readerOfFile(null));
+		assertFalse(testFileParser.readFile(""));
+		assertFalse(testFileParser.readFile(null));
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class FileParserTest {
 				writer.write(rssLink);// We wrote a txt file
 			}
 		}
-		assertFalse(testFileParser.readerOfFile(file));
+		assertFalse(testFileParser.readFile(file));
 	}
 
 	@Before
@@ -107,8 +107,8 @@ public class FileParserTest {
 	@Test
 	public void wrongPathWay() {
 
-		assertFalse(testFileParser.readerOfFile(System.getProperty("user.dir")));
-		assertFalse(!testFileParser.readerOfFile(file)); // givin truepath and
+		assertFalse(testFileParser.readFile(System.getProperty("user.dir")));
+		assertFalse(!testFileParser.readFile(file)); // givin truepath and
 															// response should
 															// be true
 	}

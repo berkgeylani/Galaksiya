@@ -7,28 +7,25 @@ import org.apache.log4j.Logger;
 
 import com.galaksiya.newsobserver.parser.RssReader;
 
-public class RssFetcher implements Runnable {
+public class RssFetcher {
 
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(RssFetcher.class);
 
 	private BlockingQueue<URL> sharedURLQueue;
 	private BlockingQueue<Feed> sharedFeedQueue;
-
-	private RssReader reader = new RssReader();
 
 	public RssFetcher(BlockingQueue<URL> sharedURLQueue, BlockingQueue<Feed> sharedFeedQueue) {
 		this.sharedURLQueue = sharedURLQueue;
 		this.sharedFeedQueue = sharedFeedQueue;
 	}
 
-	@Override
-	public void run() {
+	public void fetch() {
 		while (!sharedURLQueue.isEmpty()) {
 			try {
 				// önce al oku sonra feed object oalrak kuyruğa ekle
 				URL url = sharedURLQueue.take();
 				LOG.info("Producing feeds for this url :\t" + url);
-				sharedFeedQueue.put(new Feed(url, reader.read(url)));
+				sharedFeedQueue.put(new Feed(url, new RssReader().read(url)));
 			} catch (InterruptedException e) {
 				LOG.error(e);
 			}

@@ -21,7 +21,7 @@ public class DerbyDb implements Database {
 
 	private static final String DATABASE_NAME = "Db.db";
 
-	private static final Logger LOG = Logger.getLogger("com.newsobserver.admin");
+	private static final Logger LOG = Logger.getLogger(DerbyDb.class);
 
 	private static DerbyDb DERBY_DB_INSTANCE = null;
 

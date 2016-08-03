@@ -17,24 +17,21 @@ import com.galaksiya.newsobserver.parser.RssReader;
 
 public class NewsChecker implements Runnable {
 
-	private final static Logger LOG = Logger.getLogger("com.newsobserver.admin");
-
+	private final static Logger LOG = Logger.getLogger(NewsChecker.class);
 
 	private DatabaseFactory databaseFactory;
 
 	private BlockingQueue<Feed> sharedFeed;
-	private BlockingQueue<URL> sharedURL;
 
 	private Database db;
 
 	private Database dbForNews;
 
-	public NewsChecker(BlockingQueue<URL> sharedURLQueue,BlockingQueue<Feed> sharedFeedQueue) {
+	public NewsChecker( BlockingQueue<Feed> sharedFeedQueue) {
 		databaseFactory = DatabaseFactory.getInstance();
 		dbForNews = databaseFactory.getDatabase("news");
 		db = databaseFactory.getDatabase("STATISTICS");
 		this.sharedFeed = sharedFeedQueue;
-		this.sharedURL = sharedURLQueue;
 	}
 
 	public NewsChecker(Database dbObject) {
@@ -96,33 +93,28 @@ public class NewsChecker implements Runnable {
 	 * 
 	 * @param rssURLs
 	 *            This is the url which will be read.
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public boolean traverseNews(Feed feed) throws InterruptedException {
 		if (feed == null || feed.isEmpty()) {
 			return false;
 		}
-		long time = System.currentTimeMillis();
-		LOG.debug(": process started for this url :" + feed.getUrl());
+		LOG.debug(": process started for this url :" + feed.getUrl() + "   size: \t "+feed.getFeedMessages().size());
 		// buraya pojo classı gelicek
 		BlockingQueue<FeedMessage> itemsAL = feed.getFeedMessages();
-	
+
 		if (itemsAL == null || itemsAL.isEmpty()) {
 			LOG.error("There is no news to handle.");
 			return false;
 		}
 		// burada da diğeri belirlenecek
-		long handleMessageSure =System.currentTimeMillis();
-		
-		while(itemsAL.size()!=0){
+
+		while (itemsAL.size() != 0) {
 			FeedMessage message = itemsAL.take();
-			handleMessageSure= System.currentTimeMillis();
 			if (!dbForNews.exists(message)) {
 				handleMessage(message);
 			}
-			LOG.debug("handle message suresi \t"+(handleMessageSure-System.currentTimeMillis()));
 		}
-		LOG.debug("link başına\t"+(System.currentTimeMillis() - time));
 
 		return true;
 	}
@@ -149,19 +141,28 @@ public class NewsChecker implements Runnable {
 			documentList.add(new Document("_id", customId).append("date", dateUtils.dateConvert(datePerNew))
 					.append("word", word).append("frequency", frequency));
 		}
-		return updater.addDatabase(documentList);
+		return updater.addDatabase(documentList); 
 	}
 
 	@Override
 	public void run() {
-		while (!sharedFeed.isEmpty() || !sharedURL.isEmpty()) {
-			try {
-				traverseNews(sharedFeed.take());
-			} catch (InterruptedException e) {
-				LOG.error("A Problem while taking from sharedFeed(BlockingQueue<Feed>)", e);
+		while (true) {
+			if (!sharedFeed.isEmpty()) {
+				while (!sharedFeed.isEmpty()) {
+					try {
+						traverseNews(sharedFeed.take());
+					} catch (InterruptedException e) {
+						LOG.error("A Problem while taking from sharedFeed(BlockingQueue<Feed>)", e);
+					}
+				}
+			} else {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					LOG.error("A problem while sleeping.", e);
+				}
 			}
 		}
-		return;
 	}
 
 }

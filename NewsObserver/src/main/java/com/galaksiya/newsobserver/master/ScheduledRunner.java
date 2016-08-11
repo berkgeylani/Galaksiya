@@ -8,7 +8,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-
+/**
+ * This class brings to program iterativity feature
+ * @author francium
+ *
+ */
 public class ScheduledRunner {
 	private static final Logger LOG = Logger.getLogger(ScheculedRunner.class);
 	private ScheduledExecutorService executor;
@@ -18,7 +22,7 @@ public class ScheduledRunner {
 	public ScheduledRunner() {
 		sharedFeedQueue = new LinkedBlockingQueue<>();
 		sharedURLQueue = new LinkedBlockingQueue<>();
-		executor = Executors.newScheduledThreadPool(11);
+		executor = Executors.newScheduledThreadPool(21);
 	}
 
 	/**
@@ -33,8 +37,8 @@ public class ScheduledRunner {
 	 * This function does their tasks repeatly in 5 min and the repeated task is
 	 * check for the actual news.
 	 * 
-	 * @param RssLinksBlockingQueue
-	 *            It is a arraylist which occurs from urls of rss's
+	 * @param filePath
+	 *            A path which will be read.
 	 */
 	public void start(String filePath) {
 		FileParser fileParser = new FileParser(filePath);
@@ -51,15 +55,15 @@ public class ScheduledRunner {
 				rssFetcher.fetch();
 			};
 		}
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 1; i++) {
 			LOG.info("Consumer thread-"+i+" has been started.");
 			new Thread(new NewsChecker(sharedFeedQueue)).start();
 		}
-		for (int i = 0; i <   rssFetcherRunnableArray.length; i++) { //Producer count-1
+		for (int i = 0; i <   2/*rssFetcherRunnableArray.length*/; i++) { //Producer count-1
 			executor.scheduleAtFixedRate(rssFetcherRunnableArray[i], 0, 5, TimeUnit.MINUTES);
 			if (i == 0) {
 				try {
-					Thread.sleep(1*1000);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					LOG.error("Problem while sleeping",e);
 				}

@@ -46,8 +46,10 @@ public class Inititator {
 	 * It initiate the app.If it doesn't have args it asks for that.After the
 	 * handle processings,menu function is called.
 	 * 
-	 * @param args
+	 * @param filePath
 	 *            File path which will be read for URLs
+	 * @param databaseType
+	 * 			  It helps to select database type.(mongo/derby..)
 	 */
 	public boolean initiateApp(String databaseType, String filePath) {
 		sc = new Scanner(System.in);

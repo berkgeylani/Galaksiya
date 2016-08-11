@@ -12,12 +12,19 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
-
+/**
+ * It helps to read a file with given path.
+ * @author francium
+ *
+ */
 public class FileParser {
 
 	private static final Logger LOG = Logger.getLogger(FileParser.class);
 	private BlockingQueue<URL> rssLinksBlockingQueue;
-
+/**
+ * It sets file path with it's arguman.
+ * @param filePath A path which will be read.
+ */
 	public FileParser(String filePath) {
 		rssLinksBlockingQueue = new LinkedBlockingQueue<>();
 		readFile(filePath);

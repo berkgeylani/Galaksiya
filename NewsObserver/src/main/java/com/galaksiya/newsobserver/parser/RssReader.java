@@ -17,7 +17,11 @@ import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
-
+/**
+ * It helps us to read rss.(Like xml reader)
+ * @author francium
+ *
+ */
 public class RssReader {
 
 	private static final Logger LOG = Logger.getLogger(RssReader.class);

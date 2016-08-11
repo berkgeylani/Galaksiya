@@ -13,7 +13,7 @@ public class WordProcessor {
 	 * It takes concat of title and description and delete the tokens inside
 	 * this,make lower case,split it according to " "
 	 * 
-	 * @param text
+	 * @param textArray
 	 *            It is concat of title and description.
 	 * @return It returns hash table which occurs from word and frequency.
 	 */

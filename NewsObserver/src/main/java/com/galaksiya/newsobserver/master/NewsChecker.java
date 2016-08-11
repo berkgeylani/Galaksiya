@@ -14,10 +14,16 @@ import com.galaksiya.newsobserver.database.Database;
 import com.galaksiya.newsobserver.database.DatabaseFactory;
 import com.galaksiya.newsobserver.parser.FeedMessage;
 import com.galaksiya.newsobserver.parser.RssReader;
-
+/**
+ * (Runnable)
+ * This class handle feeds with its function.
+ * @author francium
+ *
+ */
 public class NewsChecker implements Runnable {
 
 	private final static Logger LOG = Logger.getLogger(NewsChecker.class);
+	private final static Logger LOG_PERFORMANCE = Logger.getLogger("performance");
 
 	private DatabaseFactory databaseFactory;
 
@@ -26,18 +32,28 @@ public class NewsChecker implements Runnable {
 	private Database db;
 
 	private Database dbForNews;
-
+	/**
+	 * Set a queue for using with thread.
+	 * @param sharedFeedQueue It is a queue which occurs URL-ArrayList(FeedMessages)
+	 */
 	public NewsChecker( BlockingQueue<Feed> sharedFeedQueue) {
 		databaseFactory = DatabaseFactory.getInstance();
 		dbForNews = databaseFactory.getDatabase("news");
 		db = databaseFactory.getDatabase("STATISTICS");
 		this.sharedFeed = sharedFeedQueue;
 	}
-
+	/**
+	 * You can set with this function database type and table name.
+	 * @param dbObject
+	 */
 	public NewsChecker(Database dbObject) {
 		db = dbObject;
 	}
-
+	/**
+	 * 
+	 * @param type "test" for run on test mode.
+	 * @param dbObject For selecting database type or tablename/collection
+	 */
 	public NewsChecker(String type, Database dbObject) {
 		if (type.equalsIgnoreCase("test")) {
 			this.dbForNews = dbObject;
@@ -88,18 +104,19 @@ public class NewsChecker implements Runnable {
 	}
 
 	/**
-	 * It travel news in url which is given with param. It gives news one by one
+	 * It travel news in url which is given with param. It gives news one by one.
 	 * to handleMessage. Also this function save the last news.
 	 * 
-	 * @param rssURLs
-	 *            This is the url which will be read.
+	 * @param feed
+	 *            This is a Feed(Pojo) which consists from URL-Arraylist(FeedMessage).
 	 * @throws InterruptedException
+ 	 * @return true :Success false :fail
 	 */
 	public boolean traverseNews(Feed feed) throws InterruptedException {
+		long time = System.currentTimeMillis();
 		if (feed == null || feed.isEmpty()) {
 			return false;
 		}
-		LOG.debug(": process started for this url :" + feed.getUrl() + "   size: \t "+feed.getFeedMessages().size());
 		// buraya pojo classı gelicek
 		BlockingQueue<FeedMessage> itemsAL = feed.getFeedMessages();
 
@@ -115,7 +132,8 @@ public class NewsChecker implements Runnable {
 				handleMessage(message);
 			}
 		}
-
+		LOG_PERFORMANCE.error(System.currentTimeMillis()-time);
+		LOG.debug(": process started for this url :" + feed.getUrl());
 		return true;
 	}
 

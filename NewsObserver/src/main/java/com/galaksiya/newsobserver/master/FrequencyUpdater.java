@@ -8,14 +8,26 @@ import org.bson.Document;
 
 import com.galaksiya.newsobserver.database.Database;
 
+/**
+ * This class is controll a data which is already inserted or not,then,if
+ * not,insert,else update.
+ * 
+ * @author francium
+ *
+ */
 public class FrequencyUpdater {
 
-	private static final Logger LOG = Logger.getLogger(FrequencyUpdater.class);
+	private final static Logger LOG = Logger.getLogger(FrequencyUpdater.class);
 
-	private static final Object AD_UPDATE_INSERT = new Object();
+	private static final Object AD_LOCK_UPDATE_INSERT = new Object();
 
 	private Database database;
 
+	/**
+	 * It gets a database object for using.
+	 * 
+	 * @param dbObject
+	 */
 	public FrequencyUpdater(Database dbObject) {
 		this.database = dbObject;
 	}
@@ -24,18 +36,20 @@ public class FrequencyUpdater {
 	 * It takes date-word and frequency then if it is in database,it
 	 * increments.If not it inserts it.
 	 * 
-	 * @param docL
+	 * @param dateWordFrequencyListPerNew
+	 *            This is a list which containg dateiword,frequency.
 	 * @return flagSuccessful Successful Flag(True: Okay False : Fault)
 	 */
-	public boolean addDatabase(List<Document> docList) {
-		if (docList == null || docList.isEmpty())
+	public boolean addDatabase(List<Document> dateWordFrequencyListPerNew) {
+		if (dateWordFrequencyListPerNew == null || dateWordFrequencyListPerNew.isEmpty())
 			return false;
 		boolean isSuccessfulAll = true;
 		boolean isSuccessfulPerProcess = true;
 		boolean isThereAnyDataToInsert = false;
 		List<Document> insertList = new ArrayList<>();
-		synchronized (AD_UPDATE_INSERT) {
-			for (Document document : docList) {
+		long time = System.currentTimeMillis();
+		synchronized (AD_LOCK_UPDATE_INSERT) {
+			for (Document document : dateWordFrequencyListPerNew) {
 				long contain = database.contain(document.getDate("date"), document.getString("word"));
 				if (contain >= 1) {
 					isSuccessfulPerProcess = database.update(document.getDate("date").toString(), // 2
@@ -53,6 +67,7 @@ public class FrequencyUpdater {
 				isSuccessfulPerProcess = database.saveMany(insertList);// 1
 				isSuccessfulAll = isSuccessfulAll && isSuccessfulPerProcess;
 			}
+			LOG.debug("Time: \t " + (System.currentTimeMillis() - time));
 		}
 		return isSuccessfulAll;
 	}

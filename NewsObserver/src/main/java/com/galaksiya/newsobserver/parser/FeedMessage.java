@@ -1,5 +1,10 @@
 package com.galaksiya.newsobserver.parser;
-
+/**
+ * This is a POJO class.It consists from title,description,pubdate,link.
+ * Save on it news.
+ * @author francium
+ *
+ */
 public class FeedMessage {
 
 	private String title;

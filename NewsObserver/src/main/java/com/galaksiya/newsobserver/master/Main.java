@@ -5,10 +5,15 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
-
+/**
+ * Main function and arguman reader which is comm'in from terminal.
+ * @author francium
+ *
+ */
 public class Main {
 
 	private static final Logger LOG = Logger.getLogger(Main.class);
+
 
 	private static final String PROPERTY_NAME = "databaseType";
 	public static final long START_TIME= System.nanoTime();
@@ -29,7 +34,6 @@ public class Main {
 		Inititator initiate = new Inititator();
 		// create Options object
 		Options options = new Options();
-
 		// add to option
 		options.addOption("p", "rsspath", true, "display current time");
 		CommandLine cmd = parser.parse(options, args);

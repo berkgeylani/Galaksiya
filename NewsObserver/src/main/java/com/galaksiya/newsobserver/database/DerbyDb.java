@@ -16,7 +16,11 @@ import org.bson.Document;
 
 import com.galaksiya.newsobserver.master.DateUtils;
 import com.galaksiya.newsobserver.parser.FeedMessage;
-
+/**
+ * It is a database class which is using Derby Db.
+ * @author francium
+ *
+ */
 public class DerbyDb implements Database {
 
 	private static final String DATABASE_NAME = "Db.db";
@@ -49,11 +53,18 @@ public class DerbyDb implements Database {
 	private DateUtils dateUtils = new DateUtils();
 
 	private String tableName = null;
-
+	
+	/**
+	 * Default database_name : Db.db
+	 * Default table_name : STATISTICS
+	 */
 	public DerbyDb() {
 		this(DatabaseConstants.TABLE_NAME_STATISTICS);
 	}
-
+	/**
+	 * Default database_name : Db.db
+	 * @param tableName String to set table name
+	 */
 	public DerbyDb(String tableName) {
 		this(tableName, DATABASE_NAME);
 	}
@@ -61,8 +72,10 @@ public class DerbyDb implements Database {
 	/**
 	 * It provide us to select table name.
 	 * 
-	 * @param collectionName
+	 * @param tableName
 	 *            String to set table name.
+	 * @param dbName
+	 * 			  String to set database name.
 	 * @throws SQLException
 	 */
 	public DerbyDb(String tableName, String dbName) {

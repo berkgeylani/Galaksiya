@@ -7,7 +7,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.apache.log4j.Logger;
 
 import com.galaksiya.newsobserver.parser.FeedMessage;
-
+/**
+ * This is a pojo class.URl-feedMessages(title-desc-pubdate-link)
+ * @author francium
+ *
+ */
 public class Feed {
 
 	private URL url;

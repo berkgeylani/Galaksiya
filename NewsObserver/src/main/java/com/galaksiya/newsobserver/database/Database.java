@@ -6,7 +6,11 @@ import java.util.List;
 import org.bson.Document;
 
 import com.galaksiya.newsobserver.parser.FeedMessage;
-
+/**
+ * This interface contains database functions.
+ * @author francium
+ *
+ */
 public interface Database {
 
 	/**
@@ -53,7 +57,9 @@ public interface Database {
 
 	/**
 	 * It insert to Db which is selected date-word-frequency
-	 * 
+	 * @param dateStr Date of a new.
+	 * @param word	A word which used in new.
+	 * @param frequency Frequency of a word in new.
 	 * @see com.galaksiya.newsobserver.database.Database#save(java.lang.String,
 	 *      java.lang.String, int)
 	 * @return true:if process has been successfully done. false: If it fault.
@@ -70,7 +76,7 @@ public interface Database {
 	
 	/**
 	 * It insert news to Db one by one.
-	 * 
+	 * @param message It occurs from publishDate-Title-Description
 	 * @see com.galaksiya.newsobserver.database.Database#save(java.lang.String,
 	 *      java.lang.String, int)
 	 * @return true:if process has been successfully done. false: If it fault.

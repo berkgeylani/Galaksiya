@@ -5,12 +5,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
-
+/**
+ * This class contains date util functions as can convertable, parse string to date , string to convertable string
+ * @author francium
+ *
+ */
 public class DateUtils {
 	static final Logger LOG = Logger.getLogger(DateUtils.class);
 
 	/**
-	 * It controls is given String can convertable to date.
+	 * It controls 'is given String can convertable to date'.
 	 * 
 	 * @param datePerNew
 	 *            String occurs date

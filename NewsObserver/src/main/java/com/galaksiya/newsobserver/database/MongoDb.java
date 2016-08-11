@@ -21,7 +21,11 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.result.UpdateResult;
-
+/**
+ * It is a database class which is using Derby Db.
+ * @author francium
+ *
+ */
 public class MongoDb implements Database {
 
 	private static final int CONNECTION_POOL_SIZE = 10;
@@ -56,9 +60,6 @@ public class MongoDb implements Database {
 	private String collectionName = DatabaseConstants.TABLE_NAME_STATISTICS;
 
 	private DateUtils dateUtils = new DateUtils();
-
-	public MongoDb() {
-	}
 
 	/**
 	 * It provide us to select collection name.
@@ -294,7 +295,7 @@ public class MongoDb implements Database {
 	 * com.galaksiya.newsObserver.database.Database#saveMany(List<Document>)
 	 */
 	@Override
-	public boolean saveMany(List<Document> insertList) {
+	public synchronized boolean saveMany(List<Document> insertList) {
 		if (insertList == null || insertList.isEmpty()) {
 			return false;
 		}

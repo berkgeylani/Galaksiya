@@ -31,14 +31,28 @@ public class WebsiteContentCreator {
 	private DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
 	private DateUtils dateUtils = new DateUtils();
 	private Database dbHelper ;
+	/**
+	 * This constructor gets database from databaseFactory.
+	 */
 	public WebsiteContentCreator(){
 		dbHelper = databaseFactory.getDatabase();
 	}
+	/**
+	 * This constructor get database from arguman.
+	 * @param dbHelperArg Database Object(mongo/derby/..)
+	 */
 	public WebsiteContentCreator(Database dbHelperArg){
 		dbHelper=dbHelperArg;
 	}
-	public String createContext(List<Document> dataAl,String collectionToShowInTitle){
-		Database dbForNews = databaseFactory.getDatabase(collectionToShowInTitle);
+	
+	/**
+	 * It create a context for ui.
+	 * @param dataAl A (date-word-frequency)List will be shown.
+	 * @param databaseCollectionName Database collection name.
+	 * @return Content.
+	 */
+	public String createContext(List<Document> dataAl,String databaseCollectionName){
+		Database dbForNews = databaseFactory.getDatabase(databaseCollectionName);
 		if(dataAl==null || dataAl.isEmpty()) return null;
 		String content="<html>"
 				+"<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/><title>Data-"+ dbForNews.getNews().size() +"</title></head>"
@@ -57,7 +71,7 @@ public class WebsiteContentCreator {
 	}
 	/**
 	 * This fill a website content with a selected date-month-year.
-	 * @param day
+	 * @param day 
 	 * @param month
 	 * @param year
 	 * @return A html content
